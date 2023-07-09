@@ -77,11 +77,6 @@ class SparkMaxSwerveNode(SwerveNode):
             (pos / (2 * math.pi)) * constants.drivetrain_turn_gear_ratio
         )
 
-    def direct_set_motor_angle(self, pos: radians):
-        self.m_turn.set_target_position(
-            (pos / (2 * math.pi)) * constants.drivetrain_turn_gear_ratio
-        )
-
     def get_current_motor_angle(self) -> radians:
         return (
             (self.m_turn.get_sensor_position() / constants.drivetrain_turn_gear_ratio)
