@@ -2,7 +2,6 @@ import subsystem
 import sensors
 import wpilib
 
-
 class Robot:
     pass
 
