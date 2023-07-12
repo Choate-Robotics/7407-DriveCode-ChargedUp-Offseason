@@ -11,12 +11,17 @@ import utils
 from oi.OI import OI
 
 from robotpy_toolkit_7407.motors import TalonFX
+from robot_systems import Robot
 
 class Robot(wpilib.TimedRobot):
     def __init__(self):
         super().__init__()
 
     def robotInit(self):
+
+        # Initialize subsystems
+        Robot.elevator.init()
+
         # Initialize Operator Interface
         OI.init()
         OI.map_controls()
