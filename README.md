@@ -42,6 +42,10 @@ You will need to have at least python 3.10 installed on your computer.
 
 If you have a Apple Silicon ARM mac, at some point you will be asked to intall Rosetta, you will be asked to install it at some point. It is required, so go ahead when it asks.
 
+```
+softwareupdate --install-rosetta
+```
+
 If you want to know if Rosetta is installed you can look at the folder ```usr/libexec/Rosetta```. If there is any files in this folder then you have Rosetta installed.
 
 You will need to intall the intel x64 version python 3.10 on your computer. 
