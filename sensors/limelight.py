@@ -21,9 +21,13 @@ class Limelight():
 
     def set_pipeline_mode(self, mode: config.limelight_pipeline):
         self.table.getEntry("pipeline").setInteger(mode)
+        self.pipeline = mode
         
     def get_pipeline_mode(self):
-        return self.table.getEntry("pipeline").getInteger(0)
+        pipelime = self.table.getEntry("pipeline").getInteger(0)
+        if self.pipeline != pipelime:
+            self.pipeline = pipelime
+        return self.pipeline
         
     def set_cam_vision(self):
         self.table.getEntry("camMode").setInteger(0)
@@ -32,6 +36,12 @@ class Limelight():
     def set_cam_driver(self):
         self.table.getEntry("camMode").setInteger(1)
         self.drive_cam = True
+        
+    def get_cam_mode(self):
+        mode = self.table.getEntry("camMode").getInteger(0)
+        if self.drive_cam != mode:
+            self.drive_cam = mode
+        return self.drive_cam
         
     def update(self):
         self.tx = self.table.getEntry("tx").getDouble(0)
@@ -46,7 +56,7 @@ class Limelight():
         return [self.tx, self.ty]
     
     def get_bot_pose(self, team: config.team = None, round_to: int = 4):
-        if self.pipeline != config.limelight_pipeline.get('feducial'):
+        if self.pipeline != config.limelight_pipeline['feducial']:
             return False
         elif self.tv == 0:
             return None

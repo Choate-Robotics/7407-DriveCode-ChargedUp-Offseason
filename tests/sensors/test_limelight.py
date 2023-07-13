@@ -13,11 +13,8 @@ from wpimath.geometry import Pose3d, Translation3d, Rotation3d
 from sensors import Limelight
 
 @pytest.fixture
-def limelight():
-    print("limelight setup")
-    
-    yield Limelight(Translation3d(0, 0, 0), Rotation3d(0, 0, 0))
-    print("limelight teardown")
+def limelight():    
+    return Limelight(Translation3d(0, 0, 0), Rotation3d(0, 0, 0))
 
 def test_init(limelight):
     assert limelight.origin_offset == Translation3d(0, 0, 0)
@@ -43,11 +40,18 @@ def test_update(limelight):
 def test_get_target_none(limelight):
     assert limelight.get_target() == None
     
+def test_get_bot_pose_wrong_pipeline(limelight):
+    assert limelight.get_bot_pose() == False
+    
+def test_get_bot_pose_none(limelight):
+    limelight.set_pipeline_mode(config.limelight_pipeline['feducial'])
+    assert limelight.get_pipeline_mode() == config.limelight_pipeline['feducial']
+    assert limelight.get_bot_pose() == None
+    
 @pytest.mark.xfail
 def test_get_target(limelight):
     tx, ty = random.randint(0, 100), random.randint(0, 100)
-    limelight.table.getEntry("tv").getDouble = MagicMock(return_value=1)
-    limelight.table.getEntry("tx").getDouble = MagicMock(return_value=tx)
-    limelight.table.getEntry("ty").getDouble = MagicMock(return_value=ty)
-    limelight.update()
-    limelight.get_target().assert_called_with([tx, ty])
+    limelight.tv = 1
+    limelight.tx = tx
+    limelight.ty = ty
+    assert limelight.get_target() == [tx, ty]
