@@ -62,13 +62,13 @@ class Limelight():
             return None
         else:
             botpose: list = []
-            match team:
-                case config.team.get('red'):
-                    botpose = self.table.getEntry("botpose_wpired").getDoubleArray([0, 0, 0, 0, 0, 0])
-                case config.team.get('blue'):
-                    botpose = self.table.getEntry("botpose_wipblue").getDoubleArray([0, 0, 0, 0, 0, 0])
-                case None:
-                    botpose = self.table.getEntry("botpose").getDoubleArray([0, 0, 0, 0, 0, 0])
+
+            if team == config.team.get('red'):
+                botpose = self.table.getEntry("botpose_wpired").getDoubleArray([0, 0, 0, 0, 0, 0])
+            elif team == config.team.get('blue'):
+                botpose = self.table.getEntry("botpose_wipblue").getDoubleArray([0, 0, 0, 0, 0, 0])
+            else:
+                botpose = self.table.getEntry("botpose").getDoubleArray([0, 0, 0, 0, 0, 0])
             botpose = [round(i, round_to) for i in botpose]
             return botpose
     
