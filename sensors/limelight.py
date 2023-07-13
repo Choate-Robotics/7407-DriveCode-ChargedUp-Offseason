@@ -62,7 +62,7 @@ class Limelight():
             return None
         else:
             botpose: list = []
-            match (team):
+            match team:
                 case config.team.get('red'):
                     botpose = self.table.getEntry("botpose_wpired").getDoubleArray([0, 0, 0, 0, 0, 0])
                 case config.team.get('blue'):
