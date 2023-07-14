@@ -3,8 +3,8 @@ from dataclasses import dataclass
 
 import rev
 from ctre.sensors import CANCoder
-from robotpy_toolkit_7407.motors.rev_motors import SparkMax, SparkMaxConfig
 from robotpy_toolkit_7407.sensors.gyro import PigeonIMUGyro_Wrapper
+from robotpy_toolkit_7407.motors.rev_motors import SparkMax, SparkMaxConfig
 from robotpy_toolkit_7407.subsystem_templates.drivetrain import (
     SwerveDrivetrain,
     SwerveNode,
@@ -17,6 +17,7 @@ from robotpy_toolkit_7407.utils.units import (
 )
 from wpimath.geometry import Pose2d
 
+import config
 import constants
 from oi.keymap import Keymap
 from units.SI import degrees, meters_per_second_squared
@@ -111,35 +112,35 @@ class SparkMaxSwerveNode(SwerveNode):
 
 class Drivetrain(SwerveDrivetrain):
     n_front_left = SparkMaxSwerveNode(
-        SparkMax(16, config=MOVE_CONFIG),
-        SparkMax(15, config=TURN_CONFIG),
-        CANCoder(24),
-        absolute_encoder_zeroed_pos=math.radians(174.638),
+        SparkMax(config.front_left_move, config=MOVE_CONFIG),
+        SparkMax(config.front_left_turn, config=TURN_CONFIG),
+        CANCoder(config.front_left_encoder),
+        absolute_encoder_zeroed_pos=config.front_left_zeroed_pos,
         name="n_front_left",
     )
     n_front_right = SparkMaxSwerveNode(
-        SparkMax(14, config=MOVE_CONFIG),
-        SparkMax(13, config=TURN_CONFIG),
-        CANCoder(23),
-        absolute_encoder_zeroed_pos=math.radians(282.304),
+        SparkMax(config.front_right_move, config=MOVE_CONFIG),
+        SparkMax(config.front_right_turn, config=TURN_CONFIG),
+        CANCoder(config.front_right_encoder),
+        absolute_encoder_zeroed_pos=config.front_right_zeroed_pos,
         name="n_front_right",
     )
     n_back_left = SparkMaxSwerveNode(
-        SparkMax(3, config=MOVE_CONFIG),
-        SparkMax(4, config=TURN_CONFIG),
-        CANCoder(21),
-        absolute_encoder_zeroed_pos=math.radians(313.769),
+        SparkMax(config.back_left_move, config=MOVE_CONFIG),
+        SparkMax(config.back_left_turn, config=TURN_CONFIG),
+        CANCoder(config.back_left_encoder),
+        absolute_encoder_zeroed_pos=config.back_left_zeroed_pos,
         name="n_back_left",
     )
     n_back_right = SparkMaxSwerveNode(
-        SparkMax(5, config=MOVE_CONFIG),
-        SparkMax(6, config=TURN_CONFIG),
-        CANCoder(22),
-        absolute_encoder_zeroed_pos=math.radians(136.58),
+        SparkMax(config.back_right_move, config=MOVE_CONFIG),
+        SparkMax(config.back_right_turn, config=TURN_CONFIG),
+        CANCoder(config.back_right_encoder),
+        absolute_encoder_zeroed_pos=config.back_right_zeroed_pos,
         name="n_back_right",
     )
 
-    gyro: PigeonIMUGyro_Wrapper = PigeonIMUGyro_Wrapper(20)
+    gyro: PigeonIMUGyro_Wrapper = PigeonIMUGyro_Wrapper(config.gyro_id)
     axis_dx = Keymap.Drivetrain.DRIVE_X_AXIS
     axis_dy = Keymap.Drivetrain.DRIVE_Y_AXIS
     axis_rotation = Keymap.Drivetrain.DRIVE_ROTATION_AXIS

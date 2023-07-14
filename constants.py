@@ -1,7 +1,7 @@
 import math
 
 from robotpy_toolkit_7407.utils.units import hour, m, mile, rad, rev, s
-from wpimath.geometry import Pose3d, Rotation3d, Transform3d
+from wpimath.geometry import Pose3d, Rotation3d
 
 from config import field_length, field_width
 from units.SI import (
@@ -9,31 +9,23 @@ from units.SI import (
     meters,
     meters_per_second,
     meters_per_second_squared,
-    radians,
     radians_per_second,
     rotations,
     rotations_per_minute,
-    rotations_per_minute_per_second,
 )
 
-#TODO Change Camera Positions
-#TODO Change drivetrain gear ratios
-#TODO Change drivetrain track width and robot length
+#TODO Change drivetrain track width
 #TODO update drivetrain wheel speeds
 
 period = 0.03
 
 # --- DRIVETRAIN ---
 
-drivetrain_turn_gear_ratio: rotations = 150 / 7  # 21.428
-drivetrain_move_gear_ratio_as_rotations_per_meter = 21.148
-
-drivetrain_move_gear_ratio: rotations_per_minute = (
-    drivetrain_move_gear_ratio_as_rotations_per_meter * 60
-)  # 20.64 * 62
+drivetrain_turn_gear_ratio = 12.8
+drivetrain_move_gear_ratio = 6.86
 
 track_width: meters = 0.50156
-robot_length: meters = 0.635
+robot_length: meters = 0.495
 
 # TODO Maybe change these
 drivetrain_accel = True
@@ -149,31 +141,4 @@ ApriltagPositionDictBlue = {
         (inches_to_meters * 18.22),
         Rotation3d(),
     ),
-}
-
-
-
-kCameras = {
-    "Arducam_OV9281_USB_Camera": [
-        Transform3d(
-            Pose3d(),
-            Pose3d(
-                6.43 * inches_to_meters,
-                -7 * inches_to_meters,
-                22.5 * inches_to_meters,
-                Rotation3d(0, 0, math.radians(180)),
-            ),
-        )
-    ],
-    "Arducam_OV9281_USB_Camera_2": [
-        Transform3d(
-            Pose3d(),
-            Pose3d(
-                -6.43 * inches_to_meters,
-                -7 * inches_to_meters,
-                22.5 * inches_to_meters,
-                Rotation3d(0, 0, math.radians(0)),
-            ),
-        )
-    ],
 }
