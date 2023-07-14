@@ -10,7 +10,6 @@ import subsystem
 import utils
 from oi.OI import OI
 
-from robotpy_toolkit_7407.motors import TalonFX
 
 class Robot(wpilib.TimedRobot):
     def __init__(self):
