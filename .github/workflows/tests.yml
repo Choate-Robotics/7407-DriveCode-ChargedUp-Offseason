@@ -138,7 +138,7 @@ jobs:
     
       - run: |
           value=`cat coverage-summary/coverage.md`
-          echo $value >> $GITHUB_STEP_SUMMARY
+          echo `coverage-summary/coverage.md` >> $GITHUB_STEP_SUMMARY
 
 
   # comment:
