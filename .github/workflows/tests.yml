@@ -70,27 +70,21 @@ jobs:
       # so this line is super-simple. But it could be as complex as you need.
       - run: poetry run coverage run robot.py test
       
-      - run: poetry run coverage html
+      - run: poetry run coverage report > coverage.txt
 
       - name: Upload Coverage Summary
         
         uses: actions/upload-artifact@v2
         with:
           name: coverage-summary
-          path: htmlcov
+          path: coverage.txt
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v2
         with:
           name: coverage-report
           path: .coverage
-          
 
-          # - run: poetry run coverage report -m > coverage-summary.txt
-        # uses: actions/upload-artifact@v2
-        # with:
-        #   name: coverage-summary
-        #   path: coverage-summary.txt
 
 
 
@@ -98,6 +92,17 @@ jobs:
   #   needs: test
 
   #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - uses: actions/github-script@v6
+  #       with:
+  #         script: |
+  #           github.rest.issues.createComment({
+  #             issue_number: context.issue.number,
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo,
+  #             body: 'Coverage report:'
+  #           })
 
     
 
