@@ -134,7 +134,11 @@ jobs:
           name: coverage-summary
           path: coverage-summary
 
-      - run: for i in `sed -n '2$p' coverage-summary/coverage.md`; do printf "$i\n"; done >> $GITHUB_STEP_SUMMARY
+      - uses: bash-actions/step@v1
+        with:
+          script: |
+            for i in `sed -n '=' coverage-summary/coverage.md`; do echo "`sed "${i}q;d" coverage-summary/coverage.md`" >> $GITHUB_STEP_SUMMARY; done
+      # - run: for i in `sed -n '=' coverage-summary/coverage.md`; do echo "`sed "${i}q;d" coverage-summary/coverage.md`" >> $GITHUB_STEP_SUMMARY; done
   
       # - run: printf `coverage-summary/coverage.md` >> $GITHUB_STEP_SUMMARY
 
