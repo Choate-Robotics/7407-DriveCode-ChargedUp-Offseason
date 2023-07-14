@@ -73,7 +73,18 @@ jobs:
       - run: poetry run coverage html
 
       - name: Upload Coverage Summary
-        run: echo poetry run coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+        
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-summary
+          path: htmlcov
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-report
+          path: .coverage
+          
 
           # - run: poetry run coverage report -m > coverage-summary.txt
         # uses: actions/upload-artifact@v2

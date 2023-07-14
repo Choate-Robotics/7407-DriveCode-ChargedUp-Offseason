@@ -52,6 +52,3 @@ class Robot(wpilib.TimedRobot):
 
 if __name__ == "__main__":
     wpilib.run(Robot)
-
-def lol():
-    pass
