@@ -5,7 +5,6 @@ from robotpy_toolkit_7407.oi import (
     DefaultButton,
 )
 
-
 class Controllers:
     DRIVER: int
     OPERATOR: int
