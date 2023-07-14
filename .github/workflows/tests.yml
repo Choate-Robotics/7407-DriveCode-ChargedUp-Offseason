@@ -134,11 +134,9 @@ jobs:
           name: coverage-summary
           path: coverage-summary
 
-        
-    
-      - run: |
-          value=`cat coverage-summary/coverage.md`
-          echo `coverage-summary/coverage.md` >> $GITHUB_STEP_SUMMARY
+      - run: for i in `sed -n '2$p' coverage-summary/coverage.md`; do printf "$i\n"; done >> $GITHUB_STEP_SUMMARY
+  
+      # - run: printf `coverage-summary/coverage.md` >> $GITHUB_STEP_SUMMARY
 
 
   # comment:
