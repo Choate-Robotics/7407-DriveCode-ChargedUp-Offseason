@@ -40,7 +40,7 @@ def test_check_exception():
 # If you want to skip a test, use the pytest.mark.skip decorator
 @pytest.mark.skip(reason="this test is not implemented yet")
 def test_not_implemented():
-    pass
+    assert False == True
 
 
 
