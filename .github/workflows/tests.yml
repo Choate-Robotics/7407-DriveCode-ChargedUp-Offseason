@@ -70,7 +70,7 @@ jobs:
       # so this line is super-simple. But it could be as complex as you need.
       - run: poetry run coverage run robot.py test
       
-      - run: poetry run coverage report > coverage.txt
+      - run: poetry run coverage report --format=markdown > coverage.md
 
 
       - name: Upload Coverage Summary
@@ -78,7 +78,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: coverage-summary
-          path: coverage.txt
+          path: coverage.md
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v2
@@ -137,7 +137,7 @@ jobs:
         
     
       - run: |
-          value=`cat coverage-summary/coverage.txt`
+          value=`cat coverage-summary/coverage.md`
           echo $value >> $GITHUB_STEP_SUMMARY
 
 
