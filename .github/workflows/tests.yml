@@ -152,7 +152,7 @@ jobs:
 
   comment:
     needs: test
-    if: ${{ contains(github.event.pull_request.state, 'open')}}
+    if: ${{ github.event.pull_request.state == 'open'}}
 
     runs-on: ubuntu-latest
 
