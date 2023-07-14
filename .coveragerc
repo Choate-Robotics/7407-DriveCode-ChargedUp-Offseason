@@ -1,6 +1,6 @@
 [run]
 branch=true
-omit=tests/*, robot.py
+omit=tests/*
 
 
 [report]
