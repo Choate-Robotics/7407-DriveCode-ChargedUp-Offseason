@@ -1,0 +1,8 @@
+[run]
+branch=true
+omit=tests/*, robot.py
+
+
+[report]
+show_missing=True
+sort=Cover
