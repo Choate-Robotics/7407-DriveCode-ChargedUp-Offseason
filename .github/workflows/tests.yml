@@ -88,21 +88,33 @@ jobs:
 
 
 
-  # summary:
-  #   needs: test
+  summary:
+    needs: test
 
-  #   runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - uses: actions/github-script@v6
-  #       with:
-  #         script: |
-  #           github.rest.issues.createComment({
-  #             issue_number: context.issue.number,
-  #             owner: context.repo.owner,
-  #             repo: context.repo.repo,
-  #             body: 'Coverage report:'
-  #           })
+    steps:
+
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: coverage-summary
+          path: coverage-summary
+
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '${{ steps.coverage-summary.outputs.artifact }}'
+            })
+
+      - run: echo ${{ steps.coverage-summary.outputs.artifact }} >> $GITHUB_STEP_SUMMARY
 
     
 
