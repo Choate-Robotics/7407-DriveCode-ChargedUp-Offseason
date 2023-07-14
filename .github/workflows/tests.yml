@@ -72,6 +72,7 @@ jobs:
       
       - run: poetry run coverage report > coverage.txt
 
+
       - name: Upload Coverage Summary
         
         uses: actions/upload-artifact@v2
@@ -132,8 +133,12 @@ jobs:
         with:
           name: coverage-summary
           path: coverage-summary
+
+        
     
-      - run: echo ${{ steps.coverage-summary.outputs.artifact }} >> $GITHUB_STEP_SUMMARY
+      - run: |
+          value: cat coverage-summary/coverage.txt
+          echo $value >> $GITHUB_STEP_SUMMARY
 
 
   # comment:
