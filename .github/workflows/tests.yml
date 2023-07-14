@@ -137,7 +137,7 @@ jobs:
         
     
       - run: |
-          value: cat coverage-summary/coverage.txt
+          value=`cat coverage.txt`
           echo $value >> $GITHUB_STEP_SUMMARY
 
 
