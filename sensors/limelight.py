@@ -41,7 +41,8 @@ class Limelight():
                 return False
             if self.tv == 0:
                 return None
-            return self.table.getEntry("tclass").getDouble(0)
+            self.t_class = self.table.getEntry("tclass").getInteger(0)
+            return self.t_class
         
     def get_cam_mode(self):
         mode = self.table.getEntry("camMode").getInteger(0)
@@ -52,10 +53,10 @@ class Limelight():
     def update(self):
         self.tx = self.table.getEntry("tx").getDouble(0)
         self.ty = self.table.getEntry("ty").getDouble(0)
-        self.tv = self.table.getEntry("tv").getDouble(0)
+        self.tv = self.table.getEntry("tv").getBoolean(0)
         
     def get_target(self):
-        self.tv = self.table.getEntry("tv").getDouble(0)
+        self.tv = self.table.getEntry("tv").getBoolean(0)
         if self.tv == 0:
             return None
         self.tx = self.table.getEntry("tx").getDouble(0)
@@ -63,7 +64,7 @@ class Limelight():
         return [self.tx, self.ty]
     
     def get_bot_pose(self, team: config.team = None, round_to: int = 4):
-        self.tv = self.table.getEntry("tv").getDouble(0)
+        self.tv = self.table.getEntry("tv").getBoolean(0)
         if self.pipeline != config.limelight_pipeline['feducial']:
             return False
         elif self.tv == 0:

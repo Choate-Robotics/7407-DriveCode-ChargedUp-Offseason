@@ -50,29 +50,27 @@ def test_get_bot_pose_none(limelight):
     assert limelight.get_bot_pose() == None
 
 @pytest.fixture
-def set_limelight_random_values(*table):
-    tx, ty = random.randint(0, 100), random.randint(0, 100)
-    txpub = table.getDoubleTopic('tx').publish()
-    txpub.set(tx)
-    typub = table.getDoubleTopic('ty').publish()
-    typub.set(ty)
-    tvpub = table.getDoubleTopic('tv').publish()
-    tvpub.set(1)
+def set_limelight_random_values():
+    def make(table: ntcore.NetworkTable):
+        tx, ty = random.randint(0, 100), random.randint(0, 100)
+        table.getEntry('tx').setDouble(tx)
+        table.getEntry('ty').setDouble(ty)
+        table.getEntry('tv').setBoolean(1)
+        if table.getEntry('tv').getBoolean(False) == 1:
+            return tx, ty
+        return None
+    return make
     
-    
-def test_get_limelight_values(limelight: Limelight, set_nt_target):
-    tx, ty = random.randint(0, 100), random.randint(0, 100)
-    set_nt_target(limelight.table, tx, ty)
+def test_get_limelight_values(limelight: Limelight, set_limelight_random_values):
+    tx, ty = set_limelight_random_values(table=limelight.table)
     assert limelight.get_target() == [tx, ty]
     
-def test_multiple_limelights():
-    a = Limelight(Pose3d(0, 0, 0, Rotation3d(0, 0, 0)), "limelight")
-    b = Limelight(Pose3d(1, 1, 1, Rotation3d(0, 0, 0)), "limelight2")
+def test_multiple_limelights(set_limelight_random_values):
+    a = Limelight(Pose3d(0, 0, 0, Rotation3d(0, 0, 0)), "limelighta")
+    b = Limelight(Pose3d(1, 1, 1, Rotation3d(0, 0, 0)), "limelightb")
     assert a.origin_offset == Pose3d(0, 0, 0, Rotation3d(0, 0, 0))
     assert b.origin_offset == Pose3d(1, 1, 1, Rotation3d(0, 0, 0))
-    txpub = a.table.getDoubleTopic('tx').publish()
-    tvpub = a.table.getDoubleTopic('tv').publish()
-    txpub.set(3)
-    tvpub.set(1)
-    assert a.get_target() == [3, 0]
-    assert b.get_target() == None
+    atx, aty = set_limelight_random_values(table=a.table)
+    btx, bty = set_limelight_random_values(table=b.table)
+    assert a.get_target() == [atx, aty]
+    assert b.get_target() == [btx, bty]
