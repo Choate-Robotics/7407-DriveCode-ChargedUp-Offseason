@@ -88,8 +88,9 @@ jobs:
 
 
 
-  summary:
+  comment:
     needs: test
+    if: ${{ contains(github.event.pull_request.state, 'open')}}
 
     runs-on: ubuntu-latest
 
@@ -114,9 +115,26 @@ jobs:
               body: '${{ steps.coverage-summary.outputs.artifact }}'
             })
 
+      
+
+  summary:
+    needs: test
+    if: ${{ !contains(github.event.pull_request.state, 'open')}}
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: coverage-summary
+          path: coverage-summary
+    
       - run: echo ${{ steps.coverage-summary.outputs.artifact }} >> $GITHUB_STEP_SUMMARY
 
-    
 
   # comment:
   #   needs: test
