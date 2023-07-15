@@ -14,12 +14,13 @@ from robot_systems import Robot, Sensors, Pneumatics
 # @pytest.fixture(scope="session")
 # def arm():
 #     print("arm setup")
+#     from robot_systems import Robot
 #     Robot.arm.init()
     
 #     yield Robot.arm()
 #     print("arm teardown")
     
-    
+
     
 # # this is a fixture that will be used to mock the ctre library
 @pytest.fixture(scope="session")

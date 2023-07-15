@@ -4,15 +4,14 @@ import wpilib
 import command
 import config
 import constants
-import robot_systems
+from robot_systems import Robot, Pneumatics, Sensors
 import sensors
 import subsystem
 import utils
 from oi.OI import OI
 
-from robotpy_toolkit_7407.motors import TalonFX
 
-class Robot(wpilib.TimedRobot):
+class _Robot(wpilib.TimedRobot):
     def __init__(self):
         super().__init__()
 
@@ -26,6 +25,8 @@ class Robot(wpilib.TimedRobot):
     def robotPeriodic(self):
         commands2.CommandScheduler.getInstance().run()
 
+        Sensors.limeLight_F.update()
+        Sensors.limeLight_B.update()
     # Initialize subsystems
 
     # Pneumatics
@@ -50,4 +51,4 @@ class Robot(wpilib.TimedRobot):
 
 
 if __name__ == "__main__":
-    wpilib.run(Robot)
+    wpilib.run(_Robot)
