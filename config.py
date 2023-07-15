@@ -4,7 +4,15 @@ limelight_pipeline: int = {
     'neural': 2
 }
 
-team = {
+limelight_led_mode: int = {
+    'pipeline_default': 0,
+    'force_off': 1,
+    'force_blink': 2,
+    'force_on': 3
+    
+}
+
+team:int = {
     'red': 0,
     'blue': 1
 }
