@@ -3,6 +3,8 @@ import utils
 
 from subsystem import Elevator
 from robotpy_toolkit_7407.command import SubsystemCommand
+
+
 class ZeroElevator(SubsystemCommand[Elevator]):
 
     def __init__(self, subsystem: Elevator):
@@ -28,8 +30,8 @@ class ZeroElevator(SubsystemCommand[Elevator]):
         :return: Boolean
         """
         return (
-            self.subsystem.elevator_bottom_sensor.get_value()
-            or (time.time() - self.start_time) > 5
+                self.subsystem.elevator_bottom_sensor.get_value()
+                or (time.time() - self.start_time) > 5
         )
 
     def end(self, interrupted=False) -> None:
