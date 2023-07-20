@@ -45,3 +45,25 @@ class ZeroElevator(SubsystemCommand[Elevator]):
             utils.logger.debug("ELEVATOR", "Elevator Successfully Zeroed.")
         else:
             utils.logger.debug("ELEVATOR", "Elevator Zero Command Interrupted.")
+
+
+class SetElevator(SubsystemCommand[Elevator]):
+    def __init__(self, subsystem: Elevator, length: float):
+        super().__init__(subsystem)
+        self.subsystem = subsystem
+        self.length = length
+
+    def initialize(self) -> None:
+        self.subsystem.set_length(self.length)
+
+    def execute(self):
+        ...
+
+    def isFinished(self) -> bool:
+        return abs(self.subsystem.get_length() - self.length) < 0.01
+
+    def end(self, interrupted=False) -> None:
+        if not interrupted:
+            utils.logger.debug("ELEVATOR", "Elevator Successfully Set.")
+        else:
+            utils.logger.debug("ELEVATOR", "Elevator Set Command Interrupted.")
