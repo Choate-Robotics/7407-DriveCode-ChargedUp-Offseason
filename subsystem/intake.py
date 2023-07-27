@@ -9,8 +9,8 @@ INTAKE_CONFIG = SparkMaxConfig(k_P=1, k_I=1, k_D=1, k_F=1)
 
 
 class Intake(Subsystem):
-    left_back_dist_sensor: rev.AnalogInput() = None
-    right_back_dist_sensor: rev.AnalogInput() = None
+    # left_back_dist_sensor: rev.AnalogInput() = None
+    # right_back_dist_sensor: rev.AnalogInput() = None
 
     def __init__(self):
         super().__init__()
