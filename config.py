@@ -54,3 +54,5 @@ back_right_zeroed_pos = 136.58 * degrees_to_radians
 # Sensors
 gyro_id = 20
 
+drivetrain_reversed = False
+

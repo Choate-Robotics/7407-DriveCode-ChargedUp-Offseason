@@ -24,6 +24,7 @@ from units.SI import (
 
 #TODO Change drivetrain track width
 #TODO update drivetrain wheel speeds
+#TODO update drivetrain gear ratio per meter
 
 period = 0.03
 
@@ -31,6 +32,9 @@ period = 0.03
 
 drivetrain_turn_gear_ratio = 12.8
 drivetrain_move_gear_ratio = 6.86
+
+#TODO: Change this
+drivetrain_move_gear_ratio_as_rotations_per_meter = 1.0
 
 track_width: meters = 0.50156
 robot_length: meters = 0.495
