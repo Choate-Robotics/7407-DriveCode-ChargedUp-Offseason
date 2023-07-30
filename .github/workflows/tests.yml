@@ -8,6 +8,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 4
     steps:
       - uses: actions/checkout@v1
         with:
@@ -98,6 +99,7 @@ jobs:
   summary:
     needs: test
     runs-on: ubuntu-latest
+    timeout-minutes: 4
 
     steps:
 

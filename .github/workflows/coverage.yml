@@ -7,6 +7,7 @@ on:
 jobs:
   coverage-report:
     runs-on: ubuntu-latest
+    timeout-minutes: 4
     steps:
       - uses: actions/checkout@v1
         with:
@@ -67,8 +68,8 @@ jobs:
 
       # And finally run tests. I'm using pytest and all my pytest config is in my `pyproject.toml`
       # so this line is super-simple. But it could be as complex as you need.
-      - run: poetry run coverage run robot.py test
-      
+      - run: poetry run coverage run robot.py test --coverage-mode
+        timeout-minutes: 2
 
       - run: poetry run coverage xml
 
@@ -79,15 +80,11 @@ jobs:
           name: coverage-summary
           path: coverage.xml
 
-      - name: Upload Coverage Report
-        uses: actions/upload-artifact@v2
-        with:
-          name: coverage-report
-          path: .coverage
 
   message:
     needs: coverage-report
     runs-on: ubuntu-latest
+    timeout-minutes: 4
 
     steps:
 
@@ -105,6 +102,3 @@ jobs:
         with:
           coverageFile: coverage-summary/coverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
-
-  
-    
