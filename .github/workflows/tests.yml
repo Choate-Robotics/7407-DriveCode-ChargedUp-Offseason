@@ -72,13 +72,21 @@ jobs:
       
       - run: poetry run coverage report --format=markdown > coverage.md
 
+      - run: poetry run coverage xml
 
-      - name: Upload Coverage Summary
+
+      - name: Upload Coverage MD
         
         uses: actions/upload-artifact@v2
         with:
           name: coverage-summary
           path: coverage.md
+
+      - name: Upload Coverage XML
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-summary
+          path: coverage.xml
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v2
@@ -107,19 +115,30 @@ jobs:
       # - run: printf `coverage-summary/coverage.md` >> $GITHUB_STEP_SUMMARY
 
 
-  # comment:
-  #   needs: test
+  message:
+    needs: test
+    runs-on: ubuntu-latest
 
-  #   runs-on: ubuntu-latest
+    steps:
 
-  #   steps:
-  #     - uses: actions/github-script@v6
-  #       with:
-  #         script: |
-  #           github.rest.issues.createComment({
-  #             issue_number: context.issue.number,
-  #             owner: context.repo.owner,
-  #             repo: context.repo.repo,
-  #             body: 'Coverage report:'
-  #           })
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: coverage-summary
+          path: coverage-summary
+
+      # - run: for i in `sed -n '=' coverage-summary/coverage.md`; do echo "`sed "${i}q;d" coverage-summary/coverage.md`" >> $GITHUB_STEP_SUMMARY; done
+  
+      # - run: printf `coverage-summary/coverage.md` >> $GITHUB_STEP_SUMMARY
+
+      - name: Get Cover 
+        uses: orgoro/coverage@v3.1
+        with:
+          coverageFile: coverage-summary/coverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  
     
