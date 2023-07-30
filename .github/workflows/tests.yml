@@ -114,31 +114,3 @@ jobs:
   
       # - run: printf `coverage-summary/coverage.md` >> $GITHUB_STEP_SUMMARY
 
-
-  message:
-    needs: test
-    runs-on: ubuntu-latest
-
-    steps:
-
-      - uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
-
-      - uses: actions/download-artifact@v2
-        with:
-          name: coverage-summary
-          path: coverage-summary
-
-      # - run: for i in `sed -n '=' coverage-summary/coverage.md`; do echo "`sed "${i}q;d" coverage-summary/coverage.md`" >> $GITHUB_STEP_SUMMARY; done
-  
-      # - run: printf `coverage-summary/coverage.md` >> $GITHUB_STEP_SUMMARY
-
-      - name: Get Cover 
-        uses: orgoro/coverage@v3.1
-        with:
-          coverageFile: coverage-summary/coverage.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-  
-    
