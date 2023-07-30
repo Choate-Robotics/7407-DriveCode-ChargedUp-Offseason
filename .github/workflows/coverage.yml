@@ -2,10 +2,10 @@ name: Coverage
 
 on:
   pull_request:
-    branches: [ master, dev ]
+    branches: [master, dev]
 
 jobs:
-  coverage-report:
+  test:
     runs-on: ubuntu-latest
     timeout-minutes: 4
     steps:
@@ -68,11 +68,18 @@ jobs:
 
       # And finally run tests. I'm using pytest and all my pytest config is in my `pyproject.toml`
       # so this line is super-simple. But it could be as complex as you need.
-      - run: poetry run coverage run robot.py test
-        timeout-minutes: 2
+      - run: poetry run coverage run robot.py test --coverage-mode
+
+      - run: poetry run coverage report --format=markdown > coverage.md
 
       - run: poetry run coverage xml
 
+      - name: Upload Coverage MD
+
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-summary
+          path: coverage.md
 
       - name: Upload Coverage XML
         uses: actions/upload-artifact@v2
@@ -80,14 +87,18 @@ jobs:
           name: coverage-summary
           path: coverage.xml
 
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-report
+          path: .coverage
 
   message:
-    needs: coverage-report
+    needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 4
 
     steps:
-
       - uses: actions/checkout@v1
         with:
           fetch-depth: 1
@@ -97,7 +108,7 @@ jobs:
           name: coverage-summary
           path: coverage-summary
 
-      - name: Get Cover 
+      - name: Get Cover
         uses: orgoro/coverage@v3.1
         with:
           coverageFile: coverage-summary/coverage.xml
