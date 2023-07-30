@@ -74,24 +74,12 @@ jobs:
 
       - run: poetry run coverage xml
 
-      - name: Upload Coverage MD
-
-        uses: actions/upload-artifact@v2
-        with:
-          name: coverage-summary
-          path: coverage.md
 
       - name: Upload Coverage XML
         uses: actions/upload-artifact@v2
         with:
           name: coverage-summary
           path: coverage.xml
-
-      - name: Upload Coverage Report
-        uses: actions/upload-artifact@v2
-        with:
-          name: coverage-report
-          path: .coverage
 
   message:
     needs: test
@@ -113,3 +101,6 @@ jobs:
         with:
           coverageFile: coverage-summary/coverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
+          thresholdAll: .8
+          thresholdNew: .9
+          thresholdModified: 0.0
