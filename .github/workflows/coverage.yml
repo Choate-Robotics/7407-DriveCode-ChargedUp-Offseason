@@ -5,7 +5,7 @@ on:
     branches: [ main, dev ]
 
 jobs:
-  test:
+  coverage-report:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -67,9 +67,8 @@ jobs:
 
       # And finally run tests. I'm using pytest and all my pytest config is in my `pyproject.toml`
       # so this line is super-simple. But it could be as complex as you need.
-      - run: poetry run coverage run robot.py test --coverage-mode
+      - run: poetry run coverage run robot.py test
       
-      - run: poetry run coverage report --format=markdown > coverage.md
 
       - run: poetry run coverage xml
 
@@ -87,7 +86,7 @@ jobs:
           path: .coverage
 
   message:
-    needs: test
+    needs: coverage-report
     runs-on: ubuntu-latest
 
     steps:
@@ -100,10 +99,6 @@ jobs:
         with:
           name: coverage-summary
           path: coverage-summary
-
-      # - run: for i in `sed -n '=' coverage-summary/coverage.md`; do echo "`sed "${i}q;d" coverage-summary/coverage.md`" >> $GITHUB_STEP_SUMMARY; done
-  
-      # - run: printf `coverage-summary/coverage.md` >> $GITHUB_STEP_SUMMARY
 
       - name: Get Cover 
         uses: orgoro/coverage@v3.1
