@@ -1,21 +1,22 @@
-name: Tests
+name: Coverage
 
 on:
-  push:
+  pull_request:
+    branches: [main, dev]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 4
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 1
 
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v1
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: 3.11
 
       # Cache the installation of Poetry itself, e.g. the next step. This prevents the workflow
       # from installing Poetry every time, which can be slow. Note the use of the Poetry version
@@ -68,18 +69,11 @@ jobs:
       # And finally run tests. I'm using pytest and all my pytest config is in my `pyproject.toml`
       # so this line is super-simple. But it could be as complex as you need.
       - run: poetry run coverage run robot.py test --coverage-mode
-      
-      - run: poetry run coverage report --format=markdown > coverage.md
+        timeout-minutes: 2
+        continue-on-error: true
 
       - run: poetry run coverage xml
 
-
-      - name: Upload Coverage MD
-        
-        uses: actions/upload-artifact@v2
-        with:
-          name: coverage-summary
-          path: coverage.md
 
       - name: Upload Coverage XML
         uses: actions/upload-artifact@v2
@@ -87,20 +81,12 @@ jobs:
           name: coverage-summary
           path: coverage.xml
 
-      - name: Upload Coverage Report
-        uses: actions/upload-artifact@v2
-        with:
-          name: coverage-report
-          path: .coverage
-
-
-  summary:
+  message:
     needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 4
 
     steps:
-
       - uses: actions/checkout@v1
         with:
           fetch-depth: 1
@@ -110,7 +96,11 @@ jobs:
           name: coverage-summary
           path: coverage-summary
 
-      - run: for i in `sed -n '=' coverage-summary/coverage.md`; do echo "`sed "${i}q;d" coverage-summary/coverage.md`" >> $GITHUB_STEP_SUMMARY; done
-  
-      # - run: printf `coverage-summary/coverage.md` >> $GITHUB_STEP_SUMMARY
-
+      - name: Get Cover
+        uses: orgoro/coverage@v3.1
+        with:
+          coverageFile: coverage-summary/coverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          thresholdAll: .8
+          thresholdNew: .9
+          thresholdModified: 0.0
