@@ -14,3 +14,5 @@ def test_extension():
 def test_retraction():
     puncher.retract()
     assert puncher.getTargetPosition() == [constants.puncher_retract, constants.puncher_retract]
+
+

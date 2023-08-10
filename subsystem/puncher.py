@@ -14,11 +14,13 @@ class Puncher(Subsystem):
     extended: bool
     left_target: float
     right_target: float
+    tolerance: float
 
     def __init__(self):
         super().__init__()
         self.left_target, self.right_target = constants.puncher_init_pos, constants.puncher_init_pos
         self.extended = False
+        self.tolerance = .5
 
     def setMotorTarget(self, pos):
         self.left_motor.set_target_position(pos)
