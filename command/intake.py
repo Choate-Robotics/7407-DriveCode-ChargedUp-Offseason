@@ -4,15 +4,16 @@ from robotpy_toolkit_7407 import SubsystemCommand
 from oi.keymap import Controllers
 from subsystem import Intake
 from robotpy_toolkit_7407.utils.units import radians
+import constants
 
 
 class SetIntake(SubsystemCommand[Intake]):
-    def __init__(self, subsystem: Intake, intake_active: bool, go_cube: bool, go_cone: bool):
+    def __init__(self, subsystem: Intake, intake_active: bool, game_piece: dict):
         super().__init__(subsystem)
         self.intake_active = intake_active
         self.finished = False
-        self.go_cube = go_cube
-        self.go_cone = go_cone
+        self.go_cube = game_piece["cube"]
+        self.go_cone = game_piece["cone"]
 
     def initialize(self) -> None:
         """
