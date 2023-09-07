@@ -25,6 +25,7 @@ class SetIntake(SubsystemCommand[Intake]):
         elif self.intake_active and self.go_cone:
             self.subsystem.grab_cone()
         else:
+            # change output dynamically to cone and cubes w/ obj variable to hold on to piece
             self.subsystem.set_lower_output(0.025)
             self.subsystem.set_upper_output(0.025)
 
@@ -48,4 +49,13 @@ class SetIntake(SubsystemCommand[Intake]):
         Checks if the intake has finished
         :return:
         """
-        return self.finished
+        return self.finished and self.subsystem.is_at_angle()
+
+    def end(self, interrupted: bool) -> None:
+        """
+        Stops the intake
+        :return:
+        """
+        self.subsystem.stop_intake()
+        Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 0)
+        self.finished = False

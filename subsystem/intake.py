@@ -9,7 +9,7 @@ import rev
 import wpilib
 
 
-# cone -> opposite direction spin(top down, bottom up), cube -> same direction spin(top down, bottom down)
+# cube -> same outwards spin(top up, bottom up), cone -> same inwards spin(top down, bottom down)
 class Intake(Subsystem):
     # left = lower roller, right = upper roller
     # lower_back_dist_sensor: rev.AnalogInput() = None
@@ -32,16 +32,14 @@ class Intake(Subsystem):
         self.intake_speed = config.default_intake_speed
         self.disable_rotation: bool = config.disable_wrist_rotation
         self.wrist_abs_encoder = None
-        self.upper_back_dist_sensor: rev.AnalogInput = None
-        self.lower_back_dist_sensor: rev.AnalogInput = None
+        self.dist_sensor: rev.AnalogInput = None
 
     def init(self):
         self.lower_intake_motor.init()
         self.upper_intake_motor.init()
-        self.write_motor.init()
-        self.upper_back_dist_sensor = self.right_intake_motor.motor.getAnalog()
-        self.lower_back_dist_sensor = self.left_intake_motor.motor.getAnalog()
-        self.wrist_abs_encoder = self.wrist.motor.getAbsoluteEncoder(
+        self.wrist_motor.init()
+        self.dist_sensor = self.upper_intake_motor.motor.getAnalog()
+        self.wrist_abs_encoder = self.wrist_motor.motor.getAbsoluteEncoder(
             rev.SparkMaxAbsoluteEncoder.Type.kDutyCycle
         )
 
@@ -92,7 +90,8 @@ class Intake(Subsystem):
         Sets the intake motors to grab a cube
         :return: None
         """
-        self.set_lower_output(self.intake_speed)
+        self.set_lower_output(-self.intake_speed)
+        self.set_upper_output(-self.intake_speed)
 
     def grab_cone(self):
         """
@@ -108,7 +107,7 @@ class Intake(Subsystem):
         :return: None
         """
         self.set_lower_output(-self.intake_speed)
-        self.set_upper_output(self.intake_speed)
+        self.set_upper_output(-self.intake_speed)
 
     def eject_cube(self):
         """

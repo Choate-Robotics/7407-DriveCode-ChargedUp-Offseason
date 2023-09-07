@@ -7,3 +7,7 @@ wrist_motor_id = 17  # change this to the wrist motor id
 INTAKE_CONFIG = SparkMaxConfig(k_P=1, k_I=1, k_D=1, k_F=1)
 WRIST_CONFIG = SparkMaxConfig(k_P=1, k_I=1, k_D=1, k_F=1)
 disable_wrist_rotation = False  # change this to disable wrist rotation
+game_piece = {
+    'cube': 1,
+    'cone': 0
+}
