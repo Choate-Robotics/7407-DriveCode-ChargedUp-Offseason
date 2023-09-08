@@ -37,7 +37,7 @@ def test_grabCube():
 def test_grabCone():
     intake.grab_cone()
     assert intake.lower_intake_motor.motor.get() == intake.intake_speed
-    assert intake.upper_intake_motor.motor.get() == intake.intake_speed
+    assert intake.upper_intake_motor.motor.get() == -intake.intake_speed
 
 
 def test_ejectCube():
@@ -49,6 +49,6 @@ def test_ejectCube():
 def test_ejectCone():
     intake.eject_cone()
     assert intake.lower_intake_motor.motor.get() == -intake.intake_speed
-    assert intake.upper_intake_motor.motor.get() == -intake.intake_speed
+    assert intake.upper_intake_motor.motor.get() == intake.intake_speed
 
 
