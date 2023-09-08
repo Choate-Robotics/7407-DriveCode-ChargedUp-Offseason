@@ -99,7 +99,7 @@ class Intake(Subsystem):
         :return: None
         """
         self.set_lower_output(self.intake_speed)
-        self.set_upper_output(self.intake_speed)
+        self.set_upper_output(-self.intake_speed)
 
     def eject_cone(self):
         """
@@ -107,7 +107,7 @@ class Intake(Subsystem):
         :return: None
         """
         self.set_lower_output(-self.intake_speed)
-        self.set_upper_output(-self.intake_speed)
+        self.set_upper_output(self.intake_speed)
 
     def eject_cube(self):
         """
@@ -141,6 +141,8 @@ class Intake(Subsystem):
         """
         if not self.disable_rotation:
             self.wrist_motor.set_target_position((pos / (pi * 2)) * constants.wrist_gear_ratio)
+            self.wrist_motor.set_sensor_position((pos / (pi * 2)) * constants.wrist_gear_ratio)
+
 
     def get_wrist_angle(self):
         """
