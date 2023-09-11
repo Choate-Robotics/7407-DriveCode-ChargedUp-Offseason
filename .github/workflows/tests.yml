@@ -66,7 +66,7 @@ jobs:
       - name: run tests
         run: |
           
-          python robot.py test
+          poetry run pytest
       
       - run: poetry run coverage report --format=markdown > coverage.md
 
