@@ -65,7 +65,6 @@ jobs:
       # so this line is super-simple. But it could be as complex as you need.
       - name: run tests
         run: |
-          source .venv/bin/activate
           coverage run robot.py test --coverage-mode
           coverage report 
       
