@@ -65,7 +65,7 @@ jobs:
       # so this line is super-simple. But it could be as complex as you need.
       - name: run tests
         run: |
-          source .venv/bin/activate
+          poetry shell
           py robot.py test --coverage-mode
       
       - run: poetry run coverage report --format=markdown > coverage.md
