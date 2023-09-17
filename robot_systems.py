@@ -10,7 +10,7 @@ class Robot:
     intake = subsystem.Intake()
 
     drivetrain = subsystem.Drivetrain()
-
+    puncher = subsystem.Puncher()
 
 
 class Pneumatics:

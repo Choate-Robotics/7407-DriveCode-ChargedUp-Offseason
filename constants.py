@@ -158,4 +158,12 @@ ApriltagPositionDictBlue = {
         Rotation3d(),
     ),
 }
+# Puncher Ratio
+# 0.00764 m/r
+# 1.53m
+puncher_ratio = 0.00764
+puncher_length = 1.53
+puncher_extend = puncher_length / puncher_ratio
+puncher_retract = 0
+puncher_init_pos = 0
 

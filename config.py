@@ -70,3 +70,6 @@ gyro_id = 20
 
 drivetrain_reversed = False
 
+# Puncher
+punch_left = 30
+punch_right = 50
