@@ -6,8 +6,12 @@ import constants
 from robotpy_toolkit_7407.subsystem_templates.drivetrain import SwerveGyro
 
 class Robot:
+
+    intake = subsystem.Intake()
+
     drivetrain = subsystem.Drivetrain()
     puncher = subsystem.Puncher()
+
 
 class Pneumatics:
     pass

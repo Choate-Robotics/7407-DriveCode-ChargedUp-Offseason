@@ -1,4 +1,8 @@
 
+game_piece = {"cone": False, "cube": True}
+wrist_gear_ratio = 155 / 1
+
+
 from wpimath.geometry import Pose3d, Translation3d, Rotation3d
 
 # limelight offsets from robot origin (in meters)
@@ -154,7 +158,6 @@ ApriltagPositionDictBlue = {
         Rotation3d(),
     ),
 }
-
 # Puncher Ratio
 # 0.00764 m/r
 # 1.53m
@@ -163,3 +166,4 @@ puncher_length = 1.53
 puncher_extend = puncher_length / puncher_ratio
 puncher_retract = 0
 puncher_init_pos = 0
+
