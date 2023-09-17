@@ -1,9 +1,16 @@
 import wpilib
+
 import commands2.button
+
 from robotpy_toolkit_7407.oi import (
     XBoxController,
     JoystickAxis,
 )
+from robotpy_toolkit_7407.oi.joysticks import Joysticks
+
+controllerDRIVER = XBoxController
+controllerOPERATOR = XBoxController
+controllerNUMPAD = XBoxController
 
 from robotpy_toolkit_7407.oi.joysticks import Joysticks
 
@@ -11,8 +18,12 @@ controllerDRIVER = XBoxController
 controllerOPERATOR = XBoxController
 
 class Controllers:
-    DRIVER: int = 0
-    OPERATOR: int = 1
+
+    DRIVER = 0
+    OPERATOR = 1
+    NUMPAD = 2
+    NUMPAD_CONTROLLER = wpilib.Joystick(2)
+
 
     DRIVER_CONTROLLER = wpilib.Joystick(0)
     OPERATOR_CONTROLLER = wpilib.Joystick(1)

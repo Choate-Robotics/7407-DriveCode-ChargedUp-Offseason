@@ -1,4 +1,8 @@
 
+game_piece = {"cone": False, "cube": True}
+wrist_gear_ratio = 155 / 1
+
+
 from wpimath.geometry import Pose3d, Translation3d, Rotation3d
 
 # limelight offsets from robot origin (in meters)
@@ -154,3 +158,4 @@ ApriltagPositionDictBlue = {
         Rotation3d(),
     ),
 }
+
