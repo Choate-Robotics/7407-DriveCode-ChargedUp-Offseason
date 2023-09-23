@@ -9,6 +9,7 @@ import sensors
 import subsystem
 import utils
 from oi.OI import OI
+from oi.PID_Tune import PIDConfigEditor
 
 
 class _Robot(wpilib.TimedRobot):
@@ -28,6 +29,12 @@ class _Robot(wpilib.TimedRobot):
         Sensors.limeLight_F.update()
         Sensors.limeLight_B.update()
     # Initialize subsystems
+
+    if config.enable_pid_tuning:
+        tuner = PIDConfigEditor()
+        
+        tuner.editSparkMaxConfig(config.WRIST_CONFIG, "wrist")
+        tuner.editProfiledPIDController(config.balance_pid, 1, 0, "balance")
 
     # Pneumatics
 

@@ -115,7 +115,7 @@ class BalanceDrivetrain(SubsystemCommand[Drivetrain]):
         self.gyro = self.subsystem.gyro
         self.speed_percent = speed
         self.timeout = timeout
-        self.pid = ProfiledPIDController(config.BALABCE_CONFIG['KP'], config.BALABCE_CONFIG['KI'], config.BALABCE_CONFIG['KD'], config.BALABCE_CONFIG['Constraints'])
+        self.pid = config.balance_pid
         self.pid.enableContinuousInput(-180, 180)
         self.pid.setTolerance(5)
         self.climbing: bool = False
