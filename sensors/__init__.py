@@ -1,1 +1,1 @@
-from sensors.limelight import Limelight
+from sensors.limelight import Limelight, LimelightController

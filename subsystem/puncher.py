@@ -5,12 +5,11 @@ import rev
 import constants
 
 
-PID = SparkMaxConfig(1,0, .5, 0, (-1,1), rev.CANSparkMax.IdleMode.kBrake)
 
 class Puncher(Subsystem):
 
-    left_motor: SparkMax = SparkMax(config.punch_left, config=PID)
-    right_motor: SparkMax = SparkMax(config.punch_right, config=PID)
+    left_motor: SparkMax = SparkMax(config.punch_left, config=config.PUNCHER_CONFIG)
+    right_motor: SparkMax = SparkMax(config.punch_right, config=config.PUNCHER_CONFIG)
     extended: bool
     left_target: float
     right_target: float

@@ -1,12 +1,23 @@
 
-from robotpy_toolkit_7407.motors.rev_motors import SparkMax, SparkMaxConfig
+from robotpy_toolkit_7407.motors.rev_motors import SparkMaxConfig
+from rev import CANSparkMax
+from wpimath.trajectory import TrapezoidProfile
 
-left_intake_motor_id = 15  # change this to the left intake motor id
-right_intake_motor_id = 16  # change this to the right intake motor id
+left_intake_motor_id = 28  # change this to the left intake motor id
+right_intake_motor_id = 80  # change this to the right intake motor id
 default_intake_speed = 0.5  # change this to the default intake speed
 wrist_motor_id = 17  # change this to the wrist motor id
-INTAKE_CONFIG = SparkMaxConfig(k_P=1, k_I=1, k_D=1, k_F=1)
-WRIST_CONFIG = SparkMaxConfig(k_P=1, k_I=1, k_D=1, k_F=1)
+INTAKE_CONFIG = SparkMaxConfig(k_P=1, k_I=1, k_D=1, k_F=0, output_range=(-1,1), idle_mode=CANSparkMax.IdleMode.kBrake)
+WRIST_CONFIG = SparkMaxConfig(k_P=1, k_I=1, k_D=1, k_F=0, output_range=(-1,1), idle_mode=CANSparkMax.IdleMode.kBrake)
+PUNCHER_CONFIG = SparkMaxConfig(1,0, .5, 0, (-1,1), CANSparkMax.IdleMode.kBrake)
+
+BALABCE_CONFIG = {
+    'kP': 1,
+    'kI': 1,
+    'kD': 1,
+    'Constraints':  TrapezoidProfile.Constraints(1, 0),
+}
+
 disable_wrist_rotation = False  # change this to disable wrist rotation
 game_piece = {
     'cube': 1,

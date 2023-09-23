@@ -1,8 +1,8 @@
-import ntcore
-
-import config
+import ntcore, config, time
 
 from wpimath.geometry import Pose3d, Translation3d, Rotation3d
+
+from robotpy_toolkit_7407.sensors.limelight.limelight import VisionEstimator
 
 
 class Limelight():
@@ -167,14 +167,15 @@ class Limelight():
         Gets the pose of the robot relative to the field using the feducial pipeline.
         This uses the botpose values from the limelight configuration, which are relative to the alliance wall.
         To call this properly, you must set the pipeline to feducial.
-        :param team: The team color of the robot. This is used to get the botpose of the robot relative to the alliance wall. can be None if you don't want to use it.
+        :param team: The team color of the robot. This is used to get the botpose of the robot relative to the alliance wall. can be None if you don't want to use it. 0 for red, 1 for blue.
         :param round_to: The number of decimal places to round the botpose to. Defaults to 4.
         :param force_update: If True, the limelight variables be updated before getting the botpose. Defaults to False.
         
         :return list: [x, y, z, pitch, yaw, roll] if a target exists
         
         :return None: if no targets exists
-        :return False: if the pipeline is not set to feducial'''
+        :return False: if the pipeline is not set to feducial
+        '''
         if self.force_update or force_update:
             self.update()
         if self.pipeline != config.limelight_pipeline['feducial']:
@@ -197,3 +198,18 @@ class Limelight():
             )
             return pose
 
+class LimelightController(VisionEstimator):
+    
+    def __init__(self, limelight_list: list[Limelight]):
+        super().__init__()
+        self.limelights = limelight_list
+        
+    def get_estimated_robot_pose(self) -> list[Pose3d] | None:
+        poses = []
+        for limelight in self.limelights:
+            if limelight.target_exists():
+                poses.append(limelight.get_bot_pose())
+        if len(poses) > 0:
+            return poses
+        else:
+            return None

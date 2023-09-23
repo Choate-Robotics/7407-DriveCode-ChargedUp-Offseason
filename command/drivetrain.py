@@ -1,6 +1,8 @@
 import logging
 from robotpy_toolkit_7407.command import SubsystemCommand
 from wpimath.filter import SlewRateLimiter
+from wpimath.controller import ProfiledPIDController, PIDController
+
 import config
 import constants
 from subsystem import Drivetrain
@@ -104,3 +106,42 @@ class DrivetrainZero(SubsystemCommand[Drivetrain]):
         logging.info("Successfully re-zeroed swerve pods.")
         ...
 
+class BalanceDrivetrain(SubsystemCommand[Drivetrain]):
+    '''
+    Balances the drivetrain using the gyro. Assumes that the robot is on a flat surface.'''
+    def __init__(self, subsystem: Drivetrain, speed: float = 0.5, timeout: float = 5.0):
+        super().__init__(subsystem)
+        self.subsystem = subsystem
+        self.gyro = self.subsystem.gyro
+        self.speed_percent = speed
+        self.timeout = timeout
+        self.pid = ProfiledPIDController(config.BALABCE_CONFIG['KP'], config.BALABCE_CONFIG['KI'], config.BALABCE_CONFIG['KD'], config.BALABCE_CONFIG['Constraints'])
+        self.pid.enableContinuousInput(-180, 180)
+        self.pid.setTolerance(5)
+        self.climbing: bool = False
+        
+    def initialize(self) -> None:
+        self.pid.reset()
+        self.pid.setGoal(0)
+    
+    def execute(self) -> None:
+        if self.gyro.get_robot_pitch() < 20 and not self.climbing:
+            self.pid.setGoal(30)
+        else:
+            self.climbing = True
+            self.pid.setGoal(0)
+
+        measurement = self.gyro.get_robot_pitch()
+        calculate = self.pid.calculate(measurement)
+        
+        calculate = calculate / 90
+        
+        vel = self.speed_percent * calculate * self.subsystem.max_vel
+        
+        self.subsystem.set_driver_centric((0, vel), 0)
+    
+    def isFinished(self) -> bool:
+        return self.pid.atGoal()
+    
+    def end(self, interrupted: bool) -> None:
+        pass
