@@ -207,7 +207,7 @@ class LimelightController(VisionEstimator):
     def get_estimated_robot_pose(self) -> list[Pose3d] | None:
         poses = []
         for limelight in self.limelights:
-            if limelight.target_exists():
+            if limelight.target_exists() and limelight.get_pipeline_mode() == config.limelight_pipeline['feducial']:
                 poses.append(limelight.get_bot_pose())
         if len(poses) > 0:
             return poses
