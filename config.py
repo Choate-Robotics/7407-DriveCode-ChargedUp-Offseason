@@ -2,7 +2,7 @@
 from robotpy_toolkit_7407.motors.rev_motors import SparkMaxConfig
 from rev import CANSparkMax
 from wpimath.trajectory import TrapezoidProfile
-from wpilib.controller import ProfiledPIDController
+from wpimath.controller import ProfiledPIDController
 
 enable_pid_tuning = True  # change this to enable pid tuning
 
@@ -56,22 +56,22 @@ field_width = 8.075
 # Drivetrain
 front_left_move = 16
 front_left_turn = 15
-front_left_encoder = 24
+front_left_encoder = 2
 front_left_zeroed_pos = 174.638 * degrees_to_radians
 
 front_right_move = 14
 front_right_turn = 13
-front_right_encoder = 23
+front_right_encoder = 3
 front_right_zeroed_pos = 282.304 * degrees_to_radians
 
 back_left_move = 3
 back_left_turn = 4
-back_left_encoder = 21
+back_left_encoder = 4
 back_left_zeroed_pos = 313.769 * degrees_to_radians
 
 back_right_move = 5
 back_right_turn = 6
-back_right_encoder = 22
+back_right_encoder = 5
 back_right_zeroed_pos = 136.58 * degrees_to_radians
 
 # Sensors

@@ -1,5 +1,6 @@
 import math
 from dataclasses import dataclass
+from wpilib import AnalogEncoder
 
 import rev
 from ctre.sensors import CANCoder
@@ -114,28 +115,28 @@ class Drivetrain(SwerveDrivetrain):
     n_front_left = SparkMaxSwerveNode(
         SparkMax(config.front_left_move, config=MOVE_CONFIG),
         SparkMax(config.front_left_turn, config=TURN_CONFIG),
-        CANCoder(config.front_left_encoder),
+        AnalogEncoder(config.front_left_encoder),
         absolute_encoder_zeroed_pos=config.front_left_zeroed_pos,
         name="n_front_left",
     )
     n_front_right = SparkMaxSwerveNode(
         SparkMax(config.front_right_move, config=MOVE_CONFIG),
         SparkMax(config.front_right_turn, config=TURN_CONFIG),
-        CANCoder(config.front_right_encoder),
+        AnalogEncoder(config.front_right_encoder),
         absolute_encoder_zeroed_pos=config.front_right_zeroed_pos,
         name="n_front_right",
     )
     n_back_left = SparkMaxSwerveNode(
         SparkMax(config.back_left_move, config=MOVE_CONFIG),
         SparkMax(config.back_left_turn, config=TURN_CONFIG),
-        CANCoder(config.back_left_encoder),
+        AnalogEncoder(config.back_left_encoder),
         absolute_encoder_zeroed_pos=config.back_left_zeroed_pos,
         name="n_back_left",
     )
     n_back_right = SparkMaxSwerveNode(
         SparkMax(config.back_right_move, config=MOVE_CONFIG),
         SparkMax(config.back_right_turn, config=TURN_CONFIG),
-        CANCoder(config.back_right_encoder),
+        AnalogEncoder(config.back_right_encoder),
         absolute_encoder_zeroed_pos=config.back_right_zeroed_pos,
         name="n_back_right",
     )

@@ -21,7 +21,7 @@ class Sensors:
     limeLight_F: Limelight = Limelight(constants.limelight_offset['front'], "limelight-F")
     limeLight_B: Limelight = Limelight(constants.limelight_offset['back'], "limelight-B")
 
-    odometry: LimelightController = LimelightController(limeLight_F, limeLight_B)
+    odometry: LimelightController = LimelightController([limeLight_F, limeLight_B])
 
     gyro: SwerveGyro
 
