@@ -29,6 +29,8 @@ class Intake(Subsystem):
             can_id=config.wrist_motor_id, inverted=True,
             config=config.WRIST_CONFIG
         )
+        
+        
         self.intake_speed = config.default_intake_speed
         self.disable_rotation: bool = config.disable_wrist_rotation
         self.wrist_abs_encoder = None
@@ -37,6 +39,8 @@ class Intake(Subsystem):
     def init(self):
         self.lower_intake_motor.init()
         self.upper_intake_motor.init()
+        self.lower_intake_motor.motor.setOpenLoopRampRate(config.intake_ramp_rate)
+        self.upper_intake_motor.motor.setOpenLoopRampRate(config.intake_ramp_rate)
         self.wrist_motor.init()
         self.dist_sensor = self.upper_intake_motor.motor.getAnalog()
         self.wrist_abs_encoder = self.wrist_motor.motor.getAbsoluteEncoder(
@@ -165,10 +169,11 @@ class Intake(Subsystem):
         Zeros the wrist
         :return: None
         """
+        self.wrist_motor.set_sensor_position(0)
         abs_encoder_position: float = self.wrist_abs_encoder.getPosition()
         if abs_encoder_position > 0.5:
             abs_encoder_position = -(1 - abs_encoder_position)
-        encoder_difference: float = abs_encoder_position - 0
+        encoder_difference: float = abs_encoder_position - 0        
         motor_change: float = encoder_difference * constants.wrist_gear_ratio
-        self.wrist_motor.set_sensor_position(-motor_change)
-        self.wrist_motor.set_target_position(-motor_change)
+        self.wrist_motor.set_sensor_position(motor_change)
+        self.wrist_motor.set_target_position(0)

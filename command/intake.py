@@ -59,3 +59,5 @@ class SetIntake(SubsystemCommand[Intake]):
         self.subsystem.stop_intake()
         Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 0)
         self.finished = False
+        
+

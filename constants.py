@@ -34,14 +34,22 @@ period = 0.03
 
 # --- DRIVETRAIN ---
 
-drivetrain_turn_gear_ratio = 12.8
-drivetrain_move_gear_ratio = 6.86
+drivetrain_wheel_gear_ratio: rotations = 6.12 # 6.12 is the gear ratio of the wheel motor
+
+drivetrain_move_motor_free_speed: rotations_per_minute = 5676 # 5676 is the free RPM of the NEO
+
+drivetrain_turn_gear_ratio: rotations = 12.8 # 12.8 is the gear ratio of the turn motor
+
+drivetrain_move_gear_ratio: rotations_per_minute = drivetrain_move_motor_free_speed / drivetrain_wheel_gear_ratio # is the RPM of the driving motor
+
+drivetrain_wheel_diameter: meters = 3.5 * inches_to_meters  # 3.5 is the diameter of the wheel in inches
 
 #TODO: Change this
-drivetrain_move_gear_ratio_as_rotations_per_meter = 1.0
+# the below variable is the rotation the motor rotates per meter of wheel movement
+drivetrain_move_gear_ratio_as_rotations_per_meter = (1 / (drivetrain_wheel_diameter * math.pi)) * drivetrain_wheel_gear_ratio
 
-track_width: meters = 0.50156
-robot_length: meters = 0.495
+track_width: meters = 0.4572 # is the distance between the wheels
+robot_length: meters = 0.635 # is the distance between the front and back wheels
 
 # TODO Maybe change these
 drivetrain_accel = True
