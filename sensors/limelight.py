@@ -23,6 +23,7 @@ class Limelight():
         self.tx: float = 0
         self.ty: float = 0
         self.tv: bool = 0
+        self.ta
         self.origin_offset: Pose3d = origin_offset
         self.drive_cam = False
         self.pipeline: config.limelight_pipeline = config.limelight_pipeline['retroreflective']
@@ -130,6 +131,7 @@ class Limelight():
         self.tx = self.table.getEntry("tx").getDouble(0)
         self.ty = self.table.getEntry("ty").getDouble(0)
         self.tv = self.table.getEntry("tv").getBoolean(0)
+        self.ta = self.table.getEntry("ta").getDouble(0)
         self.botpose_red = self.table.getEntry("botpose_wpired").getDoubleArray([0, 0, 0, 0, 0, 0])
         self.botpose_blue = self.table.getEntry("botpose_wpiblue").getDoubleArray([0, 0, 0, 0, 0, 0])
         self.botpose = self.table.getEntry("botpose").getDoubleArray([0, 0, 0, 0, 0, 0])
@@ -160,7 +162,7 @@ class Limelight():
             self.update()
         if self.tv == 0:
             return None
-        return [self.tx, self.ty]
+        return [self.tx, self.ty, self.ta]
 
     def get_bot_pose(self, team: config.team = None, round_to: int = 4, force_update: bool = False):
         '''

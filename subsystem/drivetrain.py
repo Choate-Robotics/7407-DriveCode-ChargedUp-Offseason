@@ -41,6 +41,7 @@ class SparkMaxSwerveNode(SwerveNode):
     encoder: AnalogEncoder
     absolute_encoder_zeroed_pos: float = 0
     name: str = "DefaultNode"
+    analog_filter: LinearFilter = LinearFilter.movingAverage(5)
 
     def init(self):
         super().init()
@@ -59,14 +60,21 @@ class SparkMaxSwerveNode(SwerveNode):
 
         self.m_move.set_sensor_position(0)
         self.m_move.set_target_position(0)
-
+    
     def zero(self):
-        
-        
+        '''
+        Zeros the node'''
         self.m_turn.set_sensor_position(0)
         abs_encoder_position: float = self.encoder.getAbsolutePosition()
-        # if abs_encoder_position > 0.5:
-        #     abs_encoder_position = -(1 - abs_encoder_position)
+        if config.drivetrain_encoder_filtered:
+            try:
+                self.analog_filter.reset()
+                for i in range(10):
+                    self.analog_filter.calculate(abs_encoder_position)
+                abs_encoder_position = self.analog_filter.calculate(abs_encoder_position)
+            except:
+                abs_encoder_position = self.encoder.getAbsolutePosition()
+                
         encoder_difference: float = (abs_encoder_position * 2 * math.pi) - (self.absolute_encoder_zeroed_pos * 2 * math.pi)
         
         if encoder_difference > .5 * 2 * math.pi:
@@ -183,3 +191,5 @@ class Drivetrain(SwerveDrivetrain):
         self.n_front_right.set_motor_angle(math.radians(-45))
         self.n_back_left.set_motor_angle(math.radians(-45))
         self.n_back_right.set_motor_angle(math.radians(45))
+        
+        

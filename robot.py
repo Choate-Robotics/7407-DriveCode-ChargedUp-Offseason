@@ -36,12 +36,18 @@ class _Robot(wpilib.TimedRobot):
         Sensors.gyro = Robot.drivetrain.gyro
         
     def robotPeriodic(self):
-        commands2.CommandScheduler.getInstance().run()
+        
+        nt = ntcore.NetworkTableInstance.getDefault()
+        
+        try:
+            commands2.CommandScheduler.getInstance().run()
+        except Exception as e:
+            nt.getTable("Command Scheduler").putString("Last Error", str(e))
 
         Sensors.limeLight_F.update()
         Sensors.limeLight_B.update()
         
-        nt = ntcore.NetworkTableInstance.getDefault()
+        
         
         nts = nt.getTable("Swerve Analog")
         
@@ -72,7 +78,7 @@ class _Robot(wpilib.TimedRobot):
         
         # # Robot.intake.set_lower_output(-1)
         # # Robot.intake.set_upper_output(1)
-
+        
         commands2.CommandScheduler.getInstance().schedule(command.DriveSwerveCustom(Robot.drivetrain))
 
     def teleopPeriodic(self):

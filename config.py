@@ -42,6 +42,19 @@ limelight_led_mode: int = {
     
 }
 
+game_piece_targeting_constraints = {
+    'cube': {
+        'tx': [0,0],
+        'ty': [0,0],
+        'ta': [0,0]
+    },
+    'cone': {
+        'tx': [-3.5, 3.5], #left to right
+        'ty': [-10, -12], #top to bottom
+        'ta': [12, 14] #area
+    }
+}
+
 team:int = {
     'red': 0,
     'blue': 1
@@ -53,6 +66,8 @@ from units.SI import (
 )
 
 driver_centric: bool = True
+
+drivetrain_encoder_filtered: bool = True
 
 # Field
 field_length = 651.25 * inches_to_meters
