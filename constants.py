@@ -36,13 +36,15 @@ period = 0.03
 
 drivetrain_wheel_gear_ratio: rotations = 6.12 # 6.12 is the gear ratio of the wheel motor
 
-drivetrain_move_motor_free_speed: rotations_per_minute = 5676 # 5676 is the free RPM of the NEO
+drivetrain_move_motor_free_speed: rotations_per_minute = 5676 # 5676 is the free speed RPM of the NEO
 
 drivetrain_turn_gear_ratio: rotations = 12.8 # 12.8 is the gear ratio of the turn motor
 
-drivetrain_move_gear_ratio: rotations_per_minute = drivetrain_move_motor_free_speed / drivetrain_wheel_gear_ratio # is the RPM of the driving motor
 
 drivetrain_wheel_diameter: meters = 3.5 * inches_to_meters  # 3.5 is the diameter of the wheel in inches
+
+
+drivetrain_move_gear_ratio: rotations_per_minute = drivetrain_move_motor_free_speed / drivetrain_wheel_gear_ratio # is the RPM constant multiple of the driving motor
 
 #TODO: Change this
 # the below variable is the rotation the motor rotates per meter of wheel movement
