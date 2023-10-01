@@ -1,4 +1,5 @@
 import rev
+
 from robotpy_toolkit_7407 import Subsystem
 from robotpy_toolkit_7407.motors.rev_motors import SparkMax, SparkMaxConfig
 from robotpy_toolkit_7407.sensors.limit_switches import MagneticLimitSwitch
@@ -21,7 +22,6 @@ class Elevator(Subsystem):
 
     def __init__(self) -> None:
         super().__init__()
-
         self.elevator_bottom_sensor = None
 
     def init(self) -> None:
@@ -50,3 +50,8 @@ class Elevator(Subsystem):
         "Return Type: meters
         """
         return self.motor_extend.get_sensor_position() * constants.elevator_length_per_rotation
+
+    def set_voltage(self, voltage: float) -> None:
+        self.motor_extend.pid_controller.setReference(voltage, rev.CANSparkMax.ControlType.kVoltage)
+    def get_voltage(self) -> float:
+        return self.motor_extend.motor.getAppliedOutput()
