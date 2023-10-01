@@ -1,9 +1,19 @@
+import config
 import subsystem
-import sensors
+from sensors import Limelight, LimelightController
 import wpilib
 
+import constants
+from robotpy_toolkit_7407.subsystem_templates.drivetrain import SwerveGyro
+
 class Robot:
+
+    intake = subsystem.Intake()
+    
     elevator = subsystem.Elevator()
+
+    drivetrain = subsystem.Drivetrain()
+    puncher = subsystem.Puncher()
 
 
 class Pneumatics:
@@ -11,4 +21,10 @@ class Pneumatics:
 
 
 class Sensors:
-    pass
+    limeLight_F: Limelight = Limelight(constants.limelight_offset['front'], "limelight-F")
+    limeLight_B: Limelight = Limelight(constants.limelight_offset['back'], "limelight-B")
+
+    odometry: LimelightController = LimelightController([limeLight_F, limeLight_B])
+
+    gyro: SwerveGyro
+
