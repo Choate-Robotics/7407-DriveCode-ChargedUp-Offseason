@@ -1,7 +1,14 @@
+
+"""
+SI units for use in typing and conversion.
+"""
+
+# Distance
 import math
 from typing import Type
 
 # Distance
+
 meters = float
 meters_to_inches = 39.3701
 meters_to_feet = meters_to_inches / 12

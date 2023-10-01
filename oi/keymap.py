@@ -12,11 +12,6 @@ controllerDRIVER = XBoxController
 controllerOPERATOR = XBoxController
 controllerNUMPAD = XBoxController
 
-from robotpy_toolkit_7407.oi.joysticks import Joysticks
-
-controllerDRIVER = XBoxController
-controllerOPERATOR = XBoxController
-
 class Controllers:
 
     DRIVER = 0

@@ -2,12 +2,15 @@ import config
 import subsystem
 from sensors import Limelight, LimelightController
 import wpilib
+
 import constants
 from robotpy_toolkit_7407.subsystem_templates.drivetrain import SwerveGyro
 
 class Robot:
 
     intake = subsystem.Intake()
+    
+    elevator = subsystem.Elevator()
 
     drivetrain = subsystem.Drivetrain()
     puncher = subsystem.Puncher()

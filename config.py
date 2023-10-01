@@ -1,4 +1,7 @@
 
+elevator_can_id = 1 # Change later, this isn't accurate
+magnetic_limit_switch_port = 5 # Change later, this is from last year
+
 from robotpy_toolkit_7407.motors.rev_motors import SparkMaxConfig
 from rev import CANSparkMax
 from wpimath.trajectory import TrapezoidProfile
