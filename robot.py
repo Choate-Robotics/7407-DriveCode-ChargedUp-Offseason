@@ -12,12 +12,15 @@ from oi.OI import OI
 import ntcore
 import math
 
-
 class _Robot(wpilib.TimedRobot):
     def __init__(self):
         super().__init__()
 
     def robotInit(self):
+
+        # Initialize subsystems
+        Robot.elevator.init()
+
         # Initialize Operator Interface
         OI.init()
         OI.map_controls()
