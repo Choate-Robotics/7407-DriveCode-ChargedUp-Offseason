@@ -41,6 +41,10 @@ class Keymap:
         X_MODE = commands2.button.JoystickButton(
             Joysticks.joysticks[Controllers.DRIVER], controllerDRIVER.X
         )
+        
+        AUTO_PICKUP = commands2.button.JoystickButton(
+            Joysticks.joysticks[Controllers.DRIVER], controllerDRIVER.LB
+        )
 
     class Puncher:
         PUNCH_EXTEND = commands2.button.JoystickButton(Joysticks.joysticks[Controllers.OPERATOR], controllerOPERATOR.SELECT)

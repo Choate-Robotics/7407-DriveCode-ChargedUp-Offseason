@@ -18,8 +18,8 @@ class Pneumatics:
 
 
 class Sensors:
-    limeLight_F: Limelight = Limelight(constants.limelight_offset['front'], "limelight-F")
-    limeLight_B: Limelight = Limelight(constants.limelight_offset['back'], "limelight-B")
+    limeLight_F: Limelight = Limelight(constants.limelight_offset['front'], "limelight-f")
+    limeLight_B: Limelight = Limelight(constants.limelight_offset['back'], "limelight-b")
 
     odometry: LimelightController = LimelightController([limeLight_F, limeLight_B])
 

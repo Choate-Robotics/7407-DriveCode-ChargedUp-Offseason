@@ -50,7 +50,7 @@ game_piece_targeting_constraints = {
     },
     'cone': {
         'tx': [-3.5, 3.5], #left to right
-        'ty': [-10, -12], #top to bottom
+        'ty': [-12, -10], #top to bottom
         'ta': [12, 14] #area
     }
 }
@@ -88,7 +88,7 @@ front_right_zeroed_pos = 0.61970 #* 360 * degrees_to_radians
 back_left_move = 6
 back_left_turn = 5
 back_left_encoder = AnalogEncoder(1)
-back_left_zeroed_pos = 0.11372 #* 360 * degrees_to_radians
+back_left_zeroed_pos = 0.792 #* 360 * degrees_to_radians
 
 back_right_move = 13
 back_right_turn = 12
@@ -98,7 +98,7 @@ back_right_zeroed_pos = 0.40152 #* 360 * degrees_to_radians
 # Sensors
 gyro_id = 26
 
-drivetrain_reversed = False
+drivetrain_reversed = True
 
 # Puncher
 punch_left = 30

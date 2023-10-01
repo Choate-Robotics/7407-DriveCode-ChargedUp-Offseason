@@ -41,7 +41,8 @@ class SparkMaxSwerveNode(SwerveNode):
     encoder: AnalogEncoder
     absolute_encoder_zeroed_pos: float = 0
     name: str = "DefaultNode"
-    analog_filter: LinearFilter = LinearFilter.movingAverage(5)
+    motor_reversed: bool = False
+    analog_filter: LinearFilter = LinearFilter.movingAverage(20)
 
     def init(self):
         super().init()
@@ -69,11 +70,15 @@ class SparkMaxSwerveNode(SwerveNode):
         if config.drivetrain_encoder_filtered:
             try:
                 self.analog_filter.reset()
-                for i in range(10):
+                for i in range(25):
                     self.analog_filter.calculate(abs_encoder_position)
                 abs_encoder_position = self.analog_filter.calculate(abs_encoder_position)
             except:
                 abs_encoder_position = self.encoder.getAbsolutePosition()
+                
+        # ntcore.NetworkTableInstance.getDefault().getTable("Swerve Difference").putNumber(self.name + " ABS Capture", abs_encoder_position)
+        
+        # ntcore.NetworkTableInstance.getDefault().getTable("Swerve Difference").putNumber(self.name + " Encoder Capture", self.m_turn.get_sensor_position())
                 
         encoder_difference: float = (abs_encoder_position * 2 * math.pi) - (self.absolute_encoder_zeroed_pos * 2 * math.pi)
         
@@ -82,12 +87,13 @@ class SparkMaxSwerveNode(SwerveNode):
         elif encoder_difference < -.5 * 2 * math.pi:
             encoder_difference += 1
             
-        ntcore.NetworkTableInstance.getDefault().getTable("Swerve Difference").putNumber(self.name + " Difference", encoder_difference)
+        # ntcore.NetworkTableInstance.getDefault().getTable("Swerve Difference").putNumber(self.name + " Difference", encoder_difference / (2 * math.pi))
         
         motor_change = encoder_difference * constants.drivetrain_turn_gear_ratio
         
-        ntcore.NetworkTableInstance.getDefault().getTable("Swerve Difference").putNumber(self.name + " motor change", motor_change)
+        # ntcore.NetworkTableInstance.getDefault().getTable("Swerve Difference").putNumber(self.name + " motor change", motor_change / (2 * math.pi))
 
+        
             
         self.m_turn.set_sensor_position(motor_change / (2 * math.pi))
         self.m_turn.set_target_position(0)
@@ -99,26 +105,29 @@ class SparkMaxSwerveNode(SwerveNode):
 
     def set_motor_angle(self, pos: radians):
         self.m_turn.set_target_position(
-            (pos / (2 * math.pi)) * constants.drivetrain_turn_gear_ratio
+            (pos / (2 * math.pi)) * constants.drivetrain_turn_gear_ratio * -1
         )
 
     def get_current_motor_angle(self) -> radians:
         return (
             (self.m_turn.get_sensor_position() / constants.drivetrain_turn_gear_ratio)
             * 2
-            * math.pi
+            * math.pi * -1
         )
 
     def set_motor_velocity(self, vel: meters_per_second):
         # self.m_turn.motor.getOutputCurrent() print this out to see if it is the motor that is causing the problem
-        
-        ntcore.NetworkTableInstance.getDefault().getTable("Target Vels").putNumber(self.name + " Vel", vel * constants.drivetrain_move_gear_ratio)
-        self.m_move.set_target_velocity(vel * constants.drivetrain_move_gear_ratio)
+        # sign = 1 if self.motor_reversed else -1
+        # ntcore.NetworkTableInstance.getDefault().getTable("Target Vels").putNumber(self.name + " Vel", vel * constants.drivetrain_move_gear_ratio)
+        self.m_move.set_target_velocity(vel * constants.drivetrain_move_gear_ratio * -1)
 
     def get_motor_velocity(self) -> radians_per_second:
+        
+        # sign = 1 if self.motor_reversed else -1
+        
         return (
             self.m_move.get_sensor_velocity()
-            / constants.drivetrain_move_gear_ratio_as_rotations_per_meter
+            / constants.drivetrain_move_gear_ratio_as_rotations_per_meter * -1
         )
 
     def get_drive_motor_traveled_distance(self) -> meters:
@@ -126,14 +135,14 @@ class SparkMaxSwerveNode(SwerveNode):
 
         return (
             sensor_position
-            / constants.drivetrain_move_gear_ratio_as_rotations_per_meter
+            / constants.drivetrain_move_gear_ratio_as_rotations_per_meter * -1
         )
 
     def get_turn_motor_angle(self) -> radians:
         return (
             (self.m_turn.get_sensor_position() / constants.drivetrain_turn_gear_ratio)
             * 2
-            * math.pi
+            * math.pi * -1
         )
 
 
@@ -151,6 +160,8 @@ class Drivetrain(SwerveDrivetrain):
         config.front_right_encoder,
         absolute_encoder_zeroed_pos=config.front_right_zeroed_pos,
         name="n_front_right",
+        motor_reversed=True,
+        
     )
     n_back_left = SparkMaxSwerveNode(
         SparkMax(config.back_left_move, config=MOVE_CONFIG),
@@ -165,6 +176,7 @@ class Drivetrain(SwerveDrivetrain):
         config.back_right_encoder,
         absolute_encoder_zeroed_pos=config.back_right_zeroed_pos,
         name="n_back_right",
+        motor_reversed=True,
     )
 
     gyro: PigeonIMUGyro_Wrapper = PigeonIMUGyro_Wrapper(config.gyro_id)

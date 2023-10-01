@@ -62,7 +62,7 @@ class DriveSwerveCustom(SubsystemCommand[Drivetrain]):
         #         self.ramp_limit_y.reset(dy_scale)
 
         if config.driver_centric:
-            self.subsystem.set_driver_centric((-dy, dx), d_theta)
+            self.subsystem.set_driver_centric((-dy, dx), -d_theta)
         elif self.driver_centric_reversed:
             self.subsystem.set_driver_centric((dy, -dx), d_theta)
         else:
@@ -82,7 +82,6 @@ class DriveSwerveCustom(SubsystemCommand[Drivetrain]):
     def runsWhenDisabled(self) -> bool:
         return False
 
-
 class DrivetrainZero(SubsystemCommand[Drivetrain]):
     def __init__(self, subsystem: Drivetrain):
         super().__init__(subsystem)
@@ -90,6 +89,7 @@ class DrivetrainZero(SubsystemCommand[Drivetrain]):
 
     def initialize(self) -> None:
         print("ZEROING DRIVETRAIN")
+        self.subsystem.gyro.reset_angle()
         self.subsystem.n_front_left.zero()
         self.subsystem.n_front_right.zero()
         self.subsystem.n_back_left.zero()

@@ -22,8 +22,8 @@ class Limelight():
         self.table: ntcore.NetworkTable = self.nt.getTable(name)
         self.tx: float = 0
         self.ty: float = 0
-        self.tv: bool = 0
-        self.ta
+        self.tv: float = 0
+        self.ta: float = 0
         self.origin_offset: Pose3d = origin_offset
         self.drive_cam = False
         self.pipeline: config.limelight_pipeline = config.limelight_pipeline['retroreflective']
@@ -128,10 +128,10 @@ class Limelight():
         Updates the tx, ty, and tv values of the limelight Manually. 
         For proper use, this should be called in the main event loop.
         '''
-        self.tx = self.table.getEntry("tx").getDouble(0)
-        self.ty = self.table.getEntry("ty").getDouble(0)
-        self.tv = self.table.getEntry("tv").getBoolean(0)
-        self.ta = self.table.getEntry("ta").getDouble(0)
+        self.tx = self.table.getNumber("tx",0)
+        self.ty = self.table.getNumber("ty",0)
+        self.tv = self.table.getNumber("tv",0)
+        self.ta = self.table.getNumber("ta",0)
         self.botpose_red = self.table.getEntry("botpose_wpired").getDoubleArray([0, 0, 0, 0, 0, 0])
         self.botpose_blue = self.table.getEntry("botpose_wpiblue").getDoubleArray([0, 0, 0, 0, 0, 0])
         self.botpose = self.table.getEntry("botpose").getDoubleArray([0, 0, 0, 0, 0, 0])
@@ -146,7 +146,7 @@ class Limelight():
         '''
         if self.force_update or force_update:
             self.update()
-        return self.tv == 1
+        return self.tv > 0.0
 
     def get_target(self, force_update: bool = False):
         '''
@@ -160,7 +160,7 @@ class Limelight():
         '''
         if self.force_update or force_update:
             self.update()
-        if self.tv == 0:
+        if self.tv < 1:
             return None
         return [self.tx, self.ty, self.ta]
 
@@ -182,7 +182,7 @@ class Limelight():
             self.update()
         if self.pipeline != config.limelight_pipeline['feducial']:
             return False
-        elif self.tv == 0:
+        elif not self.target_exists:
             return None
         else:
             botpose: list = []
