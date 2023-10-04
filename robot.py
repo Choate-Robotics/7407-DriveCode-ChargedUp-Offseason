@@ -19,7 +19,6 @@ class _Robot(wpilib.TimedRobot):
     def robotInit(self):
 
         # Initialize subsystems
-        Robot.elevator.init()
 
         # Initialize Operator Interface
         OI.init()
@@ -29,6 +28,7 @@ class _Robot(wpilib.TimedRobot):
         
         Robot.drivetrain.init()
         Robot.intake.init()
+        Robot.elevator.init()
         
         # for i in range(15):
         #     Robot.drivetrain.n_front_left.initial_zero()
@@ -69,7 +69,7 @@ class _Robot(wpilib.TimedRobot):
         
         nti = nt.getTable("Intake")
         
-        calculation = ((Robot.drivetrain.n_back_left.get_turn_motor_angle()/ (-2 * math.pi)) + config.back_left_zeroed_pos) - config.back_left_encoder.getAbsolutePosition()
+        calculation = ((Robot.drivetrain.n_back_left.get_turn_motor_angle()/ (2 * math.pi)) + config.back_left_zeroed_pos) - config.back_left_encoder.getAbsolutePosition()
         
         ntcore.NetworkTableInstance.getDefault().getTable("Swerve Difference").putNumber("back left calculation", calculation)
         
@@ -83,12 +83,13 @@ class _Robot(wpilib.TimedRobot):
 
     def teleopInit(self):
         
+
         Robot.intake.zero_wrist()
         
         # Robot.intake.set_lower_output(-1)
         # Robot.intake.set_upper_output(-1)
-        
         commands2.CommandScheduler.getInstance().schedule(command.DriveSwerveCustom(Robot.drivetrain))
+        # commands2.CommandScheduler.getInstance().schedule(command.ZeroElevator(Robot.elevator))
 
     def teleopPeriodic(self):
         pass

@@ -80,11 +80,11 @@ class SparkMaxSwerveNode(SwerveNode):
         
         # ntcore.NetworkTableInstance.getDefault().getTable("Swerve Difference").putNumber(self.name + " Encoder Capture", self.m_turn.get_sensor_position())
                 
-        encoder_difference: float = (abs_encoder_position * 2 * math.pi) - (self.absolute_encoder_zeroed_pos * 2 * math.pi)
+        encoder_difference: float = (abs_encoder_position ) - (self.absolute_encoder_zeroed_pos)
         
-        if encoder_difference > .5 * 2 * math.pi:
+        if encoder_difference > .5:
             encoder_difference -= 1
-        elif encoder_difference < -.5 * 2 * math.pi:
+        elif encoder_difference < -.5:
             encoder_difference += 1
             
         # ntcore.NetworkTableInstance.getDefault().getTable("Swerve Difference").putNumber(self.name + " Difference", encoder_difference / (2 * math.pi))
@@ -95,7 +95,7 @@ class SparkMaxSwerveNode(SwerveNode):
 
         
             
-        self.m_turn.set_sensor_position(motor_change / (2 * math.pi))
+        self.m_turn.set_sensor_position(-motor_change)
         self.m_turn.set_target_position(0)
         
         # self.m_turn.set_target_position(0)

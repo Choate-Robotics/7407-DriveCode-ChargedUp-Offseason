@@ -23,7 +23,7 @@ def test_set_upper_output():
 
 
 def test_setIntake():
-    command = SetIntake(intake, 0.5, config.game_piece)
+    command = SetIntake(intake, 0.5, config.GamePiece)
     command.initialize()
 
 

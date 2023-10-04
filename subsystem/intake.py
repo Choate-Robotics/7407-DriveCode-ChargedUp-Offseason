@@ -42,6 +42,7 @@ class Intake(Subsystem):
         self.lower_intake_motor.motor.setOpenLoopRampRate(config.intake_ramp_rate)
         self.upper_intake_motor.motor.setOpenLoopRampRate(config.intake_ramp_rate)
         self.wrist_motor.init()
+        self.wrist_motor.motor.setClosedLoopRampRate(.03)
         self.dist_sensor = self.upper_intake_motor.motor.getAnalog()
         self.wrist_abs_encoder = self.wrist_motor.motor.getAbsoluteEncoder(
             rev.SparkMaxAbsoluteEncoder.Type.kDutyCycle
@@ -51,26 +52,33 @@ class Intake(Subsystem):
     # def get_no_grab_cube_detected(self):
     #     avg_voltage = self.lower_back_dist_sensor.getVoltage()
     #     return 0.3 < avg_voltage
+    
+    def get_detected(self, piece: config.GamePiece):
+        if piece == config.GamePiece.cube:
+            return self.get_cube_detected()
+        elif piece == config.GamePiece.cone:
+            return self.get_cone_detected()
+        
 
     def get_cube_detected(self):
         """
         :return: True if cube is detected, False if not
         """
-        avg_voltage = self.lower_back_dist_sensor.getVoltage()
+        avg_voltage = self.dist_sensor.getVoltage()
         return 0.7 < avg_voltage  # put voltage in config
 
     def get_cone_detected(self):
         """
         :return: True if cone is detected, False if not
         """
-        avg_voltage = self.upper_back_dist_sensor.getVoltage() + self.lower_back_dist_sensor.getVoltage() / 2
+        avg_voltage = self.dist_sensor.getVoltage()
         return 0.6 < avg_voltage
 
     def get_double_station_detected(self):
         """
         :return: True if double station is detected, False if not
         """
-        avg_voltage = self.upper_back_dist_sensor.getVoltage() + self.lower_back_dist_sensor.getVoltage() / 2
+        avg_voltage = self.dist_sensor.getVoltage() 
         return 0.7 < avg_voltage
 
     def set_upper_output(self, speed: float):
@@ -95,15 +103,23 @@ class Intake(Subsystem):
         :return: None
         """
         self.set_lower_output(-self.intake_speed)
-        self.set_upper_output(-self.intake_speed)
+        self.set_upper_output(self.intake_speed)
 
     def grab_cone(self):
         """
         Sets the intake motors to grab a cone
         :return: None
         """
-        self.set_lower_output(self.intake_speed)
+        self.set_lower_output(-self.intake_speed)
         self.set_upper_output(-self.intake_speed)
+        
+    def hold_cube(self):
+        self.set_lower_output(config.idle_intake_speed)
+        self.set_upper_output(config.idle_intake_speed)
+        
+    def hold_cone(self):
+        self.set_lower_output(-config.idle_intake_speed)
+        self.set_upper_output(-config.idle_intake_speed)
 
     def eject_cone(self):
         """
@@ -112,6 +128,10 @@ class Intake(Subsystem):
         """
         self.set_lower_output(-self.intake_speed)
         self.set_upper_output(self.intake_speed)
+
+    def stop_intake(self):
+        self.set_lower_output(0)
+        self.set_upper_output(0)
 
     def eject_cube(self):
         """
@@ -145,7 +165,7 @@ class Intake(Subsystem):
         """
         if not self.disable_rotation:
             self.wrist_motor.set_target_position((pos / (pi * 2)) * constants.wrist_gear_ratio)
-            self.wrist_motor.set_sensor_position((pos / (pi * 2)) * constants.wrist_gear_ratio)
+            # self.wrist_motor.set_sensor_position((pos / (pi * 2)) * constants.wrist_gear_ratio)
 
 
     def get_wrist_angle(self):

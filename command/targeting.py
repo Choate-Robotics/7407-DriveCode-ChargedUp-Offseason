@@ -1,4 +1,4 @@
-from subsystem import Drivetrain, Intake
+from subsystem import Drivetrain, Intake, Elevator
 from sensors import Limelight
 from robotpy_toolkit_7407.command import BasicCommand, SubsystemCommand 
 import command
@@ -7,7 +7,7 @@ import config, constants, math, ntcore
 from wpimath.controller import PIDController
 
 class LineupSwerve(SubsystemCommand[Drivetrain]):
-    def __init__(self, subsystem: Drivetrain, LimeLight: Limelight, target: config.game_piece):
+    def __init__(self, subsystem: Drivetrain, LimeLight: Limelight, target: config.GamePiece):
         '''
         Lines up the robot with the target
         :param drivetrain: Drivetrain subsystem
@@ -22,7 +22,7 @@ class LineupSwerve(SubsystemCommand[Drivetrain]):
         self.h_pid = PIDController(0.1, 0, 0.01)
         self.nt = ntcore.NetworkTableInstance.getDefault().getTable("Targetting command")
         tn = 'cube'
-        if target == 0:
+        if target == config.GamePiece.cone:
             tn = 'cone'
         self.constraints = config.game_piece_targeting_constraints[tn]
         
@@ -32,8 +32,8 @@ class LineupSwerve(SubsystemCommand[Drivetrain]):
         
         self.nt.putNumber('tracking', 2)
         self.limelight.set_pipeline_mode(0)
-        self.v_pid.setTolerance(4)
-        self.h_pid.setTolerance(2)
+        # self.v_pid.setTolerance(4)
+        # self.h_pid.setTolerance(2)
         
     def execute(self):
         
@@ -47,10 +47,8 @@ class LineupSwerve(SubsystemCommand[Drivetrain]):
         else:
             # self.nt.putBoolean('see target', True)
             print("target")
-            a = self.limelight.get_target()
-            tx = a[0]
-            ty = a[1]
-            ta = a[2]
+            tx, ty, ta = self.limelight.get_target()
+            
             self.nt.putNumber("tx", tx)
             self.nt.putNumber("ty", ty)
             self.nt.putNumber('ta', ta)
@@ -108,17 +106,41 @@ class LineupSwerve(SubsystemCommand[Drivetrain]):
     def end(self, interrupted: bool = False):
         self.drivetrain.set_robot_centric((0, 0), 0)
 
+           
+            
+class Target(SequentialCommandGroup):
+    def __init__(self, intake: Intake, elevator: Elevator, target: config.Target, piece: config.GamePiece = None, force: bool = False):
+        if intake.get_wrist_angle() < math.radians(-3) \
+            and elevator.get_length() < config.elevator_intake_threshold * constants.elevator_max_rotation \
+            and target['length'] < config.elevator_intake_threshold * constants.elevator_max_rotation:
+            super().__init__(
+                command.SetCarriage(intake, 0, False, piece),
+            )
+        elif intake.get_wrist_angle() > math.radians(160) \
+            and target['length'] > elevator.get_length():
+            super().__init__(
+                command.SetCarriage(intake, math.radians(120), False, piece),
+            )
+        super().__init__(
+            ParallelCommandGroup(
+                    command.SetElevator(elevator, target['length'], force),
+                    command.SetWrist(intake, target['angle'])
+                )
+        )
+        if target['goal'] == 'pickup':
+            super().__init__(
+                command.SetCarriage(intake, target['angle'], config.IntakeActive.kIn, piece),
+            )
+        
 class AutoPickup(SequentialCommandGroup):
-    def __init__(self, drivetrain: Drivetrain, intake: Intake, limelight: Limelight, target: config.game_piece):
+    def __init__(self, drivetrain: Drivetrain, intake: Intake, elevator: Elevator, limelight: Limelight, target: config.GamePiece):
         super().__init__(
             ParallelCommandGroup(
                 LineupSwerve(drivetrain, limelight, target),
-                # bring elevator and intake down
+                Target(intake, elevator, config.Target.floor_up)
                 ),
-            # lower intake to floor,
-            InstantCommand(lambda: drivetrain.set_driver_centric(0, -.4 * constants.drivetrain_move_gear_ratio), 0),
-            WaitUntilCommand() # wait until intake has game piece,
-            # raise intake back up
+            Target(intake, elevator, config.Target.floor_down),
+            InstantCommand(lambda: drivetrain.set_driver_centric(-.4 * constants.drivetrain_move_gear_ratio, 0), 0),
+            WaitUntilCommand(lambda: Intake.get_detected(intake, target)), # wait until intake has game piece,
+            Target(intake, elevator, config.Target.floor_up),
             )
-            
-            

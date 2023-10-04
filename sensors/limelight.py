@@ -162,7 +162,7 @@ class Limelight():
             self.update()
         if self.tv < 1:
             return None
-        return [self.tx, self.ty, self.ta]
+        return (self.tx, self.ty, self.ta)
 
     def get_bot_pose(self, team: config.team = None, round_to: int = 4, force_update: bool = False):
         '''
