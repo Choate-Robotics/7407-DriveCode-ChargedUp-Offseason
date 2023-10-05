@@ -2,6 +2,9 @@
 # Elevator
 elevator_max_rotation = 63.59651 
 
+elevator_speed_threshold = 0.4 * elevator_max_rotation
+
+
 
 game_piece = {"cone": False, "cube": True}
 wrist_gear_ratio = 155 / 1
@@ -54,12 +57,14 @@ drivetrain_move_gear_ratio: rotations_per_minute = drivetrain_move_motor_free_sp
 # the below variable is the rotation the motor rotates per meter of wheel movement
 drivetrain_move_gear_ratio_as_rotations_per_meter = (1 / (drivetrain_wheel_diameter * math.pi)) * drivetrain_wheel_gear_ratio
 
+
 track_width: meters = 0.4572 # is the distance between the wheels
 robot_length: meters = 0.635 # is the distance between the front and back wheels
 
 # TODO Maybe change these
 drivetrain_accel = True
 drivetrain_max_vel: meters_per_second = (15 * mile / hour).asNumber(m / s)  # 15 11
+drivetrain_max_vel_adjustable: meters_per_second = (15 * mile / hour).asNumber(m / s)  # 15 11
 drivetrain_max_accel_tele: meters_per_second_squared = (45 * mile / hour).asNumber(m / s)
 drivetrain_max_target_accel: meters_per_second_squared = (
     1.5 * mile / hour

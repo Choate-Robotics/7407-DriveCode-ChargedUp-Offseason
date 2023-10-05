@@ -4,6 +4,8 @@ magnetic_limit_switch_port = 0 # Change later, this is from last year
 elevator_ramp_rate = .3
 elevator_intake_threshold = .5 # multiply this by max rotations, this is the threshold for the elevator and intake to move at the same time
 
+
+
 from robotpy_toolkit_7407.motors.rev_motors import SparkMaxConfig
 from rev import CANSparkMax
 from wpimath.trajectory import TrapezoidProfile
@@ -12,6 +14,18 @@ from wpilib import AnalogEncoder
 import math
 
 enable_pid_tuning = True  # change this to enable pid tuning
+
+from robotpy_toolkit_7407.utils.units import hour, m, mile, rad, rev, s
+
+from units.SI import (
+    inches_to_meters,
+    meters,
+    meters_per_second,
+    meters_per_second_squared,
+    radians_per_second,
+    rotations,
+    rotations_per_minute,
+)
 
 #----Intake and Wrist----
 
@@ -93,6 +107,12 @@ class Target:
         'angle': math.radians(-30),
         'goal': 'pickup',
     }
+    
+    idle = {
+        'length': .2,
+        'angle': math.radians(0),
+        'goal': 'idle',
+    }
 
 
 game_piece_targeting_constraints = {
@@ -147,6 +167,8 @@ back_right_move = 13
 back_right_turn = 12
 back_right_encoder = AnalogEncoder(2)
 back_right_zeroed_pos = 0.61598 #* 360 * degrees_to_radians
+
+calculated_max_vel = (15 * mile / hour).asNumber(m / s)  
 
 # Sensors
 gyro_id = 26

@@ -184,7 +184,8 @@ class Drivetrain(SwerveDrivetrain):
     axis_dy = Keymap.Drivetrain.DRIVE_Y_AXIS
     axis_rotation = Keymap.Drivetrain.DRIVE_ROTATION_AXIS
     track_width: meters = constants.track_width
-    max_vel: meters_per_second = constants.drivetrain_max_vel
+    # max_vel: meters_per_second = constants.drivetrain_max_vel
+    max_vel: meters_per_second = config.calculated_max_vel
     max_target_accel: meters_per_second_squared = constants.drivetrain_max_target_accel
     max_angular_vel: radians_per_second = constants.drivetrain_max_angular_vel
     deadzone_velocity: meters_per_second = 0.15

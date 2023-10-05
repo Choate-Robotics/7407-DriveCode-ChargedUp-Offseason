@@ -78,7 +78,7 @@ class SetWrist(SubsystemCommand[Intake]):
         
     def initialize(self):
         
-        if self.intake_active == config.IntakeActive.kIn:
+        if self.intake_active == config.IntakeActive.kIn and self.game_piece == config.GamePiece.cube:
             self.wrist_angle -= math.radians(30)
         
         self.subsystem.set_wrist_angle(self.wrist_angle)

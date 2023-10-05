@@ -109,24 +109,57 @@ class LineupSwerve(SubsystemCommand[Drivetrain]):
            
             
 class Target(SequentialCommandGroup):
+    '''
+    Command for controlling the elevator, wrist, and intake
+    Includes logic for moving the intake out of the way of the elevator
+    
+    :param intake: Intake subsystem
+    
+    :param elevator: Elevator subsystem
+    
+    :param target: Target to move to (config.Target)
+    
+    :param piece: (OPTIONAL) Game piece to pickup (config.GamePiece)
+    
+    :param force: (OPTIONAL) Force the elevator to move even if it is not zeroed (bool)
+    '''
     def __init__(self, intake: Intake, elevator: Elevator, target: config.Target, piece: config.GamePiece = None, force: bool = False):
+        # if the intake is in the way of the elevator if its moving down, move it out of the way
         if intake.get_wrist_angle() < math.radians(-3) \
-            and elevator.get_length() < config.elevator_intake_threshold * constants.elevator_max_rotation \
-            and target['length'] < config.elevator_intake_threshold * constants.elevator_max_rotation:
+            and elevator.get_length() <= config.elevator_intake_threshold * constants.elevator_max_rotation + 3 \
+            and target['length'] < config.elevator_intake_threshold:
             super().__init__(
                 command.SetCarriage(intake, 0, False, piece),
             )
+        # if the intake is in the way of the elevator if its moving up, move it out of the way
         elif intake.get_wrist_angle() > math.radians(160) \
-            and target['length'] > elevator.get_length():
+            and target['length'] * constants.elevator_max_rotation > elevator.get_length():
             super().__init__(
                 command.SetCarriage(intake, math.radians(120), False, piece),
             )
-        super().__init__(
-            ParallelCommandGroup(
+        # if the wrist target rotation is past 0 degrees and the elevator is below the threshold, move the elevator up and then move the wrist
+        if target['angle'] < math.radians(0) \
+            and elevator.get_length() < config.elevator_intake_threshold * constants.elevator_max_rotation \
+            and target['length'] > config.elevator_intake_threshold:
+            super().__init__(
+                ParallelCommandGroup(
                     command.SetElevator(elevator, target['length'], force),
-                    command.SetWrist(intake, target['angle'])
+                    command.SetCarriage(intake, math.radians(0)),
+                    SequentialCommandGroup(
+                        WaitUntilCommand(lambda: elevator.get_length() > config.elevator_intake_threshold * constants.elevator_max_rotation),
+                        command.SetCarriage(intake, target['angle'])
+                    )
                 )
-        )
+            )
+        else:
+            # Normal Operation
+            super().__init__(
+                ParallelCommandGroup(
+                        command.SetElevator(elevator, target['length'], force),
+                        command.SetWrist(intake, target['angle'])
+                    )
+            )
+        # if the target goal is to pickup game pieces, set intake to automatically run in
         if target['goal'] == 'pickup':
             super().__init__(
                 command.SetCarriage(intake, target['angle'], config.IntakeActive.kIn, piece),
@@ -140,7 +173,7 @@ class AutoPickup(SequentialCommandGroup):
                 Target(intake, elevator, config.Target.floor_up)
                 ),
             Target(intake, elevator, config.Target.floor_down),
-            InstantCommand(lambda: drivetrain.set_driver_centric(-.4 * constants.drivetrain_move_gear_ratio, 0), 0),
-            WaitUntilCommand(lambda: Intake.get_detected(intake, target)), # wait until intake has game piece,
+            InstantCommand(lambda: drivetrain.set_driver_centric(-.4 * constants.drivetrain_max_vel, 0), 0),
+            WaitUntilCommand(lambda: intake.get_detected(target)), # wait until intake has game piece,
             Target(intake, elevator, config.Target.floor_up),
             )

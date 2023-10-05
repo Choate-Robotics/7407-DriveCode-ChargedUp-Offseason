@@ -58,6 +58,8 @@ class Intake(Subsystem):
             return self.get_cube_detected()
         elif piece == config.GamePiece.cone:
             return self.get_cone_detected()
+        else:
+            return False
         
 
     def get_cube_detected(self):

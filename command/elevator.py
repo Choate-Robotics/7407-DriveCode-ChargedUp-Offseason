@@ -5,7 +5,7 @@ from subsystem import Elevator
 from robotpy_toolkit_7407.command import SubsystemCommand
 from wpimath.controller import ProfiledPIDController
 from wpimath.trajectory import TrapezoidProfile
-import ntcore, constants
+import ntcore, constants, config
 import commands2
 
 
@@ -46,6 +46,7 @@ class ZeroElevator(SubsystemCommand[Elevator]):
         Ends the zero process and checks if it is finished or interrupted
         :param interrupted: (OPTIONAL) Boolean
         """
+        config.calculated_max_vel = constants.drivetrain_max_vel
         if not interrupted:
             self.subsystem.zeroed = True
             ntcore.NetworkTableInstance.getDefault().getTable('Arm Voltage').putBoolean('zeroed', self.subsystem.zeroed)
@@ -88,6 +89,12 @@ class SetElevator(SubsystemCommand[Elevator]):
         
         if self.subsystem.elevator_bottom_sensor.get_value():
             self.subsystem.motor_extend.set_sensor_position(0)
+            
+        if self.subsystem.get_length() > constants.elevator_speed_threshold:
+            #limit the speed more the higher the elevator is
+            config.calculated_max_vel = constants.drivetrain_max_vel * max((1 - self.subsystem.get_length() / constants.elevator_max_rotation),.4)
+        else:
+            config.calculated_max_vel = constants.drivetrain_max_vel
         # ntcore.NetworkTableInstance.getDefault().getTable("Arm Voltage").putNumber("position", self.subsystem.get_length())
         
         # voltage = self.pid.calculate(self.subsystem.get_length())
