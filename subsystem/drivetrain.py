@@ -76,10 +76,7 @@ class SparkMaxSwerveNode(SwerveNode):
             except:
                 abs_encoder_position = self.encoder.getAbsolutePosition()
                 
-        # ntcore.NetworkTableInstance.getDefault().getTable("Swerve Difference").putNumber(self.name + " ABS Capture", abs_encoder_position)
         
-        # ntcore.NetworkTableInstance.getDefault().getTable("Swerve Difference").putNumber(self.name + " Encoder Capture", self.m_turn.get_sensor_position())
-                
         encoder_difference: float = (abs_encoder_position ) - (self.absolute_encoder_zeroed_pos)
         
         if encoder_difference > .5:
@@ -87,11 +84,8 @@ class SparkMaxSwerveNode(SwerveNode):
         elif encoder_difference < -.5:
             encoder_difference += 1
             
-        # ntcore.NetworkTableInstance.getDefault().getTable("Swerve Difference").putNumber(self.name + " Difference", encoder_difference / (2 * math.pi))
-        
+
         motor_change = encoder_difference * constants.drivetrain_turn_gear_ratio
-        
-        # ntcore.NetworkTableInstance.getDefault().getTable("Swerve Difference").putNumber(self.name + " motor change", motor_change / (2 * math.pi))
 
         
             
@@ -116,9 +110,6 @@ class SparkMaxSwerveNode(SwerveNode):
         )
 
     def set_motor_velocity(self, vel: meters_per_second):
-        # self.m_turn.motor.getOutputCurrent() print this out to see if it is the motor that is causing the problem
-        # sign = 1 if self.motor_reversed else -1
-        # ntcore.NetworkTableInstance.getDefault().getTable("Target Vels").putNumber(self.name + " Vel", vel * constants.drivetrain_move_gear_ratio)
         self.m_move.set_target_velocity(vel * constants.drivetrain_move_gear_ratio * -1)
 
     def get_motor_velocity(self) -> radians_per_second:

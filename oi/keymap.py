@@ -89,11 +89,11 @@ class Keymap:
     class Grid:
         
         RAISE_GRID = commands2.button.Button(
-            lambda: Controllers.DRIVER_CONTROLLER.getRawAxis(-controllerDRIVER.RT) > 0.5
+            lambda: Controllers.OPERATOR_CONTROLLER.getRawAxis(-controllerDRIVER.RT) > 0.5
         )
         
         LOWER_GRID = commands2.button.Button(
-            lambda: Controllers.DRIVER_CONTROLLER.getRawAxis(-controllerDRIVER.LT) > 0.5
+            lambda: Controllers.OPERATOR_CONTROLLER.getRawAxis(-controllerDRIVER.LT) > 0.5
         )
         
         NO_GRID = commands2.button.Button(
@@ -113,8 +113,8 @@ class Keymap:
         
         RUN_INTAKE = JoystickAxis(Controllers.OPERATOR, controllerOPERATOR.L_JOY[1])
 
-    class Puncher:
-        PUNCH_EXTEND = commands2.button.JoystickButton(Joysticks.joysticks[Controllers.OPERATOR], controllerOPERATOR.SELECT)
-        PUNCH_RETRACT = commands2.button.JoystickButton(Joysticks.joysticks[Controllers.OPERATOR], controllerOPERATOR.START)
+    # class Puncher:
+    #     PUNCH_EXTEND = commands2.button.JoystickButton(Joysticks.joysticks[Controllers.OPERATOR], controllerOPERATOR.SELECT)
+    #     PUNCH_RETRACT = commands2.button.JoystickButton(Joysticks.joysticks[Controllers.OPERATOR], controllerOPERATOR.START)
 
 

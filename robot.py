@@ -21,8 +21,7 @@ class _Robot(wpilib.TimedRobot):
         # Initialize subsystems
 
         # Initialize Operator Interface
-        OI.init()
-        OI.map_controls()
+        
         period = .03
         commands2.CommandScheduler.getInstance().setPeriod(period)
         
@@ -37,6 +36,9 @@ class _Robot(wpilib.TimedRobot):
         #     Robot.drivetrain.n_back_right.initial_zero()
         
         Sensors.gyro = Robot.drivetrain.gyro
+        
+        OI.init()
+        OI.map_controls()
         
     def robotPeriodic(self):
         
@@ -85,7 +87,7 @@ class _Robot(wpilib.TimedRobot):
         
 
         Robot.intake.zero_wrist()
-        
+        Robot.intake.wrist_zeroed = True
         # Robot.intake.set_lower_output(-1)
         # Robot.intake.set_upper_output(-1)
         commands2.CommandScheduler.getInstance().schedule(command.DriveSwerveCustom(Robot.drivetrain))

@@ -71,9 +71,9 @@ class SetElevator(SubsystemCommand[Elevator]):
         elif self.length < 0:
             self.length = 0
         
-        if self.subsystem.zeroed == False and self.force == False:
-            commands2.CommandScheduler.getInstance().schedule(ZeroElevator(self.subsystem))
-            return
+        # if self.subsystem.zeroed == False and self.force == False:
+        #     commands2.CommandScheduler.getInstance().schedule(ZeroElevator(self.subsystem))
+        #     return
         
         # self.pid.reset(self.subsystem.get_length())
         
@@ -92,7 +92,7 @@ class SetElevator(SubsystemCommand[Elevator]):
             
         if self.subsystem.get_length() > constants.elevator_speed_threshold:
             #limit the speed more the higher the elevator is
-            config.calculated_max_vel = constants.drivetrain_max_vel * max((1 - self.subsystem.get_length() / constants.elevator_max_rotation),.4)
+            config.calculated_max_vel = constants.drivetrain_max_vel * max((1 - self.subsystem.get_length() / constants.elevator_max_rotation),.1)
         else:
             config.calculated_max_vel = constants.drivetrain_max_vel
         # ntcore.NetworkTableInstance.getDefault().getTable("Arm Voltage").putNumber("position", self.subsystem.get_length())

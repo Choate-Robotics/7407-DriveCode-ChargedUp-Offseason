@@ -2,8 +2,8 @@ from subsystem import Drivetrain, Intake, Elevator
 from sensors import Limelight
 from robotpy_toolkit_7407.command import BasicCommand, SubsystemCommand 
 import command
-from commands2 import SequentialCommandGroup, InstantCommand, ParallelCommandGroup, WaitCommand, RunCommand, CommandBase, WaitUntilCommand
-import config, constants, math, ntcore
+from commands2 import SequentialCommandGroup, InstantCommand, ParallelCommandGroup, WaitCommand, RunCommand, CommandBase, WaitUntilCommand, ParallelDeadlineGroup, PrintCommand
+import config, constants, math, ntcore, commands2
 from wpimath.controller import PIDController
 
 class LineupSwerve(SubsystemCommand[Drivetrain]):
@@ -72,13 +72,11 @@ class LineupSwerve(SubsystemCommand[Drivetrain]):
             if self.target_exists == False and self.target_exists:
                 self.target_exists = True
                 self.target_constrained = False
-                self.v_pid.setSetpoint(-9)
-                self.h_pid.setSetpoint(avg(self.constraints['tx']))
                 
             print("Tracking...")
                 
-            dy = self.v_pid.calculate(ty)
-            dx = self.h_pid.calculate(tx)
+            dy = self.v_pid.calculate(ty, -9)
+            dx = self.h_pid.calculate(tx, avg(self.constraints['tx']))
             
             self.nt.putNumber('PID dx', dx)
             self.nt.putNumber('PID dy', dy)
@@ -106,9 +104,17 @@ class LineupSwerve(SubsystemCommand[Drivetrain]):
     def end(self, interrupted: bool = False):
         self.drivetrain.set_robot_centric((0, 0), 0)
 
-           
-            
-class Target(SequentialCommandGroup):
+        
+class ZeroTarget(SequentialCommandGroup):
+    
+    def __init__(self, intake: Intake, elevator: Elevator):
+        super().__init__(
+            command.ZeroWrist(intake),
+            WaitCommand(1),
+            command.ZeroElevator(elevator)
+        )
+        
+class Target(commands2.CommandBase):
     '''
     Command for controlling the elevator, wrist, and intake
     Includes logic for moving the intake out of the way of the elevator
@@ -123,48 +129,147 @@ class Target(SequentialCommandGroup):
     
     :param force: (OPTIONAL) Force the elevator to move even if it is not zeroed (bool)
     '''
-    def __init__(self, intake: Intake, elevator: Elevator, target: config.Target, piece: config.GamePiece = None, force: bool = False):
+    
+    def __init__(self, intake: Intake, elevator: Elevator, force: bool = False):
+        super().__init__()
+        self.intake = intake
+        self.elevator = elevator
+        self.target: config.active_target
+        self.piece: config.active_piece
+        self.force = force
+        
+    def initialize(self) -> None:
+        
+        if self.elevator.zeroed == False or self.intake.wrist_zeroed == False:
+            commands2.CommandScheduler.getInstance().schedule(ZeroTarget(self.intake, self.elevator).andThen(Idle(self.intake, self.elevator)))
+            return
+        
+        self.piece = config.active_piece
+        
+        self.target = config.active_target
+    
+        command_list = []
+        command_goal = []
+        save = self.target['angle']
+        if self.piece == config.GamePiece.cube and self.target['goal'] == 'pickup':
+            self.target['angle'] = self.target['angle-cube']
+            command_goal.append('cube angle')
+        else:
+            self.target['angle'] = save
+            command_goal.append('cone angle')
+        
+        if self.piece == config.GamePiece.cone:
+            command_goal.append('cone')
+        elif self.piece == config.GamePiece.cube:
+            command_goal.append('cube')
+        command_goal.append( 'Obj: ' + self.target['goal'])
         # if the intake is in the way of the elevator if its moving down, move it out of the way
-        if intake.get_wrist_angle() < math.radians(-3) \
-            and elevator.get_length() <= config.elevator_intake_threshold * constants.elevator_max_rotation + 3 \
-            and target['length'] < config.elevator_intake_threshold:
-            super().__init__(
-                command.SetCarriage(intake, 0, False, piece),
-            )
+        if self.intake.get_wrist_angle() < math.radians(-.2) \
+            and self.elevator.get_length() <= config.elevator_intake_threshold * constants.elevator_max_rotation + 5 \
+            and self.target['length'] < config.elevator_intake_threshold:
+            
+            command_list.append(command.SetCarriage(self.intake, math.radians(0), config.IntakeActive.kIdle, self.piece))
+            command_goal.append(f'move wrist to zero (BLOCKING) {self.intake.get_wrist_angle()} ')
+            
         # if the intake is in the way of the elevator if its moving up, move it out of the way
-        elif intake.get_wrist_angle() > math.radians(160) \
-            and target['length'] * constants.elevator_max_rotation > elevator.get_length():
-            super().__init__(
-                command.SetCarriage(intake, math.radians(120), False, piece),
-            )
-        # if the wrist target rotation is past 0 degrees and the elevator is below the threshold, move the elevator up and then move the wrist
-        if target['angle'] < math.radians(0) \
-            and elevator.get_length() < config.elevator_intake_threshold * constants.elevator_max_rotation \
-            and target['length'] > config.elevator_intake_threshold:
-            super().__init__(
-                ParallelCommandGroup(
-                    command.SetElevator(elevator, target['length'], force),
-                    command.SetCarriage(intake, math.radians(0)),
-                    SequentialCommandGroup(
-                        WaitUntilCommand(lambda: elevator.get_length() > config.elevator_intake_threshold * constants.elevator_max_rotation),
-                        command.SetCarriage(intake, target['angle'])
-                    )
+        if self.intake.get_wrist_angle() > math.radians(110) \
+            and self.target['length'] * constants.elevator_max_rotation > self.elevator.get_length():
+            # command_list.append(command.SetCarriage(self.intake, math.radians(100), config.IntakeActive.kIdle, self.piece))
+            
+            command_list.append(
+                ParallelDeadlineGroup(
+                    WaitUntilCommand(lambda: self.intake.get_wrist_angle() < math.radians(145)),
+                    command.SetCarriage(self.intake, math.radians(0), config.IntakeActive.kIdle, self.piece)
                 )
             )
-        else:
-            # Normal Operation
-            super().__init__(
+            command_list.append(
                 ParallelCommandGroup(
-                        command.SetElevator(elevator, target['length'], force),
-                        command.SetWrist(intake, target['angle'])
+                    command.SetElevator(self.elevator, self.target['length'], self.force),
+                    command.SetCarriage(self.intake, self.target['angle'], config.IntakeActive.kIdle, self.piece)
+                )
+            )
+            print(self.intake.get_wrist_angle())
+            command_goal.append(f'move wrist to 100 (BLOCKING)')
+        # if the wrist target rotation is past 0 degrees and the elevator is below the threshold, move the elevator up and then move the wrist
+        elif self.target['angle'] < math.radians(0) \
+            and self.intake.get_wrist_angle() > math.radians(-10) \
+            and self.elevator.get_length() < config.elevator_intake_threshold * constants.elevator_max_rotation:
+
+            command_list.append(
+                ParallelDeadlineGroup(
+                    WaitUntilCommand(lambda: self.elevator.get_length() > config.elevator_intake_threshold * constants.elevator_max_rotation),
+                    command.SetElevator(self.elevator, self.target['length'], self.force),
+                    command.SetCarriage(self.intake, math.radians(0), config.IntakeActive.kIdle, self.piece)
                     )
             )
-        # if the target goal is to pickup game pieces, set intake to automatically run in
-        if target['goal'] == 'pickup':
-            super().__init__(
-                command.SetCarriage(intake, target['angle'], config.IntakeActive.kIn, piece),
+            command_list.append(
+                ParallelCommandGroup(
+                    command.SetElevator(self.elevator, self.target['length'], self.force),
+                    command.SetCarriage(self.intake, self.target['angle'], config.IntakeActive.kIdle, self.piece)
+                )
             )
+            command_goal.append(str(self.intake.get_wrist_angle()))
+            command_goal.append('intake moving past 0')
+            command_goal.append(f'run elevator up to threshold (BLOCKING), wrist goes to zero')
+            command_goal.append('move wrist to desired rotation continue elevator to desired position')
+        else:
+            # Normal Operation
+            command_list.append(
+                ParallelCommandGroup(
+                        command.SetElevator(self.elevator, self.target['length'], self.force),
+                        command.SetCarriage(self.intake, self.target['angle'], config.IntakeActive.kIdle, self.piece)
+                    )
+            )
+            command_goal.append('run elevator and wrist to desired setpoint')
+        # if the target goal is to pickup game pieces, set intake to automatically run in
+        if self.target['goal'] == 'pickup':
+            command_list.append(
+                command.SetIntake(self.intake, config.IntakeActive.kIn, self.piece),
+            )
+            command_goal.append('run intake in')
         
+        action = ''
+        for i in command_goal:
+            action += i + ', '    
+        
+        self.target['angle'] = save
+        
+        print(action)
+        commands2.CommandScheduler.getInstance().schedule(
+            ParallelCommandGroup(
+                PrintCommand(action),
+                SequentialCommandGroup(
+                    *command_list
+                )
+            )
+        )
+        
+    def isFinished(self) -> bool:
+        return True
+    
+    def end(self, interrupted):
+        pass
+        
+
+class Idle(commands2.CommandBase):
+    
+    def __init__(self, intake: Intake, elevator: Elevator) -> None:
+        super().__init__()
+        self.intake = intake
+        self.elevator = elevator
+        
+    def initialize(self) -> None:
+        target = config.active_target
+        config.active_target = config.Target.idle
+        commands2.CommandScheduler.getInstance().schedule(Target(self.intake, self.elevator))
+        config.active_target = target
+        
+    def isFinished(self) -> bool:
+        return True
+    
+    def end(self, interrupted):
+        pass
+
 class AutoPickup(SequentialCommandGroup):
     def __init__(self, drivetrain: Drivetrain, intake: Intake, elevator: Elevator, limelight: Limelight, target: config.GamePiece):
         super().__init__(

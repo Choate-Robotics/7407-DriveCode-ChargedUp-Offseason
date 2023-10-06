@@ -4,12 +4,12 @@ from robotpy_toolkit_7407 import SubsystemCommand
 from oi.keymap import Controllers
 from subsystem import Intake
 from robotpy_toolkit_7407.utils.units import radians
-import constants, math
+import constants, math, commands2
 from commands2 import SequentialCommandGroup
 
 
 class SetIntake(SubsystemCommand[Intake]):
-    def __init__(self, subsystem: Intake, intake_active: bool, game_piece: config.GamePiece):
+    def __init__(self, subsystem: Intake, intake_active: config.IntakeActive, game_piece: config.GamePiece):
         super().__init__(subsystem)
         self.intake_active = intake_active
         self.finished = False
@@ -24,10 +24,14 @@ class SetIntake(SubsystemCommand[Intake]):
         Sets the intake to the desired state
         :return:
         """
-        if self.intake_active and self.piece == 'cube':
+        if self.intake_active == config.IntakeActive.kIn and self.piece == 'cube':
             self.subsystem.grab_cube()
-        elif self.intake_active and self.piece == 'cone':
+        elif self.intake_active == config.IntakeActive.kIn and self.piece == 'cone':
             self.subsystem.grab_cone()
+        elif self.intake_active == config.IntakeActive.kOut and self.piece == 'cone':
+            self.subsystem.eject_cone()
+        elif self.intake_active == config.IntakeActive.kOut and self.piece == 'cube':
+            self.subsystem.eject_cube()
         else:
             # change output dynamically to cone and cubes w/ obj variable to hold on to piece
             if self.piece == 'cone':
@@ -47,27 +51,51 @@ class SetIntake(SubsystemCommand[Intake]):
         elif self.piece == 'cone' and self.subsystem.get_cone_detected():
             self.finished = True
             Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 0.5)
-        elif self.piece == 'cube' and self.subsystem.get_no_grab_cube_detected():
-            self.finished = True
-            Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 0.5)
+        # elif self.piece == 'cube' and self.subsystem.get_no_grab_cube_detected():
+        #     self.finished = True
+        #     Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 0.5)
 
     def isFinished(self) -> bool:
         """
         Checks if the intake has finished
         :return:
         """
-        return self.finished
+        return True
 
     def end(self, interrupted: bool) -> None:
         """
         Stops the intake
         :return:
         """
-        self.subsystem.stop_intake()
+        if self.intake_active == config.IntakeActive.kIn:
+            if self.piece == config.GamePiece.cone:
+                self.subsystem.hold_cone
+            else:
+                self.subsystem.hold_cube
+        elif self.intake_active == config.IntakeActive.kOut:
+                self.subsystem.stop()
         Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 0)
         self.finished = False
         
+class ZeroWrist(SubsystemCommand[Intake]):
+    def __init__(self, subsystem: Intake):
+        super().__init__(subsystem)
+        self.subsystem = subsystem
+
+    def initialize(self) -> None:
+        self.subsystem.zero_wrist()
         
+    def execute(self) -> None:
+        pass
+    
+    def isFinished(self) -> bool:
+        return self.subsystem.is_at_angle(0)
+    
+    def end(self, interrupted):
+        if not interrupted:
+            self.subsystem.wrist_zeroed = True
+        
+                
 class SetWrist(SubsystemCommand[Intake]):
     def __init__(self, subsystem: Intake, wrist_angle: radians, game_piece: config.GamePiece, intake_active: config.IntakeActive):
         super().__init__(subsystem)
@@ -78,8 +106,6 @@ class SetWrist(SubsystemCommand[Intake]):
         
     def initialize(self):
         
-        if self.intake_active == config.IntakeActive.kIn and self.game_piece == config.GamePiece.cube:
-            self.wrist_angle -= math.radians(30)
         
         self.subsystem.set_wrist_angle(self.wrist_angle)
         
@@ -90,14 +116,13 @@ class SetWrist(SubsystemCommand[Intake]):
         return self.subsystem.is_at_angle(self.wrist_angle, math.radians(2))
     
     def end(self, interrupted):
-        if interrupted:
-            self.subsystem.set_wrist_angle(self.subsystem.get_wrist_angle())
-    
+        self.subsystem.set_wrist_angle(self.subsystem.get_wrist_angle())
     
 class SetCarriage(SequentialCommandGroup):
     
     def __init__(self, subsystem: Intake, wrist_angle: radians, intake_active: config.IntakeActive, game_piece: config.GamePiece):
         super().__init__(
+            SetIntake(subsystem, config.IntakeActive.kIdle, game_piece),
             SetWrist(subsystem, wrist_angle, game_piece, intake_active),
             SetIntake(subsystem, intake_active, game_piece)
         )

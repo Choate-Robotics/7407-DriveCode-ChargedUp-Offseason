@@ -35,6 +35,7 @@ class Intake(Subsystem):
         self.disable_rotation: bool = config.disable_wrist_rotation
         self.wrist_abs_encoder = None
         self.dist_sensor: rev.AnalogInput = None
+        self.wrist_zeroed: bool = False
 
     def init(self):
         self.lower_intake_motor.init()
@@ -128,7 +129,7 @@ class Intake(Subsystem):
         Sets the intake motors to eject a cone
         :return: None
         """
-        self.set_lower_output(-self.intake_speed)
+        self.set_lower_output(self.intake_speed)
         self.set_upper_output(self.intake_speed)
 
     def stop_intake(self):
@@ -140,8 +141,9 @@ class Intake(Subsystem):
         Sets the intake motors to eject a cube
         :return: None
         """
-        self.set_lower_output(self.intake_speed)
+        self.set_lower_output(-self.intake_speed)
         self.set_upper_output(self.intake_speed)
+        
 
     def disengage(self):
         """

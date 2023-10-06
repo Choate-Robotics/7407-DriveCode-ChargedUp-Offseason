@@ -2,7 +2,7 @@
 elevator_can_id = 11 # 11 can ID # Change later, this isn't accurate
 magnetic_limit_switch_port = 0 # Change later, this is from last year
 elevator_ramp_rate = .3
-elevator_intake_threshold = .5 # multiply this by max rotations, this is the threshold for the elevator and intake to move at the same time
+elevator_intake_threshold = .4 # multiply this by max rotations, this is the threshold for the elevator and intake to move at the same time
 
 
 
@@ -32,14 +32,14 @@ from units.SI import (
 left_intake_motor_id = 1  # correct motor id
 right_intake_motor_id = 20  # correct motor id
 intake_ramp_rate = .1
-default_intake_speed = .85  # change this to the default intake speed
-idle_intake_speed = .05
+default_intake_speed = .21 #.85 # change this to the default intake speed
+idle_intake_speed = .1
 wrist_motor_id = 18  # correct motor id
 
 INTAKE_CONFIG = SparkMaxConfig(k_P=1, k_I=1, k_D=1, k_F=0, output_range=(-1,1), idle_mode=CANSparkMax.IdleMode.kBrake)
 
-WRIST_CONFIG = SparkMaxConfig(k_P=.3, k_I=0, k_D=.1, k_F=0, output_range=(-.9,.9), idle_mode=CANSparkMax.IdleMode.kBrake)
-
+WRIST_CONFIG = SparkMaxConfig(k_P=.31, k_I=0, k_D=.08, k_F=0, output_range=(-.9,.9), idle_mode=CANSparkMax.IdleMode.kBrake)
+#.9
 
 balance_pid = ProfiledPIDController(1, 1, 1, TrapezoidProfile.Constraints(1, 0))
 
@@ -78,33 +78,37 @@ class Target:
         'goal': 'score',
     }
     mid = {
-        'length': .4,
+        'length': .6,
         'angle': math.radians(-45),
         'goal': 'score',
     }
     low = {
-        'length': .2,
-        'angle': math.radians(-90),
+        'length': .45,
+        'angle': math.radians(-50),
         'goal': 'score',
     }
     floor_up = {
         'length': 0,
-        'angle': math.radians(160),
+        'angle': math.radians(150),
+        'angle-cube': math.radians(150),
         'goal': 'pickup'
     }
     floor_down = {
         'length': 0,
-        'angle': math.radians(180),
+        'angle': math.radians(175),
+        'angle-cube': math.radians(150),
         'goal': 'pickup',
     }
     single = {
         'length': .1,
         'angle': math.radians(90),
+        'angle-cube': math.radians(45),
         'goal': 'pickup',
     }
     double = {
         'length': 1,
         'angle': math.radians(-30),
+        'angle-cube': math.radians(-20),
         'goal': 'pickup',
     }
     
@@ -113,6 +117,13 @@ class Target:
         'angle': math.radians(0),
         'goal': 'idle',
     }
+    
+    
+active_piece: GamePiece = GamePiece.cone
+
+active_target: Target = Target.single
+
+active_grid: int = 1
 
 
 game_piece_targeting_constraints = {

@@ -2,7 +2,7 @@
 # Elevator
 elevator_max_rotation = 63.59651 
 
-elevator_speed_threshold = 0.4 * elevator_max_rotation
+elevator_speed_threshold = 0.3 * elevator_max_rotation
 
 
 
