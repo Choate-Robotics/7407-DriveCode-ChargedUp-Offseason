@@ -51,6 +51,7 @@ class ZeroElevator(SubsystemCommand[Elevator]):
             self.subsystem.zeroed = True
             ntcore.NetworkTableInstance.getDefault().getTable('Arm Voltage').putBoolean('zeroed', self.subsystem.zeroed)
             self.subsystem.stop()
+            config.calculated_max_vel = constants.drivetrain_max_vel
             self.subsystem.motor_extend.set_sensor_position(0)
 
 
@@ -93,8 +94,10 @@ class SetElevator(SubsystemCommand[Elevator]):
         if self.subsystem.get_length() > constants.elevator_speed_threshold:
             #limit the speed more the higher the elevator is
             config.calculated_max_vel = constants.drivetrain_max_vel * max((1 - self.subsystem.get_length() / constants.elevator_max_rotation),.1)
+            config.calculated_max_angular_vel = constants.drivetrain_max_angular_vel * max((1 - self.subsystem.get_length() / constants.elevator_max_rotation),.5)
         else:
             config.calculated_max_vel = constants.drivetrain_max_vel
+            config.calculated_max_angular_vel = constants.drivetrain_max_angular_vel
         # ntcore.NetworkTableInstance.getDefault().getTable("Arm Voltage").putNumber("position", self.subsystem.get_length())
         
         # voltage = self.pid.calculate(self.subsystem.get_length())

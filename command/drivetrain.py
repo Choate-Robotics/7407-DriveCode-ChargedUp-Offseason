@@ -45,7 +45,7 @@ class DriveSwerveCustom(SubsystemCommand[Drivetrain]):
 
         dx *= config.calculated_max_vel # self.subsystem.max_vel
         dy *= -config.calculated_max_vel #-self.subsystem.max_vel
-        d_theta *= self.subsystem.max_angular_vel
+        d_theta *= config.calculated_max_angular_vel #self.subsystem.max_angular_vel
 
         # if constants.drivetrain_accel:
         #     dx_scale = dx

@@ -20,7 +20,7 @@ limelight_offset: Pose3d = {
 import math
 
 from robotpy_toolkit_7407.utils.units import hour, m, mile, rad, rev, s
-from wpimath.geometry import Pose3d, Rotation3d
+from wpimath.geometry import Pose3d, Rotation3d, Translation2d
 
 from config import field_length, field_width
 from units.SI import (
@@ -75,6 +75,14 @@ drivetrain_target_max_vel: meters_per_second = (2 * mile / hour).asNumber(m / s)
 drivetrain_max_angular_vel: radians_per_second = (1 * rev / s).asNumber(rad / s)  # 5
 drivetrain_max_correction_vel: radians_per_second = (2 * rev / s).asNumber(rad / s)
 drivetrain_max_climb_vel: meters_per_second = (5 * mile / hour).asNumber(m / s)
+
+class Node:
+    
+    # scoring location to the left of the apriltag
+    left: Translation2d = Translation2d(0, -22 * inches_to_meters)
+    
+    # scoring location to the right of the apriltag
+    right: Translation2d = Translation2d(0, 22 * inches_to_meters) 
 
 ApriltagPositionDictRed = {
     1: Pose3d(

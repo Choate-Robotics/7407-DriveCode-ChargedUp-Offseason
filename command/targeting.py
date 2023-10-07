@@ -55,7 +55,6 @@ class LineupSwerve(SubsystemCommand[Drivetrain]):
             self.nt.putNumber("ty", ty)
             self.nt.putNumber('ta', ta)
             
-                # command.DriveSwerveCustom.execute(self)
             
             # to line up the game piece properly, we need to constrain the tx, ty, and ta values to certain ranges
             # tx needs to be between -3.5 and 3.5
@@ -88,8 +87,8 @@ class LineupSwerve(SubsystemCommand[Drivetrain]):
             # else:
             #     dy *= -1
                 
-            dx *= self.drivetrain.max_vel * .25
-            dy *= self.drivetrain.max_vel * .25
+            dx *= config.calculated_max_vel * .25
+            dy *= config.calculated_max_vel * .25
                 
             self.drivetrain.set_robot_centric((dy, -dx), 0)
             self.nt.putBoolean('tx constrained', constrained(tx, self.constraints['tx']))
@@ -125,9 +124,6 @@ class Target(commands2.CommandBase):
     
     :param elevator: Elevator subsystem
     
-    :param target: Target to move to (config.Target)
-    
-    :param piece: (OPTIONAL) Game piece to pickup (config.GamePiece)
     
     :param force: (OPTIONAL) Force the elevator to move even if it is not zeroed (bool)
     '''
@@ -143,7 +139,7 @@ class Target(commands2.CommandBase):
     def initialize(self) -> None:
         
         if self.elevator.zeroed == False or self.intake.wrist_zeroed == False:
-            commands2.CommandScheduler.getInstance().schedule(ZeroTarget(self.intake, self.elevator).andThen(Idle(self.intake, self.elevator)))
+            commands2.CommandScheduler.getInstance().schedule(ZeroTarget(self.intake, self.elevator))
             return
         
         self.piece = config.active_piece
@@ -291,6 +287,6 @@ class AutoPickup(SequentialCommandGroup):
             Target(intake, elevator),
             InstantCommand(lambda: drivetrain.set_robot_centric((-.4 * constants.drivetrain_max_vel, 0), 0)),
             WaitUntilCommand(lambda: intake.get_detected(target)), # wait until intake has game piece,
-            InstantCommand(lambda: set_target(config.Target.floor_up)),
+            InstantCommand(lambda: set_target(config.Target.idle)),
             Target(intake, elevator),
             )

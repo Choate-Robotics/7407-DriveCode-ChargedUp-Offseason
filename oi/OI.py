@@ -109,7 +109,12 @@ class OI:
         
         Keymap.Drivetrain.X_MODE.onTrue(InstantCommand(lambda: Robot.drivetrain.x_mode()))
         
-        Keymap.Drivetrain.AUTO_PICKUP.onTrue(command.AutoPickup(Robot.drivetrain, Robot.intake, Robot.elevator, Sensors.limeLight_B, config.GamePiece.cube)).onFalse(command.DriveSwerveCustom(Robot.drivetrain))
+        Keymap.Drivetrain.AUTO_PICKUP.onTrue(
+            command.AutoPickup(Robot.drivetrain, Robot.intake, Robot.elevator, Sensors.limeLight_B, config.GamePiece.cube)
+            ).onFalse(
+                command.DriveSwerveCustom(Robot.drivetrain)\
+                    .alongWith(command.Idle(Robot.intake, Robot.elevator))
+                )
         
         # Keymap.Drivetrain.TEST_WRIST.whenPressed(command.SetCarriage(Robot.intake, math.radians(90), True, config.game_piece['cone'])).whenReleased(command.SetCarriage(Robot.intake, math.radians(0), False, config.game_piece['cone']))
         

@@ -13,28 +13,26 @@ class SetIntake(SubsystemCommand[Intake]):
         super().__init__(subsystem)
         self.intake_active = intake_active
         self.finished = False
-        self.piece = ''
-        if game_piece == config.GamePiece.cone:
-            self.piece = 'cone'
-        elif game_piece == config.GamePiece.cube:
-            self.piece = 'cube'
+        self.piece = game_piece
 
     def initialize(self) -> None:
         """
         Sets the intake to the desired state
         :return:
         """
-        if self.intake_active == config.IntakeActive.kIn and self.piece == 'cube':
-            self.subsystem.grab_cube()
-        elif self.intake_active == config.IntakeActive.kIn and self.piece == 'cone':
-            self.subsystem.grab_cone()
-        elif self.intake_active == config.IntakeActive.kOut and self.piece == 'cone':
-            self.subsystem.eject_cone()
-        elif self.intake_active == config.IntakeActive.kOut and self.piece == 'cube':
-            self.subsystem.eject_cube()
+        if self.intake_active == config.IntakeActive.kIn:
+            if self.piece == config.GamePiece.cone:
+                self.subsystem.grab_cone()
+            else:
+                self.subsystem.grab_cube()
+        elif self.intake_active == config.IntakeActive.kOut: 
+            if self.piece == config.GamePiece.cone:
+                self.subsystem.eject_cone()
+            else:
+                self.subsystem.eject_cube()
         else:
             # change output dynamically to cone and cubes w/ obj variable to hold on to piece
-            if self.piece == 'cone':
+            if self.piece == config.GamePiece.cone:
                 self.subsystem.hold_cone()
             else:
                 self.subsystem.hold_cube()
@@ -45,15 +43,19 @@ class SetIntake(SubsystemCommand[Intake]):
         Checks if the intake has detected a game piece
         :return:
         """
-        if self.piece == 'cube' and self.subsystem.get_cube_detected():
-            self.finished = True
-            Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 0.5)
-        elif self.piece == 'cone' and self.subsystem.get_cone_detected():
-            self.finished = True
-            Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 0.5)
+        # if self.piece == 'cube' and self.subsystem.get_cube_detected():
+        #     self.finished = True
+        #     Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 0.5)
+        # elif self.piece == 'cone' and self.subsystem.get_cone_detected():
+        #     self.finished = True
+        #     Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 0.5)
         # elif self.piece == 'cube' and self.subsystem.get_no_grab_cube_detected():
         #     self.finished = True
         #     Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 0.5)
+        # if self.subsystem.get_avg_current() > 20:
+        #     self.finished = True
+        #     Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 1)
+        #     Controllers.DRIVER_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 1)
 
     def isFinished(self) -> bool:
         """
@@ -67,14 +69,10 @@ class SetIntake(SubsystemCommand[Intake]):
         Stops the intake
         :return:
         """
-        if self.intake_active == config.IntakeActive.kIn:
-            if self.piece == config.GamePiece.cone:
-                self.subsystem.hold_cone
-            else:
-                self.subsystem.hold_cube
-        elif self.intake_active == config.IntakeActive.kOut:
+        if self.intake_active == config.IntakeActive.kOut:
                 self.subsystem.stop()
         Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 0)
+        Controllers.DRIVER_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 0)
         self.finished = False
         
 class ZeroWrist(SubsystemCommand[Intake]):

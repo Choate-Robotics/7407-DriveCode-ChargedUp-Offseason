@@ -7,6 +7,7 @@ import config
 import math
 import rev
 import wpilib
+from oi.keymap import Controllers
 
 
 # cube -> same outwards spin(top up, bottom up), cone -> same inwards spin(top down, bottom down)
@@ -76,6 +77,14 @@ class Intake(Subsystem):
         """
         avg_voltage = self.dist_sensor.getVoltage()
         return 0.6 < avg_voltage
+    
+    def get_avg_current(self):
+        return (self.lower_intake_motor.motor.getOutputCurrent() + self.upper_intake_motor.motor.getOutputCurrent()) / 2
+    
+    def rumble_if_detected(self):
+        if self.get_avg_current() > config.intake_current_threshold:
+            Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 1)
+            Controllers.DRIVER_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 1)
 
     def get_double_station_detected(self):
         """
@@ -105,7 +114,7 @@ class Intake(Subsystem):
         Sets the intake motors to grab a cube
         :return: None
         """
-        self.set_lower_output(-self.intake_speed)
+        self.set_lower_output(self.intake_speed)
         self.set_upper_output(self.intake_speed)
 
     def grab_cone(self):

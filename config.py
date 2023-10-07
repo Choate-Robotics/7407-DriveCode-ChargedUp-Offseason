@@ -1,4 +1,6 @@
 
+DEBUG_MODE = False
+
 elevator_can_id = 11 # 11 can ID # Change later, this isn't accurate
 magnetic_limit_switch_port = 0 # Change later, this is from last year
 elevator_ramp_rate = .3
@@ -12,6 +14,7 @@ from wpimath.trajectory import TrapezoidProfile
 from wpimath.controller import ProfiledPIDController
 from wpilib import AnalogEncoder
 import math
+from wpimath.geometry import Translation2d
 
 enable_pid_tuning = True  # change this to enable pid tuning
 
@@ -35,6 +38,7 @@ intake_ramp_rate = .1
 default_intake_speed = .85 # change this to the default intake speed
 idle_intake_speed = .1
 wrist_motor_id = 18  # correct motor id
+intake_current_threshold = 20 # change this to the intake current threshold
 
 INTAKE_CONFIG = SparkMaxConfig(k_P=1, k_I=1, k_D=1, k_F=0, output_range=(-1,1), idle_mode=CANSparkMax.IdleMode.kBrake)
 
@@ -118,6 +122,8 @@ class Target:
         'goal': 'idle',
     }
     
+
+
     
 active_piece: GamePiece = GamePiece.cone
 
@@ -180,7 +186,7 @@ back_right_encoder = AnalogEncoder(2)
 back_right_zeroed_pos = 0.61598 #* 360 * degrees_to_radians
 
 calculated_max_vel = (15 * mile / hour).asNumber(m / s)  
-
+calculated_max_angular_vel: radians_per_second = (1 * rev / s).asNumber(rad / s)  # 5
 # Sensors
 gyro_id = 26
 

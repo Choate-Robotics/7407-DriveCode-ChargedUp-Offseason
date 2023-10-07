@@ -44,39 +44,20 @@ class _Robot(wpilib.TimedRobot):
         
         nt = ntcore.NetworkTableInstance.getDefault()
         
-        # try:
-        #     commands2.CommandScheduler.getInstance().run()
-        # except Exception as e:
-        #     nt.getTable("Command Scheduler").putString("Last Error", str(e))
+        if config.DEBUG_MODE: 
+            commands2.CommandScheduler.getInstance().run()
+        else:
+            try:
+                commands2.CommandScheduler.getInstance().run()
+            except Exception as e:
+                nt.getTable("Command Scheduler").putString("Last Error", str(e))
         
-        commands2.CommandScheduler.getInstance().run()
 
         Sensors.limeLight_F.update()
         Sensors.limeLight_B.update()
         
         
         
-        nts = nt.getTable("Swerve Analog")
-        
-        nts.putNumber("ABS VAL Back Left", config.back_left_zeroed_pos)
-        
-        nts.putNumber('MAX VEL', Robot.drivetrain.max_vel)
-        
-        nts.putNumber("BACK LEFT ENCODER", (Robot.drivetrain.n_back_left.get_turn_motor_angle() / (2 * math.pi) * constants.drivetrain_turn_gear_ratio))
-        
-        nts.putNumber("Front Left", config.front_left_encoder.getAbsolutePosition())
-        nts.putNumber("Front Right", config.front_right_encoder.getAbsolutePosition())
-        nts.putNumber("Back Left", config.back_left_encoder.getAbsolutePosition())
-        nts.putNumber("Back Right", config.back_right_encoder.getAbsolutePosition())
-        
-        nti = nt.getTable("Intake")
-        
-        calculation = ((Robot.drivetrain.n_back_left.get_turn_motor_angle()/ (2 * math.pi)) + config.back_left_zeroed_pos) - config.back_left_encoder.getAbsolutePosition()
-        
-        ntcore.NetworkTableInstance.getDefault().getTable("Swerve Difference").putNumber("back left calculation", calculation)
-        
-        nti.putNumber("Motor Encoder", Robot.intake.wrist_motor.get_sensor_position() / constants.wrist_gear_ratio)
-        nti.putNumber("ABS Encoder", Robot.intake.wrist_abs_encoder.getPosition())
         
     # Initialize subsystems
 
@@ -94,7 +75,10 @@ class _Robot(wpilib.TimedRobot):
         # commands2.CommandScheduler.getInstance().schedule(command.ZeroElevator(Robot.elevator))
 
     def teleopPeriodic(self):
-        pass
+        Robot.intake.rumble_if_detected()
+        
+        
+        
     def autonomousInit(self):
         pass
 

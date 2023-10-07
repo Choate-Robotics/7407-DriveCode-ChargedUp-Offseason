@@ -19,6 +19,8 @@ class Robot:
 class Pneumatics:
     pass
 
+class PowerDistribution:
+    pdh = wpilib.PowerDistribution()
 
 class Sensors:
     limeLight_F: Limelight = Limelight(constants.limelight_offset['front'], "limelight-f")
