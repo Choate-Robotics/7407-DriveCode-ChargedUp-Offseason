@@ -2,7 +2,7 @@ from robotpy_toolkit_7407.utils import logger
 from oi.keymap import Keymap
 from robot_systems import Robot, Sensors
 import command, math, config, constants, commands2
-from commands2 import InstantCommand, StartEndCommand, RunCommand
+from commands2 import InstantCommand, StartEndCommand, RunCommand, RepeatCommand
 logger.info("Hi, I'm OI!")
 
 class OI:
@@ -109,7 +109,7 @@ class OI:
         
         Keymap.Drivetrain.X_MODE.onTrue(InstantCommand(lambda: Robot.drivetrain.x_mode()))
         
-        Keymap.Drivetrain.AUTO_PICKUP.onTrue(command.LineupSwerve(Robot.drivetrain, Sensors.limeLight_B, 0))#.onFalse(command.DriveSwerveCustom(Robot.drivetrain))
+        Keymap.Drivetrain.AUTO_PICKUP.onTrue(command.AutoPickup(Robot.drivetrain, Robot.intake, Robot.elevator, Sensors.limeLight_B, config.GamePiece.cube)).onFalse(command.DriveSwerveCustom(Robot.drivetrain))
         
         # Keymap.Drivetrain.TEST_WRIST.whenPressed(command.SetCarriage(Robot.intake, math.radians(90), True, config.game_piece['cone'])).whenReleased(command.SetCarriage(Robot.intake, math.radians(0), False, config.game_piece['cone']))
         

@@ -7,7 +7,7 @@ import config, constants, math, ntcore, commands2
 from wpimath.controller import PIDController
 
 class LineupSwerve(SubsystemCommand[Drivetrain]):
-    def __init__(self, subsystem: Drivetrain, LimeLight: Limelight, target: config.GamePiece):
+    def __init__(self, subsystem: Drivetrain, LimeLight: Limelight):
         '''
         Lines up the robot with the target
         :param drivetrain: Drivetrain subsystem
@@ -18,22 +18,23 @@ class LineupSwerve(SubsystemCommand[Drivetrain]):
         self.limelight = LimeLight
         self.target_exists = False
         self.target_constrained = False
-        self.v_pid = PIDController(0.1, 0, 0)
-        self.h_pid = PIDController(0.1, 0, 0.01)
+        self.v_pid = PIDController(0.1, 0, 0.001)
+        self.h_pid = PIDController(0.08, 0, 0.001)
         self.nt = ntcore.NetworkTableInstance.getDefault().getTable("Targetting command")
-        tn = 'cube'
-        if target == config.GamePiece.cone:
-            tn = 'cone'
-        self.constraints = config.game_piece_targeting_constraints[tn]
+        self.target: config.GamePiece
+        
         
     def initialize(self):
         
-        
+        tn = 'cube'
+        if config.active_piece == config.GamePiece.cone:
+            tn = 'cone'
+        self.constraints = config.game_piece_targeting_constraints[tn]
         
         self.nt.putNumber('tracking', 2)
         self.limelight.set_pipeline_mode(0)
-        # self.v_pid.setTolerance(4)
-        # self.h_pid.setTolerance(2)
+        self.v_pid.setTolerance(4)
+        self.h_pid.setTolerance(2)
         
     def execute(self):
         
@@ -43,6 +44,7 @@ class LineupSwerve(SubsystemCommand[Drivetrain]):
             print('no target')
             print(self.limelight.table.getNumber('tv', 3))
             self.drivetrain.set_robot_centric((0,0),0)
+            commands2.CommandScheduler.getInstance().schedule(command.DriveSwerveCustom(self.drivetrain))
             # self.nt.putBoolean('see target', False)
         else:
             # self.nt.putBoolean('see target', True)
@@ -89,7 +91,7 @@ class LineupSwerve(SubsystemCommand[Drivetrain]):
             dx *= self.drivetrain.max_vel * .25
             dy *= self.drivetrain.max_vel * .25
                 
-            self.drivetrain.set_robot_centric((-dy, -dx), 0)
+            self.drivetrain.set_robot_centric((dy, -dx), 0)
             self.nt.putBoolean('tx constrained', constrained(tx, self.constraints['tx']))
             self.nt.putBoolean('ty constrained', constrained(ty, self.constraints['ty']))
             
@@ -98,7 +100,7 @@ class LineupSwerve(SubsystemCommand[Drivetrain]):
                 # self.drivetrain.set_driver_centric((0,0), 0)
             
     def isFinished(self):
-        return self.target_constrained and self.target_exists
+        return self.h_pid.atSetpoint() and self.v_pid.atSetpoint()
         return False
     
     def end(self, interrupted: bool = False):
@@ -269,16 +271,26 @@ class Idle(commands2.CommandBase):
     
     def end(self, interrupted):
         pass
+    
+def set_target(target: config.Target):
+    config.active_target = target
+    
+def set_piece(piece: config.GamePiece):
+    config.active_piece = piece
 
 class AutoPickup(SequentialCommandGroup):
     def __init__(self, drivetrain: Drivetrain, intake: Intake, elevator: Elevator, limelight: Limelight, target: config.GamePiece):
         super().__init__(
             ParallelCommandGroup(
-                LineupSwerve(drivetrain, limelight, target),
-                Target(intake, elevator, config.Target.floor_up)
+                InstantCommand(lambda: set_piece(config.GamePiece.cube)),
+                LineupSwerve(drivetrain, limelight),
+                InstantCommand(lambda: set_target(config.Target.floor_up)),
+                Target(intake, elevator)
                 ),
-            Target(intake, elevator, config.Target.floor_down),
-            InstantCommand(lambda: drivetrain.set_driver_centric(-.4 * constants.drivetrain_max_vel, 0), 0),
+            InstantCommand(lambda: set_target(config.Target.floor_down)),
+            Target(intake, elevator),
+            InstantCommand(lambda: drivetrain.set_robot_centric((-.4 * constants.drivetrain_max_vel, 0), 0)),
             WaitUntilCommand(lambda: intake.get_detected(target)), # wait until intake has game piece,
-            Target(intake, elevator, config.Target.floor_up),
+            InstantCommand(lambda: set_target(config.Target.floor_up)),
+            Target(intake, elevator),
             )

@@ -32,7 +32,7 @@ from units.SI import (
 left_intake_motor_id = 1  # correct motor id
 right_intake_motor_id = 20  # correct motor id
 intake_ramp_rate = .1
-default_intake_speed = .21 #.85 # change this to the default intake speed
+default_intake_speed = .85 # change this to the default intake speed
 idle_intake_speed = .1
 wrist_motor_id = 18  # correct motor id
 
@@ -89,14 +89,14 @@ class Target:
     }
     floor_up = {
         'length': 0,
-        'angle': math.radians(150),
-        'angle-cube': math.radians(150),
+        'angle': math.radians(110),
+        'angle-cube': math.radians(110),
         'goal': 'pickup'
     }
     floor_down = {
         'length': 0,
         'angle': math.radians(175),
-        'angle-cube': math.radians(150),
+        'angle-cube': math.radians(152),
         'goal': 'pickup',
     }
     single = {
