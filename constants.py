@@ -205,6 +205,11 @@ ApriltagPositionDictBlue = {
         Rotation3d(),
     ),
 }
+
+border_tag_to_wall = 42.015 * inches_to_meters
+
+path_box_height = 70 * inches_to_meters
+
 # Puncher Ratio
 # 0.00764 m/r
 # 1.53m

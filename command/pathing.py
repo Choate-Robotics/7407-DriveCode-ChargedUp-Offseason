@@ -41,10 +41,23 @@ class Path():
                 res.minAcceleration = 0
                 res.maxAcceleration = self.grid_speed[1]
                 return res
-        
+            
+        rec_points = list[Translation2d]
+            
+        if config.active_team == config.Team.blue:
+            rec_points = [
+                Pose2d(Translation2d(-constants.border_tag_to_wall, 0),0).relativeTo(constants.ApriltagPositionDictBlue[6].translation()).translation(),
+                Pose2d(Translation2d(constants.border_tag_to_wall, constants.path_box_height),0).relativeTo(constants.ApriltagPositionDictBlue[8].translation()).translation(),
+            ]
+        else:
+            rec_points = [
+                Pose2d(Translation2d(-constants.border_tag_to_wall, 0),0).relativeTo(constants.ApriltagPositionDictRed[1].translation()).translation(),
+                Pose2d(Translation2d(constants.border_tag_to_wall, constants.path_box_height),0).relativeTo(constants.ApriltagPositionDictRed[3].translation()).translation(),
+            ]
+            
         community = RectangularRegionConstraint(
-            Translation2d(0, 0),
-            Translation2d(0, 0),
+            rec_points[0],
+            rec_points[1],
             Constraint(self.grid_speed[0], self.grid_speed[1])
         )
         config = TrajectoryConfig(self.max_velocity, self.max_acceleration)
