@@ -18,7 +18,13 @@ class OI:
         
         logger.info("Mapping controls...")
         
+        def set_active_route(route: config.Route):
+            config.active_route = route
+            print('route', f'{config.active_route=}')
         
+        def set_active_station(station: config.Station):
+            config.active_station = station
+            print('station', f'{config.active_station=}')
         
         def set_active_target(target: config.Target):
             config.active_target = target
@@ -77,6 +83,23 @@ class OI:
         Keymap.Grid.LOWER_GRID.whenActive(InstantCommand(lower_active_grid))
         
         Keymap.Grid.NO_GRID.whenActive(InstantCommand(no_active_grid))
+        
+        
+        Keymap.Station.SINGLE.whenActive(InstantCommand(lambda: set_active_station(config.Station.single)))
+        
+        Keymap.Station.DOUBLE_LEFT.whenActive(InstantCommand(lambda: set_active_station(config.Station.double_left)))
+        
+        Keymap.Station.DOUBLE_RIGHT.whenActive(InstantCommand(lambda: set_active_station(config.Station.double_right)))
+        
+        Keymap.Route.SET_STATION_ROUTE.whenActive(InstantCommand(lambda: set_active_route(config.Route.station)))
+        
+        Keymap.Route.SET_GRID_ROUTE.whenActive(InstantCommand(lambda: set_active_route(config.Route.grid)))
+        
+        Keymap.Route.SET_AUTO_ROUTE.whenActive(InstantCommand(lambda: set_active_route(config.Route.auto)))
+        
+        
+        Keymap.Route.RUN_ROUTE.whenActive(command.RunRoute(Robot.drivetrain, Sensors.odometry))\
+            .onFalse(command.DriveSwerveCustom(Robot.drivetrain))
         
         # Keymap.Grid.AUTO_ALIGN.whenActive().whenInactive()
         

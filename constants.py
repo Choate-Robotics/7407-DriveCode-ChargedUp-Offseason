@@ -76,13 +76,33 @@ drivetrain_max_angular_vel: radians_per_second = (1 * rev / s).asNumber(rad / s)
 drivetrain_max_correction_vel: radians_per_second = (2 * rev / s).asNumber(rad / s)
 drivetrain_max_climb_vel: meters_per_second = (5 * mile / hour).asNumber(m / s)
 
-class Node:
+node_bumps = 22.7 * inches_to_meters
+
+single_station_x = (49.535 - (robot_length / 2)) * inches_to_meters
+
+class Targets:
     
     # scoring location to the left of the apriltag
-    left: Translation2d = Translation2d(0, -22 * inches_to_meters)
+    node_left: Translation2d = Translation2d(-22 * inches_to_meters, node_bumps)
     
     # scoring location to the right of the apriltag
-    right: Translation2d = Translation2d(0, 22 * inches_to_meters) 
+    node_right: Translation2d = Translation2d(22 * inches_to_meters, node_bumps)
+    
+    # scoring location in front of the apriltag
+    node_front: Translation2d = Translation2d(0, node_bumps)
+    
+    # loading location near apriltag 5 (red)
+    load_single_red: Translation2d = Translation2d(single_station_x, -68.02 * inches_to_meters)
+    
+    # loading location near apriltag 4 (blue)
+    load_single_blue: Translation2d = Translation2d(-single_station_x, -68.02 * inches_to_meters)
+    
+    # loading location near apriltag 4/5
+    load_double_left: Translation2d = Translation2d(0, -32.43 * inches_to_meters)
+    
+    # loading location near apriltag 4/5
+    load_double_right: Translation2d = Translation2d(0, 32.43 * inches_to_meters)
+    
 
 ApriltagPositionDictRed = {
     1: Pose3d(

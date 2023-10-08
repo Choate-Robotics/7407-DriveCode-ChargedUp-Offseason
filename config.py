@@ -122,14 +122,38 @@ class Target:
         'goal': 'idle',
     }
     
+class Team:
+        
+    red = 0
+    blue = 1
+    
+class Station:
+    
+    single = 0
+    double_left = 1
+    double_right = 2
+    auto = 3
+    
+class Route:
+    
+    grid = 0
+    station = 1
+    auto = 2
+    
 
-
+auto_target: bool = False
     
 active_piece: GamePiece = GamePiece.cone
 
 active_target: Target = Target.single
 
 active_grid: int = 1
+
+active_station: Station = Station.single
+
+active_team: Team = Team.red
+
+active_route: Route = Route.grid
 
 
 game_piece_targeting_constraints = {
@@ -145,10 +169,7 @@ game_piece_targeting_constraints = {
     }
 }
 
-team:int = {
-    'red': 0,
-    'blue': 1
-}
+
 
 from units.SI import (
     inches_to_meters,

@@ -86,6 +86,7 @@ class Keymap:
             lambda: Controllers.DRIVER_CONTROLLER.getRawAxis(-controllerDRIVER.RT) > 0.5
         )
         
+        
     class Grid:
         
         RAISE_GRID = commands2.button.Button(
@@ -100,10 +101,37 @@ class Keymap:
             lambda: Controllers.OPERATOR_CONTROLLER.getPOV() == 0
         )
         
-        AUTO_ALIGN = commands2.button.Button(
-            lambda: Controllers.DRIVER_CONTROLLER.getRawAxis(-controllerDRIVER.LT) > 0.5
+    class Station:
+        
+        DOUBLE_STATION_LEFT = commands2.button.Button(
+            lambda: Controllers.OPERATOR_CONTROLLER.getPOV() == 270
         )
         
+        DOUBLE_STATION_RIGHT = commands2.button.Button(
+            lambda: Controllers.OPERATOR_CONTROLLER.getPOV() == 90
+        )
+        
+        SINGLE_STATION = commands2.button.Button(
+            lambda: Controllers.OPERATOR_CONTROLLER.getPOV() == 180
+        )
+        
+    class Route:
+        
+        SET_STATION_ROUTE = commands2.button.Button(
+            lambda: Controllers.DRIVER_CONTROLLER.getPOV() == 270
+        )
+        
+        SET_GRID_ROUTE = commands2.button.Button(
+            lambda: Controllers.DRIVER_CONTROLLER.getPOV() == 90
+        )
+        
+        SET_AUTO_ROUTE = commands2.button.Button(
+            lambda: Controllers.DRIVER_CONTROLLER.getPOV() == 0
+        )
+        
+        RUN_ROUTE = commands2.button.Button(
+            lambda: Controllers.DRIVER_CONTROLLER.getRawAxis(-controllerDRIVER.LT) > 0.5
+        )
     
     class Intake:
         

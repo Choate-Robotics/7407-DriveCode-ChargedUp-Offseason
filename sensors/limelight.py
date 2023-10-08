@@ -164,7 +164,7 @@ class Limelight():
             return None
         return (self.tx, self.ty, self.ta)
 
-    def get_bot_pose(self, team: config.team = None, round_to: int = 4, force_update: bool = False):
+    def get_bot_pose(self, team: config.Team = config.active_team, round_to: int = 4, force_update: bool = False):
         '''
         Gets the pose of the robot relative to the field using the feducial pipeline.
         This uses the botpose values from the limelight configuration, which are relative to the alliance wall.
@@ -187,9 +187,9 @@ class Limelight():
         else:
             botpose: list = []
 
-            if team == config.team.get('red') or team == 0:
+            if team == config.Team.red or team == 0:
                 botpose = self.botpose_red
-            elif team == config.team.get('blue') or team == 1:
+            elif team == config.Team.blue or team == 1:
                 botpose = self.botpose_blue
             else:
                 botpose = self.botpose
