@@ -56,7 +56,7 @@ class _Robot(wpilib.TimedRobot):
         Sensors.limeLight_F.update()
         Sensors.limeLight_B.update()
         
-        
+        Sensors.odometry.update()
         
         
     # Initialize subsystems
