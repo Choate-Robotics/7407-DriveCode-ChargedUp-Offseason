@@ -10,7 +10,7 @@ from units.SI import meters
 
 # TODO: Change config once robot is built
 ELEVATOR_CONFIG = SparkMaxConfig(
-    0.1, 0, 0.04, 0.00017, (-.5, .75), idle_mode=rev.CANSparkMax.IdleMode.kBrake
+    0.1, 0, 0.03, 0.000, (-.5, .75), idle_mode=rev.CANSparkMax.IdleMode.kBrake
 )
 #-.5, .75
 

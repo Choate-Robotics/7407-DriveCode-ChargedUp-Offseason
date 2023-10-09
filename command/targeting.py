@@ -149,12 +149,14 @@ class Target(commands2.CommandBase):
         command_list = []
         command_goal = []
         save = self.target['angle']
+        save_l = self.target['length']
         if self.piece == config.GamePiece.cube and self.target['goal'] == 'pickup':
             self.target['angle'] = self.target['angle-cube']
-            command_goal.append('cube angle')
+            self.target['length'] = self.target['length-cube']
+            command_goal.append('cube angle/length')
         else:
             self.target['angle'] = save
-            command_goal.append('cone angle')
+            command_goal.append('cone angle/length')
         
         if self.piece == config.GamePiece.cone:
             command_goal.append('cone')
@@ -231,6 +233,7 @@ class Target(commands2.CommandBase):
             action += i + ', '    
         
         self.target['angle'] = save
+        self.target['length'] = save_l
         
         print(action)
         commands2.CommandScheduler.getInstance().schedule(
@@ -274,19 +277,23 @@ def set_target(target: config.Target):
 def set_piece(piece: config.GamePiece):
     config.active_piece = piece
 
+def set_auto():
+    config.active_leds = (config.LedType.KStatic(0, 255, 0), 1, 5)
+
 class AutoPickup(SequentialCommandGroup):
     def __init__(self, drivetrain: Drivetrain, intake: Intake, elevator: Elevator, limelight: Limelight, target: config.GamePiece):
         super().__init__(
             ParallelCommandGroup(
-                InstantCommand(lambda: set_piece(config.GamePiece.cube)),
+                InstantCommand(set_auto),
                 LineupSwerve(drivetrain, limelight),
                 InstantCommand(lambda: set_target(config.Target.floor_up)),
                 Target(intake, elevator)
                 ),
             InstantCommand(lambda: set_target(config.Target.floor_down)),
             Target(intake, elevator),
-            InstantCommand(lambda: drivetrain.set_robot_centric((-.4 * constants.drivetrain_max_vel, 0), 0)),
-            WaitUntilCommand(lambda: intake.get_detected(target)), # wait until intake has game piece,
+            WaitUntilCommand(lambda: intake.get_wrist_angle() > math.radians(155)),
+            InstantCommand(lambda: drivetrain.set_robot_centric((-.3 * constants.drivetrain_max_vel, 0), 0)),
+            WaitUntilCommand(lambda: intake.get_avg_current() > 30), # wait until intake has game piece,
             InstantCommand(lambda: set_target(config.Target.idle)),
             Target(intake, elevator),
             )

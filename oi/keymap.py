@@ -41,7 +41,7 @@ class Keymap:
             Joysticks.joysticks[Controllers.DRIVER], controllerDRIVER.LB
         )
         
-        TEST_WRIST = commands2.button.JoystickButton(
+        ZERO_ELEVATOR = commands2.button.JoystickButton(
             Joysticks.joysticks[Controllers.DRIVER], controllerDRIVER.Y
         )
     

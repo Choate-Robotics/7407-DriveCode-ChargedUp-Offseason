@@ -1,6 +1,6 @@
 import config
 import subsystem
-from sensors import Limelight, LimelightController, FieldOdometry
+from sensors import Limelight, LimelightController, FieldOdometry, ALeds
 import wpilib
 
 import constants
@@ -21,14 +21,18 @@ class Pneumatics:
 
 class PowerDistribution:
     pdh = wpilib.PowerDistribution()
+    
+class LEDs:
+    
+    elevator = ALeds(config.elevator_leds_id, config.elevator_leds_size)
 
 class Sensors:
     limeLight_F: Limelight = Limelight(constants.limelight_offset['front'], "limelight-f")
     limeLight_B: Limelight = Limelight(constants.limelight_offset['back'], "limelight-b")
 
-    LC: LimelightController = LimelightController([limeLight_F, limeLight_B])
+    l_c: LimelightController 
     
-    odometry: FieldOdometry = FieldOdometry(Robot.drivetrain, LC)
+    odometry: FieldOdometry
 
     gyro: SwerveGyro
 

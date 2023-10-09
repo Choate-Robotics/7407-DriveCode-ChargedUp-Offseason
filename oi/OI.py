@@ -2,6 +2,7 @@ from robotpy_toolkit_7407.utils import logger
 from oi.keymap import Keymap
 from robot_systems import Robot, Sensors
 import command, math, config, constants, commands2
+from sensors import ALeds
 from commands2 import InstantCommand, StartEndCommand, RunCommand, RepeatCommand
 logger.info("Hi, I'm OI!")
 
@@ -56,8 +57,14 @@ class OI:
             
             config.active_piece = piece
             if piece == config.GamePiece.cone:
+                # yellow
+                config.active_leds = (ALeds.Type.KBlink(255, 255, 0), 1, 3)
+                config.led_piece = config.led_cone
                 print('piece', 'cone')
             else:
+                # Purple
+                config.active_leds = (ALeds.Type.KBlink(255, 0, 255), 1, 3)
+                config.led_piece = config.led_cube
                 print('piece', 'cube')
                 
         def intake_drop():
@@ -68,9 +75,14 @@ class OI:
                 
         def intake_idle():
             if config.active_piece == config.GamePiece.cone:
+                config.active_leds = (ALeds.Type.KStatic(255, 255, 0), 1, 3)
                 Robot.intake.hold_cone()
             else:
+                config.active_leds = (ALeds.Type.KStatic(255, 0, 255), 1, 3)
                 Robot.intake.hold_cube()
+                
+        def set_led_piece():
+            config.active_leds = (config.led_piece, 1, 5)
         
         
         Keymap.Target.CONE_ACTIVE.debounce(0.3).whenActive(InstantCommand(lambda: set_active_piece(config.GamePiece.cone)))
@@ -85,11 +97,11 @@ class OI:
         Keymap.Grid.NO_GRID.whenActive(InstantCommand(no_active_grid))
         
         
-        Keymap.Station.SINGLE.whenActive(InstantCommand(lambda: set_active_station(config.Station.single)))
+        Keymap.Station.SINGLE_STATION.whenActive(InstantCommand(lambda: set_active_station(config.Station.single)))
         
-        Keymap.Station.DOUBLE_LEFT.whenActive(InstantCommand(lambda: set_active_station(config.Station.double_left)))
+        Keymap.Station.DOUBLE_STATION_LEFT.whenActive(InstantCommand(lambda: set_active_station(config.Station.double_left)))
         
-        Keymap.Station.DOUBLE_RIGHT.whenActive(InstantCommand(lambda: set_active_station(config.Station.double_right)))
+        Keymap.Station.DOUBLE_STATION_RIGHT.whenActive(InstantCommand(lambda: set_active_station(config.Station.double_right)))
         
         Keymap.Route.SET_STATION_ROUTE.whenActive(InstantCommand(lambda: set_active_route(config.Route.station)))
         
@@ -99,7 +111,7 @@ class OI:
         
         
         Keymap.Route.RUN_ROUTE.whenActive(command.RunRoute(Robot.drivetrain, Sensors.odometry))\
-            .onFalse(command.DriveSwerveCustom(Robot.drivetrain))
+            .onFalse(command.DriveSwerveCustom(Robot.drivetrain).alongWith(InstantCommand(set_led_piece)))
         
         # Keymap.Grid.AUTO_ALIGN.whenActive().whenInactive()
         
@@ -136,10 +148,15 @@ class OI:
             command.AutoPickup(Robot.drivetrain, Robot.intake, Robot.elevator, Sensors.limeLight_B, config.GamePiece.cube)
             ).onFalse(
                 command.DriveSwerveCustom(Robot.drivetrain)\
-                    .alongWith(command.Idle(Robot.intake, Robot.elevator))
+                    .alongWith(command.Idle(Robot.intake, Robot.elevator))\
+                    .alongWith(InstantCommand(set_led_piece))
                 )
+        
+        Keymap.Drivetrain.ZERO_ELEVATOR.onTrue(
+            command.ZeroElevator(Robot.elevator)
+        )
         
         # Keymap.Drivetrain.TEST_WRIST.whenPressed(command.SetCarriage(Robot.intake, math.radians(90), True, config.game_piece['cone'])).whenReleased(command.SetCarriage(Robot.intake, math.radians(0), False, config.game_piece['cone']))
         
-        Keymap.Drivetrain.TEST_WRIST.whenPressed(command.SetElevator(Robot.elevator, 1)).whenReleased(command.SetElevator(Robot.elevator, 0))
+        # Keymap.Drivetrain.TEST_WRIST.whenPressed(command.SetElevator(Robot.elevator, 1)).whenReleased(command.SetElevator(Robot.elevator, 0))
         

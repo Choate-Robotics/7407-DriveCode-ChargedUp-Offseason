@@ -150,6 +150,8 @@ class RouteTarget(SubsystemCommand[SwerveDrivetrain]):
         self.x_pid.setTolerance(self.threshold[1])
         self.w_pid.setTolerance(self.threshold[2])
     
+        config.active_leds = (config.LedType.KStatic(5, 0, 134), 1, 5)
+
     def execute(self):
         
         self.pose = self.subsystem.odometry.getPose()
@@ -199,10 +201,12 @@ class RouteTarget(SubsystemCommand[SwerveDrivetrain]):
     def end(self, interrupted: bool):
         
         self.subsystem.set_driver_centric((0, 0), 0)
+        config.active_leds = (config.LedType.KBlink(5, 0, 134), 1, 5)
         
 class RunRoute(commands2.CommandBase):
     
     def __init__(self, drivetrain: SwerveDrivetrain, odometry: FieldOdometry):
+        super().__init__()
         self.drivetrain = drivetrain
         self.odometry = odometry
         self.target: Pose2d = None
@@ -210,8 +214,11 @@ class RunRoute(commands2.CommandBase):
         self.grid_tags: list[Pose3d] = None
         self.station_tag: Pose3d = None
         self.team_station: Pose2d = None
+        self.grid: bool = False
         
     def initialize(self):
+        
+        dis = lambda target: target.translation().distance(self.odometry.getPose().translation())
         
         # Find team and april tags
         if config.active_team == config.Team.blue:
@@ -241,6 +248,7 @@ class RunRoute(commands2.CommandBase):
         
         # if the active route type is grid, select grid target
         if config.active_route == config.Route.grid:
+            self.grid = True
             # if the active grid is auto, select the closest grid target
             if config.active_grid == 0:
                 self.target = min(
@@ -271,7 +279,7 @@ class RunRoute(commands2.CommandBase):
             
         # run the route
         commands2.CommandScheduler.get_instance().schedule(
-            RouteTarget(self.drivetrain, self.target)
+            RouteTarget(self.drivetrain, self.target, grid=self.grid)
         )
         
     def isFinished(self):

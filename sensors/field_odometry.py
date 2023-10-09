@@ -70,7 +70,6 @@ class FieldOdometry:
         """
         Updates the robot's pose relative to the field. This should be called periodically.
         """
-
         self.drivetrain.odometry.update(
             self.drivetrain.get_heading(), *self.drivetrain.node_positions
         )
@@ -93,8 +92,9 @@ class FieldOdometry:
                         if self.vision_estimator
                         else None
                     )
-                except:
+                except Exception as e:
                     vision_robot_pose_list = None
+                    # print(e)
 
             if vision_robot_pose_list:
                 for vision_robot_pose in vision_robot_pose_list:

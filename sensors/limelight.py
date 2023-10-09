@@ -4,6 +4,11 @@ from wpimath.geometry import Pose3d, Translation3d, Rotation3d
 
 from robotpy_toolkit_7407.sensors.limelight.limelight import VisionEstimator
 
+from wpilib import Timer
+
+
+
+import math
 
 class Limelight():
     '''
@@ -19,11 +24,13 @@ class Limelight():
         If you only have one limelight, you can leave this as the default value.'''
         
         self.nt = ntcore.NetworkTableInstance.getDefault()
+        self.name = name
         self.table: ntcore.NetworkTable = self.nt.getTable(name)
         self.tx: float = 0
         self.ty: float = 0
         self.tv: float = 0
         self.ta: float = 0
+        self.tid: float = -1
         self.origin_offset: Pose3d = origin_offset
         self.drive_cam = False
         self.pipeline: config.limelight_pipeline = config.limelight_pipeline['retroreflective']
@@ -132,9 +139,13 @@ class Limelight():
         self.ty = self.table.getNumber("ty",0)
         self.tv = self.table.getNumber("tv",0)
         self.ta = self.table.getNumber("ta",0)
-        self.botpose_red = self.table.getEntry("botpose_wpired").getDoubleArray([0, 0, 0, 0, 0, 0])
-        self.botpose_blue = self.table.getEntry("botpose_wpiblue").getDoubleArray([0, 0, 0, 0, 0, 0])
-        self.botpose = self.table.getEntry("botpose").getDoubleArray([0, 0, 0, 0, 0, 0])
+        self.tid = self.table.getNumber('tid', -1)
+        # self.botpose_red = self.table.getEntry("botpose_wpired").getDoubleArray([0, 0, 0, 0, 0, 0])
+        self.botpose_red = self.table.getNumberArray("botpose_wpired", [0, 0, 0, 0, 0, 0])
+        # self.botpose_blue = self.table.getEntry("botpose_wpiblue").getDoubleArray([0, 0, 0, 0, 0, 0])
+        self.botpose_blue = self.table.getNumberArray("botpose_wpiblue", [0, 0, 0, 0, 0, 0])
+        # self.botpose = self.table.getEntry("botpose").getDoubleArray([0, 0, 0, 0, 0, 0])
+        self.botpose = self.table.getNumberArray("botpose", [0, 0, 0, 0, 0, 0])
         
     def target_exists(self, force_update: bool = False):
         '''
@@ -178,11 +189,14 @@ class Limelight():
         :return None: if no targets exists
         :return False: if the pipeline is not set to feducial
         '''
+        # print('get bot pose')
         if self.force_update or force_update:
             self.update()
         if self.pipeline != config.limelight_pipeline['feducial']:
+            # print('wrong pipeline')
             return False
-        elif not self.target_exists:
+        elif not self.target_exists():
+            # print('no targets')
             return None
         else:
             botpose: list = []
@@ -196,22 +210,29 @@ class Limelight():
             botpose = [round(i, round_to) for i in botpose]
             pose = Pose3d(
                 Translation3d(botpose[0], botpose[1], botpose[2]),
-                Rotation3d(botpose[3], botpose[4], botpose[5])
+                Rotation3d(botpose[3], botpose[4], math.radians(botpose[5]))
             )
+            # print(pose)
             return pose
 
 class LimelightController(VisionEstimator):
     
     def __init__(self, limelight_list: list[Limelight]):
         super().__init__()
-        self.limelights = limelight_list
+        self.limelights: list[Limelight] = limelight_list
         
     def get_estimated_robot_pose(self) -> list[Pose3d] | None:
         poses = []
         for limelight in self.limelights:
             if limelight.target_exists() and limelight.get_pipeline_mode() == config.limelight_pipeline['feducial']:
-                poses.append(limelight.get_bot_pose())
+                # print(limelight.name+' Is sending bot pose')
+                poses += [(limelight.get_bot_pose(), Timer.getFPGATimestamp())]
+            else:
+                # print(limelight.name+' Is not sending bot pose')
+                ...
         if len(poses) > 0:
+            # print(poses)
             return poses
         else:
+            # print('returning none')
             return None

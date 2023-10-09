@@ -15,6 +15,7 @@ from wpimath.controller import ProfiledPIDController
 from wpilib import AnalogEncoder
 import math
 from wpimath.geometry import Translation2d
+from sensors.leds import ALeds
 
 enable_pid_tuning = True  # change this to enable pid tuning
 
@@ -30,15 +31,18 @@ from units.SI import (
     rotations_per_minute,
 )
 
+elevator_leds_id = 0
+elevator_leds_size = 60
+
 #----Intake and Wrist----
 
 left_intake_motor_id = 1  # correct motor id
 right_intake_motor_id = 20  # correct motor id
 intake_ramp_rate = .1
-default_intake_speed = .85 # change this to the default intake speed
-idle_intake_speed = .1
+default_intake_speed = 0#.25 # change this to the default intake speed
+idle_intake_speed = 0#.1
 wrist_motor_id = 18  # correct motor id
-intake_current_threshold = 20 # change this to the intake current threshold
+intake_current_threshold = 30 # change this to the intake current threshold
 
 INTAKE_CONFIG = SparkMaxConfig(k_P=1, k_I=1, k_D=1, k_F=0, output_range=(-1,1), idle_mode=CANSparkMax.IdleMode.kBrake)
 
@@ -61,8 +65,8 @@ class IntakeActive:
     kIdle = 2
 
 limelight_pipeline: int = {
-    'retroreflective': 0,
-    'feducial': 1,
+    'retroreflective': 1,
+    'feducial': 0,
     'neural': 2
 }
 
@@ -78,12 +82,12 @@ class Target:
     
     high = {
         'length': 1,
-        'angle': math.radians(-45),
+        'angle': math.radians(-40),
         'goal': 'score',
     }
     mid = {
-        'length': .6,
-        'angle': math.radians(-45),
+        'length': .7,
+        'angle': math.radians(-50),
         'goal': 'score',
     }
     low = {
@@ -93,26 +97,30 @@ class Target:
     }
     floor_up = {
         'length': 0,
+        'length-cube': .07,
         'angle': math.radians(110),
-        'angle-cube': math.radians(110),
+        'angle-cube': math.radians(140),
         'goal': 'pickup'
     }
     floor_down = {
         'length': 0,
+        'length-cube': .07,
         'angle': math.radians(175),
-        'angle-cube': math.radians(152),
+        'angle-cube': math.radians(160),
         'goal': 'pickup',
     }
     single = {
-        'length': .1,
-        'angle': math.radians(90),
-        'angle-cube': math.radians(45),
+        'length': .4,
+        'length-cube': .365,
+        'angle': math.radians(145),
+        'angle-cube': math.radians(0),
         'goal': 'pickup',
     }
     double = {
         'length': 1,
-        'angle': math.radians(-30),
-        'angle-cube': math.radians(-20),
+        'length-cube': .9,
+        'angle': math.radians(-42),
+        'angle-cube': math.radians(-33),
         'goal': 'pickup',
     }
     
@@ -140,6 +148,11 @@ class Route:
     station = 1
     auto = 2
     
+class LedType(ALeds.Type):
+    
+    def __init__():
+        super().__init__()
+        
 
 auto_target: bool = False
     
@@ -155,6 +168,17 @@ active_team: Team = Team.red
 
 active_route: Route = Route.grid
 
+active_leds: tuple[LedType, float, float] = (LedType.KStatic(255, 0, 0), 1, 5)
+
+led_cone: LedType = LedType.KStatic(255, 255, 0)
+
+led_cube: LedType = LedType.KStatic(255, 0, 255)
+
+led_piece: LedType = led_cone
+
+led_elevator: LedType = LedType.KRainbow()
+
+auto_led_elevator: bool = False
 
 game_piece_targeting_constraints = {
     'cube': {

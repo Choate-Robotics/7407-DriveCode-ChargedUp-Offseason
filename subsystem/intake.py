@@ -85,6 +85,11 @@ class Intake(Subsystem):
         if self.get_avg_current() > config.intake_current_threshold:
             Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 1)
             Controllers.DRIVER_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 1)
+            return True
+        else:
+            Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 0)
+            Controllers.DRIVER_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 0)
+            return False
 
     def get_double_station_detected(self):
         """
@@ -122,8 +127,8 @@ class Intake(Subsystem):
         Sets the intake motors to grab a cone
         :return: None
         """
-        self.set_lower_output(-self.intake_speed)
-        self.set_upper_output(-self.intake_speed)
+        self.set_lower_output(-self.intake_speed * 1.5)
+        self.set_upper_output(-self.intake_speed / 1.5)
         
     def hold_cube(self):
         self.set_lower_output(config.idle_intake_speed)
@@ -138,8 +143,8 @@ class Intake(Subsystem):
         Sets the intake motors to eject a cone
         :return: None
         """
-        self.set_lower_output(self.intake_speed)
-        self.set_upper_output(self.intake_speed)
+        self.set_lower_output(self.intake_speed * 2)
+        self.set_upper_output(self.intake_speed * 2)
 
     def stop_intake(self):
         self.set_lower_output(0)

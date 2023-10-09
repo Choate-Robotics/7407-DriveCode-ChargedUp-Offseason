@@ -111,7 +111,7 @@ class SetElevator(SubsystemCommand[Elevator]):
         # self.subsystem.set_voltage(voltage)
 
     def isFinished(self) -> bool:
-        return abs(self.subsystem.get_length() - (self.goal)) < 0.5
+        return abs(self.subsystem.get_length() - (self.goal)) < 0.2
 
     def end(self, interrupted=False) -> None:
         # if not interrupted:
