@@ -30,6 +30,11 @@ class SetIntake(SubsystemCommand[Intake]):
                 self.subsystem.eject_cone()
             else:
                 self.subsystem.eject_cube()
+        elif self.intake_active == config.IntakeActive.kShoot:
+            if self.piece == config.GamePiece.cone:
+                self.subsystem.shoot_cone()
+            else:
+                self.subsystem.shoot_cube()
         else:
             # change output dynamically to cone and cubes w/ obj variable to hold on to piece
             if self.piece == config.GamePiece.cone:

@@ -10,7 +10,7 @@ from units.SI import meters
 
 # TODO: Change config once robot is built
 ELEVATOR_CONFIG = SparkMaxConfig(
-    0.1, 0, 0.03, 0.000, (-.5, .75), idle_mode=rev.CANSparkMax.IdleMode.kBrake
+    0.055, 0.0, 0.01, 0.000, (-.5, .75), idle_mode=rev.CANSparkMax.IdleMode.kBrake
 )
 #-.5, .75
 
@@ -43,7 +43,15 @@ class Elevator(Subsystem):
         Args:
             length (meters): Length in meters
         """
-        self.motor_extend.set_target_position(length)
+        ff:float
+        current = self.get_length()
+        if length > .3 * constants.elevator_max_rotation:
+            ff = .65 * (1 if current < length else -1)
+        elif length < .3 * constants.elevator_max_rotation and length < current:
+            ff = -.75
+        else: ff = 0
+        
+        self.motor_extend.pid_controller.setReference(length, rev.CANSparkMax.ControlType.kPosition, arbFeedforward=ff)
 
     def get_length(self) -> float:
         """
@@ -52,6 +60,16 @@ class Elevator(Subsystem):
         "Return Type: meters
         """
         return self.motor_extend.get_sensor_position()
+    
+    def set_motor_position(self, position: float) -> None:
+        if position > 1:
+            position = 1
+        elif position < 0:
+            position = 0
+        self.motor_extend.set_sensor_position(position * constants.elevator_max_rotation)
+        
+    def set_auto_position(self):
+        self.set_motor_position(config.elevator_auto_position)
 
     def set_voltage(self, voltage: float) -> None:
         self.motor_extend.pid_controller.setReference(voltage, rev.CANSparkMax.ControlType.kVoltage)

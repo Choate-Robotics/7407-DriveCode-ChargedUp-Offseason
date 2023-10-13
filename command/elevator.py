@@ -29,7 +29,7 @@ class ZeroElevator(SubsystemCommand[Elevator]):
         self.time.start()
 
     def execute(self):
-        ...
+        config.active_leds = (config.LedType.KBlink(255, 255, 255), 1, 2)
 
     def isFinished(self) -> bool:
         """
@@ -40,6 +40,9 @@ class ZeroElevator(SubsystemCommand[Elevator]):
                 self.subsystem.elevator_bottom_sensor.get_value()
                 or self.time.hasElapsed(5)
         )
+        
+        
+
 
     def end(self, interrupted=False) -> None:
         """
@@ -47,6 +50,8 @@ class ZeroElevator(SubsystemCommand[Elevator]):
         :param interrupted: (OPTIONAL) Boolean
         """
         config.calculated_max_vel = constants.drivetrain_max_vel
+        config.active_leds = (config.led_piece, 1, 5)
+        
         if not interrupted:
             self.subsystem.zeroed = True
             ntcore.NetworkTableInstance.getDefault().getTable('Arm Voltage').putBoolean('zeroed', self.subsystem.zeroed)
@@ -114,8 +119,9 @@ class SetElevator(SubsystemCommand[Elevator]):
         return abs(self.subsystem.get_length() - (self.goal)) < 0.2
 
     def end(self, interrupted=False) -> None:
+        pass
         # if not interrupted:
         #     utils.logger.debug("ELEVATOR", "Elevator Successfully Set.")
         # else:
         #     utils.logger.debug("ELEVATOR", "Elevator Set Command Interrupted.")
-        self.subsystem.set_length(self.subsystem.get_length())
+        # self.subsystem.set_length(self.subsystem.get_length())

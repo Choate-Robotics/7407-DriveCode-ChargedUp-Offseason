@@ -4,6 +4,7 @@ import wpilib
 import command
 import config
 import constants
+import autos.routines as autonomous
 from robot_systems import Robot, Sensors, LEDs
 from sensors import LimelightController, FieldOdometry
 import utils
@@ -17,6 +18,9 @@ class _Robot(wpilib.TimedRobot):
         self.nt = ntcore.NetworkTableInstance.getDefault()
         self.previous_led = None
         self.detected_c = False
+        self.team: wpilib.SendableChooser
+        self.sensor_odometry: wpilib.SendableChooser
+        self.auto: wpilib.SendableChooser
 
     def robotInit(self):
 
@@ -30,6 +34,9 @@ class _Robot(wpilib.TimedRobot):
         Robot.drivetrain.init()
         Robot.intake.init()
         Robot.elevator.init()
+        LEDs.elevator.init()
+        Sensors.limeLight_F.init()
+        Sensors.limeLight_B.init()
         
         # for i in range(15):
         #     Robot.drivetrain.n_front_left.initial_zero()
@@ -43,28 +50,58 @@ class _Robot(wpilib.TimedRobot):
         OI.init()
         OI.map_controls()
         
-        team = wpilib.SendableChooser()
-        team.setDefaultOption("Red", config.Team.red)
-        team.addOption("Blue", config.Team.blue)
-        wpilib.SmartDashboard.putData("Team", team)
+        # Team
+        self.team = wpilib.SendableChooser()
         
-        sensor_odometry = wpilib.SendableChooser()
-        sensor_odometry.setDefaultOption('On', True)
-        sensor_odometry.addOption('Off', False)
-        wpilib.SmartDashboard.putData('Sensor Odometry', sensor_odometry)
+        self.team.setDefaultOption("Red", config.Team.red)
+        self.team.addOption("Blue", config.Team.blue)
+        wpilib.SmartDashboard.putData("Team", self.team)
+        
+        # Sensor Odometry
+        self.sensor_odometry = wpilib.SendableChooser()
+        self.sensor_odometry.setDefaultOption('On', True)
+        self.sensor_odometry.addOption('Off', False)
+        wpilib.SmartDashboard.putData('Sensor Odometry', self.sensor_odometry)
+        
+        if self.team.getSelected() == config.Team.blue:
+            config.active_team = config.Team.blue
+        else:
+            config.active_team = config.Team.red
+            
+        # Autos
+        self.auto = wpilib.SendableChooser()
+        
+        self.auto.setDefaultOption("Do Nothing", autonomous.do_nothing)
+        self.auto.addOption('One Piece', autonomous.one_piece)
+        self.auto.addOption('One Piece Drive', autonomous.one_piece_drive)
+        wpilib.SmartDashboard.putData("Auto", self.auto)
+        
         
     def robotPeriodic(self):
         
         elevator_percentage = Robot.elevator.get_length() / constants.elevator_max_rotation
-        
-        if self.previous_led != config.active_leds:
+        # print('elevator percent:', elevator_percentage)
+        if self.previous_led != config.active_leds or config.auto_led_elevator:
             if config.auto_led_elevator:
-                LEDs.elevator.setLED(config.LedType.KLadder(config.active_leds[0], config.led_elevator, elevator_percentage, 5), config.active_leds[1], config.active_leds[2] )
+                LEDs.elevator.setLED(
+                    config.LedType.KLadder(config.active_leds[0], config.led_elevator, elevator_percentage, 5),
+                    config.active_leds[1],
+                    config.active_leds[2]
+                    )
             else:
                 LEDs.elevator.setLED(*config.active_leds)
             self.previous_led = config.active_leds
         
-        LEDs.elevator.cycle()
+        
+        if config.DEBUG_MODE:
+            LEDs.elevator.cycle()
+        else:
+            try:
+                LEDs.elevator.cycle()
+            except Exception as e:
+                print('LED Error:', str(e))
+                self.nt.getTable("Errors").putString("LEDS", str(e))
+        
         
         if config.DEBUG_MODE: 
             commands2.CommandScheduler.getInstance().run()
@@ -72,7 +109,8 @@ class _Robot(wpilib.TimedRobot):
             try:
                 commands2.CommandScheduler.getInstance().run()
             except Exception as e:
-                self.nt.getTable("Command Scheduler").putString("Last Error", str(e))
+                print('Command Scheduler Error:', str(e))
+                self.nt.getTable("Errors").putString("Command Scheduler", str(e))
         
 
         Sensors.limeLight_F.update()
@@ -80,7 +118,7 @@ class _Robot(wpilib.TimedRobot):
         
         Sensors.odometry.update()
         
-        pose = Robot.drivetrain.odometry.getPose()
+        pose = Sensors.odometry.getPose()
         
         self.nt.getTable("Odometry").putNumberArray("pose", [
             pose.X(),
@@ -89,36 +127,57 @@ class _Robot(wpilib.TimedRobot):
         ])
         
         try:
-            self.nt.getTable('Odometry').putNumberArray('Limelight-F', [
-                Sensors.limeLight_F.get_bot_pose().X(),
-                Sensors.limeLight_F.get_bot_pose().Y(),
-                Sensors.limeLight_F.get_bot_pose().toPose2d().rotation().radians()
-            ])
+            if Sensors.limeLight_F.get_bot_pose() is not None:
+                self.nt.getTable('Odometry').putNumberArray('Limelight-F', [
+                    Sensors.limeLight_F.get_bot_pose().X(),
+                    Sensors.limeLight_F.get_bot_pose().Y(),
+                    Sensors.limeLight_F.get_bot_pose().toPose2d().rotation().radians()
+                ])
         except:
             pass
         
         try:
-            self.nt.getTable('Odometry').putNumberArray('Limelight-B', [
-                Sensors.limeLight_B.get_bot_pose().X(),
-                Sensors.limeLight_B.get_bot_pose().Y(),
-                Sensors.limeLight_B.get_bot_pose().toPose2d().rotation().radians()
-            ])
+            if Sensors.limeLight_B.get_bot_pose() is not None:
+                self.nt.getTable('Odometry').putNumberArray('Limelight-B', [
+                    Sensors.limeLight_B.get_bot_pose().X(),
+                    Sensors.limeLight_B.get_bot_pose().Y(),
+                    Sensors.limeLight_B.get_bot_pose().toPose2d().rotation().radians()
+                ])
         except:
             pass
         
         n_1, n_2, n_3, n_4 = Robot.drivetrain.node_states
         
-        self.nt.getTable('Odometry').putNumberArray("NODE_STATES", [
+        # fl, fr, bl, br
+        self.nt.getTable('Odometry').putNumberArray("NODE_STATES_EXP", [
             n_1.angle.radians(), n_1.speed,
             n_2.angle.radians(), n_2.speed,
             n_3.angle.radians(), n_3.speed,
             n_4.angle.radians(), n_4.speed
         ])   
         
+        # n_fl = Robot.drivetrain.n_front_left
+        # n_fr = Robot.drivetrain.n_front_right
+        # n_bl = Robot.drivetrain.n_back_left
+        # n_br = Robot.drivetrain.n_back_right
+        
+        # # fl, fr, bl, br
+        # self.nt.getTable('Odometry').putNumberArray("NODE_STATES_TRUE", [
+        #     n_fl.get_turn_motor_angle(), n_fl.get_motor_velocity(),
+        #     n_fr.get_turn_motor_angle(), n_fr.get_motor_velocity(),
+        #     n_bl.get_turn_motor_angle(), n_bl.get_motor_velocity(),
+        #     n_br.get_turn_motor_angle(), n_br.get_motor_velocity()
+        #     ])
+    
+        rotation = Robot.drivetrain.get_heading()
+        
+        self.nt.getTable("Odometry").putNumber("Heading", rotation.radians())
+        
+        
         wpilib.SmartDashboard.putNumber("Active Grid", config.active_grid)
         wpilib.SmartDashboard.putNumber("Active Station", config.active_station)
         route_name = ('grid' if config.active_route == config.Route.grid else 'station' if config.active_route == config.Route.station else 'auto')
-        wpilib.SmartDashboard.putNumber("Active Route", route_name)
+        wpilib.SmartDashboard.putString("Active Route", route_name)
         target_name = (
             'low' if config.active_target == config.Target.low 
             else 'mid' if config.active_target == config.Target.mid 
@@ -128,10 +187,11 @@ class _Robot(wpilib.TimedRobot):
             else 'floor' if config.active_target == config.Target.floor_down 
             else 'floor up' if config.active_target == config.Target.floor_up
             else 'idle')
-        wpilib.SmartDashboard.putNumber("Active Target", target_name)
+        wpilib.SmartDashboard.putString("Active Target", target_name)
         game_piece = ('cone' if config.active_piece == config.GamePiece.cone else 'cube')
-        wpilib.SmartDashboard.putNumber("Active Game Piece", game_piece)
+        wpilib.SmartDashboard.putString("Active Game Piece", game_piece)
 
+        # print('pipeline:', Sensors.limeLight_B.pipeline)
     # Initialize subsystems
     
 
@@ -150,7 +210,10 @@ class _Robot(wpilib.TimedRobot):
 
     def teleopPeriodic(self):
         
-        config.active_team = wpilib.SmartDashboard.getData("Team")
+        if self.team.getSelected() == config.Team.blue:
+            config.active_team = config.Team.blue
+        else:
+            config.active_team = config.Team.red
         
         if Robot.intake.rumble_if_detected():
             self.detected_c = True
@@ -166,7 +229,17 @@ class _Robot(wpilib.TimedRobot):
         
     def autonomousInit(self):
         
-        config.active_team = wpilib.SmartDashboard.getData("Team")
+        if self.team.getSelected() == config.Team.blue:
+            config.active_team = config.Team.blue
+        else:
+            config.active_team = config.Team.red
+        
+        if self.sensor_odometry.getSelected():
+            Sensors.odometry.enable()
+        else:
+            Sensors.odometry.disable()
+            
+        self.auto.getSelected().run()
         
         config.active_leds = (config.LedType.KStatic(0, 255, 0), 1, 5)
 
@@ -174,10 +247,11 @@ class _Robot(wpilib.TimedRobot):
         pass
 
     def disabledInit(self) -> None:
+        print(config.active_team)
         if config.active_team == config.Team.blue:
-            config.active_leds = (config.LedType.KBlink(0, 0, 255), 1, 5)
+            config.active_leds = (config.LedType.KBlink(0, 0, 255), 1, 30)
         else:
-            config.active_leds = (config.LedType.KBlink(255, 0, 0), 1, 5)
+            config.active_leds = (config.LedType.KBlink(255, 0, 0), 1, 30)
 
     def disabledPeriodic(self) -> None:
         pass

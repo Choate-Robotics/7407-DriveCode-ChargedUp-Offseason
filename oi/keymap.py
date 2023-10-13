@@ -38,6 +38,10 @@ class Keymap:
         )
         
         AUTO_PICKUP = commands2.button.JoystickButton(
+            Joysticks.joysticks[Controllers.DRIVER], controllerDRIVER.RB
+        )
+        
+        SQUARE_DRIVE = commands2.button.JoystickButton(
             Joysticks.joysticks[Controllers.DRIVER], controllerDRIVER.LB
         )
         
@@ -86,6 +90,9 @@ class Keymap:
             lambda: Controllers.DRIVER_CONTROLLER.getRawAxis(-controllerDRIVER.RT) > 0.5
         )
         
+        RUN_SHOOT = commands2.button.Button(
+            lambda: Controllers.DRIVER_CONTROLLER.getPOV() == 0
+        )
         
     class Grid:
         

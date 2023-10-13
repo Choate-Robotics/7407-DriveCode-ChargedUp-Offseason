@@ -127,8 +127,8 @@ class Intake(Subsystem):
         Sets the intake motors to grab a cone
         :return: None
         """
-        self.set_lower_output(-self.intake_speed * 1.5)
-        self.set_upper_output(-self.intake_speed / 1.5)
+        self.set_lower_output(-self.intake_speed * .5)
+        self.set_upper_output(-self.intake_speed * 1.5)
         
     def hold_cube(self):
         self.set_lower_output(config.idle_intake_speed)
@@ -158,6 +158,13 @@ class Intake(Subsystem):
         self.set_lower_output(-self.intake_speed)
         self.set_upper_output(self.intake_speed)
         
+    def shoot_cone(self):
+        self.set_lower_output(1)
+        self.set_upper_output(1)
+        
+    def shoot_cube(self):
+        self.set_lower_output(-1)
+        self.set_upper_output(1)
 
     def disengage(self):
         """

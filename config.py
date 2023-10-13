@@ -1,12 +1,12 @@
 
-DEBUG_MODE = False
+DEBUG_MODE = True
 
 elevator_can_id = 11 # 11 can ID # Change later, this isn't accurate
 magnetic_limit_switch_port = 0 # Change later, this is from last year
-elevator_ramp_rate = .3
+elevator_ramp_rate = .5 # .3
 elevator_intake_threshold = .4 # multiply this by max rotations, this is the threshold for the elevator and intake to move at the same time
-
-
+elevator_wall_threshold = .3 # multiply this by max rotations, this is the threshold for the elevator and intake to move at the same time when the robot is against the wall
+elevator_auto_position = .2
 
 from robotpy_toolkit_7407.motors.rev_motors import SparkMaxConfig
 from rev import CANSparkMax
@@ -15,7 +15,7 @@ from wpimath.controller import ProfiledPIDController
 from wpilib import AnalogEncoder
 import math
 from wpimath.geometry import Translation2d
-from sensors.leds import ALeds
+# from sensors import ALeds
 
 enable_pid_tuning = True  # change this to enable pid tuning
 
@@ -32,15 +32,15 @@ from units.SI import (
 )
 
 elevator_leds_id = 0
-elevator_leds_size = 60
+elevator_leds_size = 39
 
 #----Intake and Wrist----
 
 left_intake_motor_id = 1  # correct motor id
 right_intake_motor_id = 20  # correct motor id
 intake_ramp_rate = .1
-default_intake_speed = 0#.25 # change this to the default intake speed
-idle_intake_speed = 0#.1
+default_intake_speed = .35 # change this to the default intake speed
+idle_intake_speed = .25
 wrist_motor_id = 18  # correct motor id
 intake_current_threshold = 30 # change this to the intake current threshold
 
@@ -63,12 +63,13 @@ class IntakeActive:
     kIn = 0
     kOut = 1
     kIdle = 2
+    kShoot = 3
 
-limelight_pipeline: int = {
-    'retroreflective': 1,
-    'feducial': 0,
-    'neural': 2
-}
+class LimelightPipeline:
+    
+    feducial = 0.0
+    neural = 1.0
+    retroreflective = 2.0
 
 limelight_led_mode: int = {
     'pipeline_default': 0,
@@ -95,6 +96,13 @@ class Target:
         'angle': math.radians(-50),
         'goal': 'score',
     }
+    shoot = {
+        'length': .3,
+        'length-cube': .25,
+        'angle': math.radians(0),
+        'angle-cube': math.radians(45),
+        'goal': 'shoot'
+    }
     floor_up = {
         'length': 0,
         'length-cube': .07,
@@ -114,6 +122,8 @@ class Target:
         'length-cube': .365,
         'angle': math.radians(145),
         'angle-cube': math.radians(0),
+        'wall': False,
+        'wall-cube': False,
         'goal': 'pickup',
     }
     double = {
@@ -129,6 +139,8 @@ class Target:
         'angle': math.radians(0),
         'goal': 'idle',
     }
+    
+pickup_wall: bool = False
     
 class Team:
         
@@ -147,8 +159,58 @@ class Route:
     grid = 0
     station = 1
     auto = 2
+
+class Type():
+        
+        def KStatic(r, g, b):
+            return {
+                'type': 1,
+                'color': {
+                    'r': r,
+                    'g': g,
+                    'b': b
+                }
+            }
+        
+        def KRainbow():
+            return {
+                'type': 2
+            }
+        
+        def KTrack(r1, g1, b1, r2, g2, b2):
+            return {
+                'type': 3,
+                'color': {
+                    'r1': r1,
+                    'g1': g1,
+                    'b1': b1,
+                    'r2': r2,
+                    'g2': g2,
+                    'b2': b2
+                }
+            }
+        
+        def KBlink(r,g,b):
+            return {
+                'type': 4,
+                'color': {
+                    'r': r,
+                    'g': g,
+                    'b': b
+                }
+            }
+            
+        def KLadder(typeA,typeB,percent,speed):
+            return {
+                'type': 5,
+                'percent': percent, # 0-1
+                'typeA': typeA,
+                'typeB': typeB,
+                'speed': speed
+            }
+        
     
-class LedType(ALeds.Type):
+class LedType(Type):
     
     def __init__():
         super().__init__()
@@ -159,6 +221,8 @@ auto_target: bool = False
 active_piece: GamePiece = GamePiece.cone
 
 active_target: Target = Target.single
+
+previous_target: Target = Target.single
 
 active_grid: int = 1
 
@@ -178,13 +242,13 @@ led_piece: LedType = led_cone
 
 led_elevator: LedType = LedType.KRainbow()
 
-auto_led_elevator: bool = False
+auto_led_elevator: bool = True
 
 game_piece_targeting_constraints = {
     'cube': {
-        'tx': [0,0],
-        'ty': [0,0],
-        'ta': [0,0]
+        'tx': [-3.5,-3.5],
+        'ty': [-12,-10],
+        'ta': [12,14]
     },
     'cone': {
         'tx': [-3.5, 3.5], #left to right

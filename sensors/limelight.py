@@ -8,6 +8,8 @@ from wpilib import Timer
 
 
 
+
+
 import math
 
 class Limelight():
@@ -17,7 +19,7 @@ class Limelight():
     def __init__(self, origin_offset: Pose3d, name: str = "limelight"):
         '''
         
-        :param origin_offset: The offset of the limelight from the robot's origin
+        :param origin_offset: The offset of the limelight from the robot's origin in meters
         
         :param name: The name of the limelight network table. This is used to differentiate between multiple limelights. 
         If you have multiple limelights, you must give them different names in order for their values to be read correctly.
@@ -33,12 +35,24 @@ class Limelight():
         self.tid: float = -1
         self.origin_offset: Pose3d = origin_offset
         self.drive_cam = False
-        self.pipeline: config.limelight_pipeline = config.limelight_pipeline['retroreflective']
+        self.pipeline: config.LimelightPipeline = config.LimelightPipeline.feducial
         self.t_class = None
         self.force_update = False
         self.botpose_blue: Pose3d = Pose3d(Translation3d(0, 0, 0), Rotation3d(0, 0, 0))
         self.botpose_red: Pose3d = Pose3d(Translation3d(0, 0, 0), Rotation3d(0, 0, 0))
         self.botpose: Pose3d = Pose3d(Translation3d(0, 0, 0), Rotation3d(0, 0, 0))
+        
+    def init(self):
+        campose = [
+            self.origin_offset.Y(),
+            self.origin_offset.X(),
+            self.origin_offset.Z(),
+            self.origin_offset.rotation().X(),
+            self.origin_offset.rotation().Y(),
+            self.origin_offset.rotation().Z()
+        ]
+        
+        self.table.putNumberArray('camerapose_robotspace', campose)
         
     def enable_force_update(self):
         '''
@@ -56,7 +70,7 @@ class Limelight():
         Disables the force update. When this is disabled, the limelight will only update its values once per loop.'''
         self.force_update = False
 
-    def set_pipeline_mode(self, mode: config.limelight_pipeline) -> None:
+    def set_pipeline_mode(self, mode: config.LimelightPipeline) -> None:
         '''
         Sets the pipeline mode of the limelight will be using (Feeducial, Retroreflective, Neural, etc.)
         These modes are defined in config.py and match the numbers used in the limelight web interface.
@@ -64,18 +78,18 @@ class Limelight():
         :param mode: The pipeline int to set the limelight to
         
         '''
-        self.table.getEntry("pipeline").setInteger(mode)
+        self.table.putNumber("pipeline", mode)
         self.pipeline = mode
         
-    def get_pipeline_mode(self) -> config.limelight_pipeline:
+    def get_pipeline_mode(self) -> config.LimelightPipeline:
         '''
         Gets the pipeline mode of the limelight will be using (Feeducial, Retroreflective, Neural, etc.) as an integer.
         
-        :return config.limelight_pipeline: The pipeline mode the limelight is currently using
+        :return config.LimelightPipeline: The pipeline mode the limelight is currently using
         '''
-        pipelime = self.table.getEntry("pipeline").getInteger(0)
-        if self.pipeline != pipelime:
-            self.pipeline = pipelime
+        pipeline = self.table.getNumber("getpipe", 0.0)
+        if self.pipeline != pipeline:
+            self.pipeline = pipeline
         return self.pipeline
         
     def set_led_mode(self, mode: config.limelight_led_mode) -> None:
@@ -84,24 +98,24 @@ class Limelight():
         
         :param mode: The LED mode to set the limelight to       
         '''
-        self.table.getEntry("ledMode").setInteger(mode)
+        self.table.putNumber("ledMode", mode)
         
     def get_led_mode(self) -> config.limelight_led_mode:
         
-        return self.table.getEntry("ledMode").getInteger(0)
+        return self.table.getNumber("ledMode", 0)
     
     def set_cam_vision(self):
         '''
         Sets the limelight to use the camera for vision processing.
         '''
-        self.table.getEntry("camMode").setInteger(0)
+        self.table.putNumber("camMode", 0)
         self.drive_cam = False
         
     def set_cam_driver(self):
         '''
         Sets the limelight to use the camera for driver vision.
         '''
-        self.table.getEntry("camMode").setInteger(1)
+        self.table.putNumber("camMode", 1)
         self.drive_cam = True
         
     def get_cam_mode(self):
@@ -109,7 +123,7 @@ class Limelight():
         Gets the camera mode of the limelight (Vision or Driver)
         :return bool: True if the limelight is in driver mode, False if it is in vision mode
         '''
-        mode = self.table.getEntry("camMode").getInteger(0)
+        mode = self.table.getNumber("camMode", 0)
         if self.drive_cam != mode:
             self.drive_cam = mode
         return self.drive_cam
@@ -123,11 +137,11 @@ class Limelight():
         '''
         if force_update or self.force_update:
             self.update()
-        if self.pipeline != config.limelight_pipeline['neural']:
+        if self.pipeline != config.LimelightPipeline.neural:
             return False
         if self.tv == 0:
             return None
-        self.t_class = self.table.getEntry("tclass").getInteger(0)
+        self.t_class = self.table.getString("tclass", '')
         return self.t_class
         
     def update(self):
@@ -140,6 +154,8 @@ class Limelight():
         self.tv = self.table.getNumber("tv",0)
         self.ta = self.table.getNumber("ta",0)
         self.tid = self.table.getNumber('tid', -1)
+        self.get_pipeline_mode()
+        self.get_neural_classId()
         # self.botpose_red = self.table.getEntry("botpose_wpired").getDoubleArray([0, 0, 0, 0, 0, 0])
         self.botpose_red = self.table.getNumberArray("botpose_wpired", [0, 0, 0, 0, 0, 0])
         # self.botpose_blue = self.table.getEntry("botpose_wpiblue").getDoubleArray([0, 0, 0, 0, 0, 0])
@@ -158,6 +174,18 @@ class Limelight():
         if self.force_update or force_update:
             self.update()
         return self.tv > 0.0
+    
+    def april_tag_exists(self, force_update: bool = False):
+        '''
+        Checks if an AprilTag exists within the limelight's field of view.
+        
+        :param force_update: If True, the limelight variables be updated before checking if a target exists. Defaults to False.
+        
+        :return bool: True if an AprilTag exists, False if not
+        '''
+        if self.force_update or force_update:
+            self.update()
+        return self.tid > 0.0
 
     def get_target(self, force_update: bool = False):
         '''
@@ -192,7 +220,7 @@ class Limelight():
         # print('get bot pose')
         if self.force_update or force_update:
             self.update()
-        if self.pipeline != config.limelight_pipeline['feducial']:
+        if self.pipeline != config.LimelightPipeline.feducial:
             # print('wrong pipeline')
             return False
         elif not self.target_exists():
@@ -224,7 +252,7 @@ class LimelightController(VisionEstimator):
     def get_estimated_robot_pose(self) -> list[Pose3d] | None:
         poses = []
         for limelight in self.limelights:
-            if limelight.target_exists() and limelight.get_pipeline_mode() == config.limelight_pipeline['feducial']:
+            if limelight.april_tag_exists() and limelight.get_pipeline_mode() == config.LimelightPipeline.feducial:
                 # print(limelight.name+' Is sending bot pose')
                 poses += [(limelight.get_bot_pose(), Timer.getFPGATimestamp())]
             else:

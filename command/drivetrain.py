@@ -3,7 +3,7 @@ from robotpy_toolkit_7407.command import SubsystemCommand
 from wpimath.filter import SlewRateLimiter
 from wpimath.controller import ProfiledPIDController, PIDController
 
-import config
+import config, math
 import constants
 from subsystem import Drivetrain
 
@@ -144,4 +144,64 @@ class BalanceDrivetrain(SubsystemCommand[Drivetrain]):
         return self.pid.atGoal()
     
     def end(self, interrupted: bool) -> None:
+        pass
+    
+class SquareDrivetrain(SubsystemCommand[Drivetrain]):
+    
+    def __init__(self, subsystem: Drivetrain):
+        super().__init__(subsystem)
+        self.subsystem = subsystem
+        self.pid = PIDController(.02, 0, 0.0008)
+        self.target: float = 360
+        self.angles = [0, 90, 180, 270, 360]
+        self.selected_angle: int
+        
+    def initialize(self) -> None:
+        self.pid.reset()
+        # self.pid.setTolerance(2.5)
+        # keep angle between -180 and 180
+        self.pid.enableContinuousInput(0, 360)
+        heading = self.subsystem.get_heading().degrees() % 360
+        distance: float = 360
+        for angle in self.angles:
+            if abs(heading - angle) < distance:
+                distance = abs(heading - angle)
+                self.selected_angle = angle
+                
+        # self.selected_angle = (0 if self.selected_angle == 360 else self.selected_angle)
+        
+        self.target = self.selected_angle
+    
+    def execute(self) -> None:
+        heading = self.subsystem.get_heading().degrees() % 360
+        # print('target:', self.selected_angle)
+        # print('angle', heading)
+        
+        
+        d_theta = -self.pid.calculate(heading, self.target)
+        
+        d_theta *= config.calculated_max_angular_vel
+        
+        dx, dy = (
+            self.subsystem.axis_dx.value * (-1 if config.drivetrain_reversed else 1),
+            self.subsystem.axis_dy.value * (-1 if config.drivetrain_reversed else 1),
+        )
+
+
+        dx = curve(dx)
+        dy = curve(dy)
+
+        dx *= config.calculated_max_vel # self.subsystem.max_vel
+        dy *= -config.calculated_max_vel #-self.subsystem.max_vel
+        
+        self.subsystem.set_driver_centric((-dy,dx), d_theta)
+        
+    def isFinished(self) -> bool:
+        return False
+    
+    def end(self, interrupted):
+        # self.subsystem.set_driver_centric((0,0),0)self.subsystem.n_front_left.set_motor_velocity(0)
+        self.subsystem.n_front_right.set_motor_velocity(0)
+        self.subsystem.n_back_left.set_motor_velocity(0)
+        self.subsystem.n_back_right.set_motor_velocity(0)
         pass

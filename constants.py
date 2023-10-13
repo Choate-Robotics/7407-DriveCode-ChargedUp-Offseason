@@ -14,8 +14,8 @@ from wpimath.geometry import Pose3d, Translation3d, Rotation3d
 
 # limelight offsets from robot origin (in meters)
 limelight_offset: Pose3d = {
-    "front": Pose3d(Translation3d(0.0, 0.0, 0.0), Rotation3d(0.0, 0.0, 0.0)),
-    "back": Pose3d(Translation3d(0.0, 0.0, 0.0), Rotation3d(0.0, 0.0, 0.0)),
+    "front": Pose3d(Translation3d(-0.0872, 0.3111, 0.422), Rotation3d(0.0, 10.0, 0.0)),
+    "back": Pose3d(Translation3d(0.0, -0.27, 0.239), Rotation3d(0.0, 0.0, -180.0)),
 }
 import math
 
@@ -91,17 +91,39 @@ class Targets:
     # scoring location in front of the apriltag
     node_front: Translation2d = Translation2d(0, node_bumps)
     
-    # loading location near apriltag 5 (red)
-    load_single_red: Translation2d = Translation2d(single_station_x, -68.02 * inches_to_meters)
     
-    # loading location near apriltag 4 (blue)
-    load_single_blue: Translation2d = Translation2d(-single_station_x, -68.02 * inches_to_meters)
+    load_single = {
+        # loading location near apriltag 5 (red)
+        'red': Translation2d(single_station_x, -68.02 * inches_to_meters),
+        # loading location near apriltag 4 (blue)
+        'blue': Translation2d(-single_station_x, -68.02 * inches_to_meters)
+    }
     
     # loading location near apriltag 4/5
     load_double_left: Translation2d = Translation2d(0, -32.43 * inches_to_meters)
     
     # loading location near apriltag 4/5
     load_double_right: Translation2d = Translation2d(0, 32.43 * inches_to_meters)
+    
+    far_left_piece_auto = {
+        'red': Translation2d(-single_station_x, -68.02 * inches_to_meters),
+        'blue': Translation2d(single_station_x, -68.02 * inches_to_meters)
+    }
+    
+    center_left_piece_auto = {
+        'red': Translation2d(-single_station_x, -68.02 * inches_to_meters),
+        'blue': Translation2d(single_station_x, -68.02 * inches_to_meters)
+    }
+    
+    center_right_piece_auto ={
+        'red': Translation2d(-single_station_x, -68.02 * inches_to_meters),
+        'blue': Translation2d(single_station_x, -68.02 * inches_to_meters)
+    }
+    
+    far_right_piece_auto = {
+        'red': Translation2d(-single_station_x, -68.02 * inches_to_meters),
+        'blue': Translation2d(single_station_x, -68.02 * inches_to_meters)
+    }
     
 
 ApriltagPositionDictRed = {

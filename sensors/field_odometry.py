@@ -65,6 +65,12 @@ class FieldOdometry:
         self.robot_pose_weight: float = 1 - self.vision_estimator_pose_weight
 
         self.vision_on = True
+        
+    def enable(self):
+        self.vision_on = True
+        
+    def disable(self):
+        self.vision_on = False
 
     def update(self) -> Pose2d:
         """
@@ -101,7 +107,7 @@ class FieldOdometry:
                     if vision_robot_pose[0] and vision_robot_pose[1]:
                         vision_time = vision_robot_pose[1]
                         vision_robot_pose = vision_robot_pose[0]
-
+                        
                         angle_diff = (
                             math.degrees(
                                 vision_robot_pose.toPose2d().rotation().radians()
@@ -109,28 +115,24 @@ class FieldOdometry:
                             )
                             % 360
                         )
+                        
                         angle_diff_rev = 360 - angle_diff
-
                         if (5 > angle_diff > -5) or (5 > angle_diff_rev > -5):
                             self.drivetrain.odometry_estimator.addVisionMeasurement(
                                 vision_robot_pose.toPose2d(), vision_time
                             )
-
                             weighted_pose = weighted_pose_average(
                                 self.drivetrain.odometry.getPose(),
                                 vision_robot_pose,
                                 self.robot_pose_weight,
                                 self.vision_estimator_pose_weight,
                             )
-
                             self.drivetrain.odometry.resetPosition(
                                 self.drivetrain.get_heading(),
                                 weighted_pose,
                                 *self.drivetrain.node_positions
                             )
-
                         self.last_update_time = current_time
-
         return self.getPose()
 
     def getPose(self) -> Pose2d:

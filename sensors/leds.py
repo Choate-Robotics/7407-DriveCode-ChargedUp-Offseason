@@ -1,5 +1,5 @@
 from wpilib import AddressableLED, PowerDistribution
-import math
+import math, config
 class ALeds():
     '''Addressable LEDS from PWM RIO'''
     m_led: AddressableLED
@@ -10,55 +10,7 @@ class ALeds():
     # last_speed: int
     # last_brightness: float
     # m_ledBuffer: AddressableLED.LEDData
-    class Type():
-        
-        def KStatic(r, g, b):
-            return {
-                'type': 1,
-                'color': {
-                    'r': r,
-                    'g': g,
-                    'b': b
-                }
-            }
-        
-        def KRainbow():
-            return {
-                'type': 2
-            }
-        
-        def KTrack(r1, g1, b1, r2, g2, b2):
-            return {
-                'type': 3,
-                'color': {
-                    'r1': r1,
-                    'g1': g1,
-                    'b1': b1,
-                    'r2': r2,
-                    'g2': g2,
-                    'b2': b2
-                }
-            }
-        
-        def KBlink(r,g,b):
-            return {
-                'type': 4,
-                'color': {
-                    'r': r,
-                    'g': g,
-                    'b': b
-                }
-            }
-            
-        def KLadder(typeA,typeB,percent,speed):
-            return {
-                'type': 5,
-                'percent': percent, # 0-1
-                'typeA': typeA,
-                'typeB': typeB,
-                'speed': speed
-            }
-        
+    
     
     def __init__(self, id: int, size: int):
         self.size = size
@@ -77,9 +29,9 @@ class ALeds():
         self.m_led = AddressableLED(self.id)
         self.m_led.setLength(self.size)
         self.m_ledBuffer = self.m_led.LEDData()
-        self.array = []
-        for i in range(self.size):
-            self.array.append(self.m_led.LEDData())
+        self.array = [self.m_ledBuffer for i in range(self.size)]
+        # for i in range(self.size):
+        #     self.array.append(self.m_led.LEDData())
         self.m_led.setData(self.array)
         self.m_led.start()
         
@@ -90,6 +42,18 @@ class ALeds():
     def disable(self):
         self.m_led.stop()
         
+    def setBrightness(self, brightness: float):
+        self.brightness = brightness
+        
+    def getArray(self):
+        return [self.m_led.LEDData() for i in range(self.size)].copy()
+    
+    def getCurrentCycle(self):
+        return self.array
+    
+    def getCurrentType(self):
+        return self.active_mode
+        
     def run(self):
         pass
     
@@ -98,7 +62,7 @@ class ALeds():
         self.last_speed = self.speed
         self.last_brightness = self.brightness
     
-    def setLED(self, type: Type, brightness: float = 1.0, speed: int = 5):
+    def setLED(self, type: config.Type, brightness: float = 1.0, speed: int = 5):
         self.storeCurrent()
         self.active_mode = type
         self.speed = speed
@@ -122,23 +86,28 @@ class ALeds():
         self.speed = self.last_speed
         self.brightness = self.last_brightness
         
-    def match(self, type: Type):
+    def match(self, type: config.Type):
         
         
-        res = []
-        color = type['color']
+        res = self.getArray()
         match type['type']:
             case 1:
-                res= self._setStatic(color['r'], color['g'], color['b'])
+                color = type['color']
+                res = self._setStatic(color['r'], color['g'], color['b'])
             case 2:
-                res=self._setRainbow()
+                res = self._setRainbow()
             case 3:
-                res=self._setTrack(color['r1'], color['g1'], color['b1'], color['r2'], color['g2'], color['b2'])
+                color = type['color']
+                res = self._setTrack(color['r1'], color['g1'], color['b1'], color['r2'], color['g2'], color['b2'])
             case 4:
-                res=self._setBlink(color['r'], color['g'], color['b']) 
+                color = type['color']
+                res = self._setBlink(color['r'], color['g'], color['b']) 
             case 5:
                 percent = type['percent']
-                res=self._setLadder(type['typeA'], type['typeB'], percent, type['speed'])
+                res = self._setLadder(type['typeA'], type['typeB'], percent, type['speed'])
+            case _:
+                res = self._setRainbow()
+        
         return res
                 
     def cycle(self):  
@@ -146,24 +115,31 @@ class ALeds():
         cycles through LED array
         this should be called periodically
         '''
-        self.match(self.active_mode)
+        self.array = self.match(self.active_mode)
+        
+        # self.m_led.setData(self.match(self.active_mode))
         
         self.m_led.setData(self.array)
         
     def _setStatic(self, red: int, green: int, blue: int):
+        
+        static = self.getArray()
+        
         for i in range(self.size):
-            self.array[i].setRGB(red, green, blue)
+            static[i].setRGB(red, green, blue)
         # self.m_led.setData(self.array)
         
-        return self.array
+        return static
         
     def _setRainbow(self):
-        for i in range(len(self.array)):
+        # arr = [self.m_led.LEDData() for i in range(self.size)]
+        arr = self.getArray()
+        for i in range(self.size):
             # Calculate the hue - hue is easier for rainbows because the color
             # shape is a circle so only one value needs to precess
-            hue = math.floor((self.m_rainbowFirstPixelHue + (i * 180 / len(self.array))) % 180)
+            hue = math.floor(self.m_rainbowFirstPixelHue + (i * 180 / self.size) % 180)
             # Set the value
-            self.array[i].setHSV(hue, 255, 128)
+            arr[i].setHSV(hue, 255, 128)
     
         # Increase by to make the rainbow "move"
         self.m_rainbowFirstPixelHue += self.speed
@@ -171,62 +147,94 @@ class ALeds():
         self.m_rainbowFirstPixelHue %= 180
         # self.m_led.setData(self.array)
         
-        return self.array
+        return arr.copy()
         
     def _setTrack(self, r1, g1, b1, r2, g2, b2):
-        for i in range(len(self.array)):
-            self.array[i].setRGB(r1, g1, b1)
+        track = self.getArray()
+        for i in range(self.size):
+            track[i].setRGB(r1, g1, b1)
             
-        for i in range(self.track_index, len(self.array), 4):
-            self.array[i].setRGB(r2, g2, b2)
+        for i in range(self.track_index, self.size, 4):
+            track[i].setRGB(r2, g2, b2)
         
         self.track_index += 1
         
-        if self.track_index > len(self.array): 
+        if self.track_index > self.size: 
             self.track_index = 0
             
-        return self.array
+        return track
         
         # self.m_led.setData(self.array)
         
     def _setBlink(self, r,g,b):
-        if self.blink_index / 2 * self.speed <= .5:
-            for i in range(len(self.array)):
-                self.array[i].setRGB(r,g,b)
+        blink = self.getArray()
+        if self.blink_index / (2 * self.speed) <= .5:
+            for i in range(self.size):
+                blink[i].setRGB(r,g,b)
         else:
-            for i in range(len(self.array)):
-                self.array[i].setRGB(0,0,0)
+            for i in range(self.size):
+                blink[i].setRGB(0,0,0)
         
         self.blink_index += 1
         if self.blink_index > 2 * self.speed:
             self.blink_index = 0  
             
-        return self.array
+        return blink
             
-    def _setLadder(self, typeA: Type, typeB: Type, percent: float, speed: int):
+    def _setLadder(self, typeA: config.Type, typeB: config.Type, percent: float, speed: int):
         
-        a = self.match(typeA).copy()
+        if percent < 0:
+            percent = 0
+        elif percent > 1:
+            percent = 1
         
-        size = math.floor(len(a) * percent)
+        # print('a type', typeA['type'])
         
-        remainder = len(a) - size
-        
-        del a[remainder:]
+        # print('ladder percent:', percent)
         
         save = self.speed
         
         self.speed = speed
         
-        b = self.match(typeB).copy()
+        b_led = self.match(typeB).copy()
         
-        del b[:size]
+        b = []
         
-        res = a + b
+        for i, led_b in enumerate(b_led):
+            if i < math.floor(self.size * percent):
+                b.append(led_b)
+        # print('b size:', len(b))
         
+        # print('list b', len(b))
+
         self.speed = save
         
-        self.array = res
         
+        a_led:list = self.match(typeA).copy()
+        
+        a:list = []
+        
+        for i, led_a in enumerate(a_led):
+            if i < self.size - math.floor(self.size * percent):
+                a.append(led_a)
+        # print('a size:', len(a))
+        
+        # print('list a', len(a))
+        
+
+        
+        res = b + a
+        
+        
+        
+        if len(res) > self.size:
+            # print('too big!!', len(res))
+            del res[self.size:]
+        else:
+            # print('led size', len(res))
+            return res.copy()
+        
+        return self.array
         
 class SLEDS:
     '''Switchable LEDS from Switchable PDH'''
