@@ -158,10 +158,10 @@ class OI:
         Keymap.Target.SET_FLOOR.debounce(0.2).whenActive(InstantCommand(lambda: set_active_target(config.Target.floor_down))).\
             whenInactive(InstantCommand(set_led_piece))
         
-        Keymap.Target.RUN_SHOOT.onTrue(command.Shoot(Robot.intake, Robot.elevator)).\
+        Keymap.Target.RUN_SHOOT.onTrue(InstantCommand(set_led_shoot).alongWith(command.Shoot(Robot.intake, Robot.elevator))).\
             onFalse(command.Idle(Robot.intake, Robot.elevator).alongWith(InstantCommand(set_led_piece)))
         
-        Keymap.Target.RUN_TARGET.onTrue(InstantCommand(set_led_shoot).alongWith(command.Target(Robot.intake, Robot.elevator)))\
+        Keymap.Target.RUN_TARGET.onTrue(command.Target(Robot.intake, Robot.elevator))\
             .onFalse(command.Idle(Robot.intake, Robot.elevator).alongWith(InstantCommand(set_led_piece)))
         
         Keymap.Intake.DROP_PIECE.whileTrue(InstantCommand(intake_drop)).onFalse(InstantCommand(intake_idle))
