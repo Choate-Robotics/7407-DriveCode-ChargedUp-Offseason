@@ -64,7 +64,7 @@ class FieldOdometry:
         self.vision_estimator_pose_weight: float = 0.4
         self.robot_pose_weight: float = 1 - self.vision_estimator_pose_weight
 
-        self.vision_on = True
+        self.vision_on = False
         
     def enable(self):
         self.vision_on = True

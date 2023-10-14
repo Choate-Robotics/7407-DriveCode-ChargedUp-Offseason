@@ -11,12 +11,12 @@ from sensors import FieldOdometry
 
 
 class Path():
-    def __init__(self, start, end, waypoints, max_velocity, max_acceleration, reversed=False, grid_speed: tuple = (0, 0)):
-        self.start = start
-        self.end = end
-        self.waypoints = waypoints
-        self.max_velocity = max_velocity
-        self.max_acceleration = max_acceleration
+    def __init__(self, start: Pose2d, end: Pose2d, waypoints: list[Translation2d], max_velocity:float, max_acceleration:float, reversed=False, grid_speed: tuple = (0, 0)):
+        self.start:Pose2d = start
+        self.end:Pose2d = end
+        self.waypoints:list[Translation2d] = waypoints
+        self.max_velocity:float = max_velocity
+        self.max_acceleration:float = max_acceleration
         self.reversed: bool = reversed
         self.grid_speed: tuple = grid_speed
         if self.grid_speed[0] == 0:
@@ -134,7 +134,7 @@ class RouteTarget(SubsystemCommand[SwerveDrivetrain]):
         self.target: Pose2d = target
         self.y_pid: PIDController = PIDController(0.1, 0, 0)
         self.x_pid: PIDController = PIDController(0.1, 0, 0)
-        self.w_pid: PIDController = PIDController(0.1, 0, 0)
+        self.w_pid: PIDController = PIDController(0.02, 0, 0.008)
         self.threshold: tuple = threshold
         self.grid: bool = grid
         self.pose: Pose2d = None
@@ -218,6 +218,8 @@ class RunRoute(commands2.CommandBase):
         
     def initialize(self):
         
+        poses = constants.Poses
+        
         dis = lambda target: target.translation().distance(self.odometry.getPose().translation())
         
         # Find team and april tags
@@ -225,26 +227,26 @@ class RunRoute(commands2.CommandBase):
             self.april_tags = [tag for tag in constants.ApriltagPositionDictBlue.values()]
             self.grid_tags = [self.april_tags[0], self.april_tags[1], self.april_tags[2]]
             self.station_tag = self.april_tags[4]
-            self.team_station = Pose2d(constants.Targets.load_single_blue, Rotation2d(90))
+            self.team_station = Pose2d(poses.load_single['blue'], Rotation2d(90))
         else:
             self.april_tags = [tag for tag in constants.ApriltagPositionDictRed.values()]
             self.grid_tags = [self.april_tags[5], self.april_tags[6], self.april_tags[7]]
             self.station_tag = self.april_tags[3]
-            self.team_station = Pose2d(constants.Targets.load_single_red, Rotation2d(-90))
+            self.team_station = Pose2d(poses.load_single['red'], Rotation2d(-90))
             
         # find grid targets
         grid_pos = []
         for tag in self.grid_tags:
             # the left, front, and right nodes relative to the tag
-            grid_pos.append(Pose2d(constants.Targets.node_left, Rotation2d(180)).relativeTo(tag))
-            grid_pos.append(Pose2d(constants.Targets.node_front, Rotation2d(180)).relativeTo(tag))
-            grid_pos.append(Pose2d(constants.Targets.node_right, Rotation2d(180)).relativeTo(tag))
+            grid_pos.append(Pose2d(poses.node_left, Rotation2d(180)).relativeTo(tag))
+            grid_pos.append(Pose2d(poses.node_front, Rotation2d(180)).relativeTo(tag))
+            grid_pos.append(Pose2d(poses.node_right, Rotation2d(180)).relativeTo(tag))
 
         # find station targets (single station, double stations)
         station_pos = []
         station_pos.append(self.team_station.relativeTo(self.station_tag))
-        station_pos.append(Pose2d(constants.Targets.load_double_left, Rotation2d(180)).relativeTo(self.station_tag))
-        station_pos.append(Pose2d(constants.Targets.load_double_right, Rotation2d(180)).relativeTo(self.station_tag))
+        station_pos.append(Pose2d(poses.load_double_left, Rotation2d(180)).relativeTo(self.station_tag))
+        station_pos.append(Pose2d(poses.load_double_right, Rotation2d(180)).relativeTo(self.station_tag))
         
         # if the active route type is grid, select grid target
         if config.active_route == config.Route.grid:
@@ -253,7 +255,7 @@ class RunRoute(commands2.CommandBase):
             if config.active_grid == 0:
                 self.target = min(
                     grid_pos,
-                    key=lambda target: target.translation().distance(self.odometry.getPose().translation())
+                    key=dis
                 )
             else:
                 # select grid target
@@ -264,7 +266,7 @@ class RunRoute(commands2.CommandBase):
             if config.active_station == config.Station.auto:
                 self.target = min(
                     station_pos,
-                    key=lambda target: target.translation().distance(self.odometry.getPose().translation())
+                    key=dis
                 )
             else:
                 # select station target
@@ -274,7 +276,7 @@ class RunRoute(commands2.CommandBase):
             targets_total:list[Pose2d] = grid_pos + station_pos
             self.target = min(
                 targets_total,
-                key=lambda target: target.translation().distance(self.odometry.getPose().translation())
+                key=dis
             )
             
         # run the route

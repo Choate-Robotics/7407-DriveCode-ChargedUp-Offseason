@@ -135,13 +135,14 @@ class Target(commands2.CommandBase):
     :param force: (OPTIONAL) Force the elevator to move even if it is not zeroed (bool)
     '''
     
-    def __init__(self, intake: Intake, elevator: Elevator, force: bool = False):
+    def __init__(self, intake: Intake, elevator: Elevator, force: bool = False, auto: bool = False):
         super().__init__()
         self.intake = intake
         self.elevator = elevator
         self.target: config.active_target
         self.piece: config.active_piece
         self.force = force
+        self.auto = auto
         
     def initialize(self) -> None:
         
@@ -269,15 +270,22 @@ class Target(commands2.CommandBase):
         self.target['length'] = save_l
         
         print(action)
-        # config.pickup_wall = wall
-        commands2.CommandScheduler.getInstance().schedule(
-            ParallelCommandGroup(
+        
+        command_final = ParallelCommandGroup(
                 PrintCommand(action),
                 SequentialCommandGroup(
                     *command_list
                 )
             )
-        )
+        
+        if self.auto:
+            return command_final
+        
+        # config.pickup_wall = wall
+        else:
+            commands2.CommandScheduler.getInstance().schedule(
+                command_final
+            )
         
     def isFinished(self) -> bool:
         return True

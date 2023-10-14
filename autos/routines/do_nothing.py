@@ -1,5 +1,5 @@
 from commands2 import SequentialCommandGroup, InstantCommand, WaitCommand
-from auto_routine import AutoRoutine
+from autos.auto_routine import AutoRoutine
 
 
 auto = SequentialCommandGroup(

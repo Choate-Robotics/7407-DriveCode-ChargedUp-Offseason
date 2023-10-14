@@ -60,7 +60,8 @@ drivetrain_move_gear_ratio_as_rotations_per_meter = (1 / (drivetrain_wheel_diame
 
 track_width: meters = 0.4572 # is the distance between the wheels
 robot_length: meters = 0.635 # is the distance between the front and back wheels
-
+bumper_thickness: meters = 0.0762 # is the thickness of the bumpers
+robot_length_full = robot_length + bumper_thickness * 2 # is the distance between the front and back bumpers
 # TODO Maybe change these
 drivetrain_accel = True
 drivetrain_max_vel: meters_per_second = (15 * mile / hour).asNumber(m / s)  # 15 11
@@ -78,54 +79,67 @@ drivetrain_max_climb_vel: meters_per_second = (5 * mile / hour).asNumber(m / s)
 
 node_bumps = 22.7 * inches_to_meters
 
-single_station_x = (49.535 - (robot_length / 2)) * inches_to_meters
+# from double station apriltag to loading station x
+single_station_x = (90.77) * inches_to_meters
 
-class Targets:
+# from double station apriltag to loading station y
+single_station_y = (42.535) * inches_to_meters
+
+grid_depth = ((4 * 12) + 8.25) * inches_to_meters
+
+staging_mark_x = ((18 * 12) + 8) * inches_to_meters 
+
+staging_mark_init_y = field_width - (180.25 * inches_to_meters)
+
+staging_mark_spacing = (4 * 12) * inches_to_meters
+
+center_drivetrain = robot_length_full / 2
+
+class Poses:
     
     # scoring location to the left of the apriltag
-    node_left: Translation2d = Translation2d(-22 * inches_to_meters, node_bumps)
+    node_left: Translation2d = Translation2d(node_bumps + center_drivetrain, -22 * inches_to_meters)
     
     # scoring location to the right of the apriltag
-    node_right: Translation2d = Translation2d(22 * inches_to_meters, node_bumps)
+    node_right: Translation2d = Translation2d(node_bumps + center_drivetrain, 22 * inches_to_meters)
     
     # scoring location in front of the apriltag
-    node_front: Translation2d = Translation2d(0, node_bumps)
+    node_front: Translation2d = Translation2d(node_bumps + center_drivetrain, 0)
     
     
     load_single = {
         # loading location near apriltag 5 (red)
-        'red': Translation2d(single_station_x, -68.02 * inches_to_meters),
+        'red': Translation2d(-single_station_x - center_drivetrain, single_station_y - center_drivetrain),
         # loading location near apriltag 4 (blue)
-        'blue': Translation2d(-single_station_x, -68.02 * inches_to_meters)
+        'blue': Translation2d(-single_station_x - center_drivetrain, - single_station_y - center_drivetrain)
     }
     
     # loading location near apriltag 4/5
-    load_double_left: Translation2d = Translation2d(0, -32.43 * inches_to_meters)
+    load_double_left: Translation2d = Translation2d(-center_drivetrain, 32.43 * inches_to_meters)
     
     # loading location near apriltag 4/5
-    load_double_right: Translation2d = Translation2d(0, 32.43 * inches_to_meters)
+    load_double_right: Translation2d = Translation2d(-center_drivetrain, -32.43 * inches_to_meters)
     
     far_left_piece_auto = {
-        'red': Translation2d(-single_station_x, -68.02 * inches_to_meters),
-        'blue': Translation2d(single_station_x, -68.02 * inches_to_meters)
+        'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y + (4 * staging_mark_spacing)),
+        'blue': Translation2d(staging_mark_x + grid_depth, field_width - staging_mark_init_y)
     }
     
     center_left_piece_auto = {
-        'red': Translation2d(-single_station_x, -68.02 * inches_to_meters),
-        'blue': Translation2d(single_station_x, -68.02 * inches_to_meters)
+        'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y + (3 * staging_mark_spacing)),
+        'blue': Translation2d(staging_mark_x + grid_depth, field_width - staging_mark_init_y - staging_mark_spacing)
     }
     
     center_right_piece_auto ={
-        'red': Translation2d(-single_station_x, -68.02 * inches_to_meters),
-        'blue': Translation2d(single_station_x, -68.02 * inches_to_meters)
+        'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y + staging_mark_spacing),
+        'blue': Translation2d(staging_mark_x + grid_depth, field_width - staging_mark_init_y - (3 * staging_mark_spacing))
     }
     
     far_right_piece_auto = {
-        'red': Translation2d(-single_station_x, -68.02 * inches_to_meters),
-        'blue': Translation2d(single_station_x, -68.02 * inches_to_meters)
+        'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y),
+        'blue': Translation2d(staging_mark_x + grid_depth, field_width - staging_mark_init_y - (4 * staging_mark_spacing))
     }
     
-
 ApriltagPositionDictRed = {
     1: Pose3d(
         (field_length - inches_to_meters * 610.77),

@@ -4,7 +4,8 @@ import wpilib
 import command
 import config
 import constants
-import autos.routines as autonomous
+import autos
+# from autos.auto_routine import AutoRoutine
 from robot_systems import Robot, Sensors, LEDs
 from sensors import LimelightController, FieldOdometry
 import utils
@@ -21,6 +22,7 @@ class _Robot(wpilib.TimedRobot):
         self.team: wpilib.SendableChooser
         self.sensor_odometry: wpilib.SendableChooser
         self.auto: wpilib.SendableChooser
+        self.debug: wpilib.SendableChooser
 
     def robotInit(self):
 
@@ -28,7 +30,7 @@ class _Robot(wpilib.TimedRobot):
 
         # Initialize Operator Interface
         
-        period = .03
+        period = .05
         commands2.CommandScheduler.getInstance().setPeriod(period)
         
         Robot.drivetrain.init()
@@ -71,13 +73,26 @@ class _Robot(wpilib.TimedRobot):
         # Autos
         self.auto = wpilib.SendableChooser()
         
-        self.auto.setDefaultOption("Do Nothing", autonomous.do_nothing)
-        self.auto.addOption('One Piece', autonomous.one_piece)
-        self.auto.addOption('One Piece Drive', autonomous.one_piece_drive)
+        self.auto.setDefaultOption("Do Nothing", autos.do_nothing)
+        self.auto.addOption('One Piece', autos.one_piece)
+        self.auto.addOption('One Piece Drive', autos.one_piece_drive)
         wpilib.SmartDashboard.putData("Auto", self.auto)
         
+        # Debug
+        self.debug = wpilib.SendableChooser()
+        self.debug.setDefaultOption('Off', False)
+        self.debug.addOption('On', True)
+        
+        wpilib.SmartDashboard.putData('Debug', self.debug)
+        
+        Robot.drivetrain.n_back_left.initial_zero()
+        Robot.drivetrain.n_back_right.initial_zero()
+        Robot.drivetrain.n_front_left.initial_zero()
+        Robot.drivetrain.n_front_right.initial_zero()
         
     def robotPeriodic(self):
+        
+        config.DEBUG_MODE = self.debug.getSelected()
         
         elevator_percentage = Robot.elevator.get_length() / constants.elevator_max_rotation
         # print('elevator percent:', elevator_percentage)
@@ -118,7 +133,8 @@ class _Robot(wpilib.TimedRobot):
         
         Sensors.odometry.update()
         
-        pose = Sensors.odometry.getPose()
+        # pose = Sensors.odometry.getPose()
+        pose = Robot.drivetrain.odometry.getPose()
         
         self.nt.getTable("Odometry").putNumberArray("pose", [
             pose.X(),
@@ -205,7 +221,11 @@ class _Robot(wpilib.TimedRobot):
         Robot.intake.wrist_zeroed = True
         # Robot.intake.set_lower_output(-1)
         # Robot.intake.set_upper_output(-1)
-        commands2.CommandScheduler.getInstance().schedule(command.DriveSwerveCustom(Robot.drivetrain))
+        commands2.CommandScheduler.getInstance().schedule(
+            command.DrivetrainZero(Robot.drivetrain).andThen(
+                command.DriveSwerveCustom(Robot.drivetrain)
+            )
+            )
         # commands2.CommandScheduler.getInstance().schedule(command.ZeroElevator(Robot.elevator))
 
     def teleopPeriodic(self):
@@ -218,7 +238,7 @@ class _Robot(wpilib.TimedRobot):
         if Robot.intake.rumble_if_detected():
             self.detected_c = True
             config.auto_led_elevator = False
-            config.active_leds = (config.LedType.KBlink(255, 255, 255), 1, 2)
+            config.active_leds = (config.LedType.KBlink(255, 255, 255), 1, 30)
         else:
             if self.detected_c:
                 config.active_leds = (config.led_piece, 1, 5)
@@ -229,6 +249,8 @@ class _Robot(wpilib.TimedRobot):
         
     def autonomousInit(self):
         
+        
+        
         if self.team.getSelected() == config.Team.blue:
             config.active_team = config.Team.blue
         else:
@@ -238,6 +260,8 @@ class _Robot(wpilib.TimedRobot):
             Sensors.odometry.enable()
         else:
             Sensors.odometry.disable()
+            
+        
             
         self.auto.getSelected().run()
         

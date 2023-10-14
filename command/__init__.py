@@ -6,4 +6,4 @@ from command.puncher import RetractPuncher, ExtendPuncher
 from command.intake import *
 from command.drivetrain import DriveSwerveCustom, DrivetrainZero, SquareDrivetrain
 from command.targeting import Target, LineupSwerve, Idle, AutoPickup, Shoot
-from command.pathing import RunRoute, FollowPathCustom
+from command.pathing import RunRoute, FollowPathCustom, Path

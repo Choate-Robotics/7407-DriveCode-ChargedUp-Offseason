@@ -29,7 +29,8 @@ class ZeroElevator(SubsystemCommand[Elevator]):
         self.time.start()
 
     def execute(self):
-        config.active_leds = (config.LedType.KBlink(255, 255, 255), 1, 2)
+        pass
+        # config.active_leds = (config.LedType.KBlink(255, 255, 255), 1, 2)
 
     def isFinished(self) -> bool:
         """

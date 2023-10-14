@@ -1,5 +1,5 @@
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 elevator_can_id = 11 # 11 can ID # Change later, this isn't accurate
 magnetic_limit_switch_port = 0 # Change later, this is from last year
@@ -269,9 +269,10 @@ driver_centric: bool = True
 drivetrain_encoder_filtered: bool = True
 
 # Field
-field_length = 651.25 * inches_to_meters
+field_length = 651.25 * inches_to_meters # 54 ft 3.25 in
 # field_width = 315.5 * inches_to_meters
-field_width = 8.075
+# field_width = 8.075 
+field_width = 315.25 * inches_to_meters # 26 ft 3.25 in
 
 # Drivetrain
 front_left_move = 3
