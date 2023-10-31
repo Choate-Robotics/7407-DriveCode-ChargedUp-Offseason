@@ -5,10 +5,10 @@ from wpimath.trajectory.constraint import RectangularRegionConstraint, Trajector
 from subsystem import Drivetrain
 from robotpy_toolkit_7407.command import SubsystemCommand
 from robotpy_toolkit_7407.subsystem_templates.drivetrain import SwerveDrivetrain
-from wpilib import Timer
+from wpilib import Timer, SmartDashboard, Field2d
 import config, commands2, constants
 from sensors import FieldOdometry
-
+import ntcore
 
 class Path():
     def __init__(self, start: Pose2d, end: Pose2d, waypoints: list[Translation2d], max_velocity:float, max_acceleration:float, reversed=False, grid_speed: tuple = (0, 0)):
@@ -19,49 +19,49 @@ class Path():
         self.max_acceleration:float = max_acceleration
         self.reversed: bool = reversed
         self.grid_speed: tuple = grid_speed
-        if self.grid_speed[0] == 0:
-            self.grid_speed[0] = self.max_velocity
-        if self.grid_speed[1] == 0:
-            self.grid_speed[1] = self.max_velocity
+        # if self.grid_speed[0] == 0:
+        #     self.grid_speed[0] = self.max_velocity
+        # if self.grid_speed[1] == 0:
+        #     self.grid_speed[1] = self.max_velocity
 
     def generate(self):
         
-        class Constraint(TrajectoryConstraint):
+        # class Constraint(TrajectoryConstraint):
             
-            def __init__(self, max_velocity, max_acceleration):
-                super().__init__()
-                self.max_velocity = max_velocity
-                self.max_acceleration = max_acceleration
+        #     def __init__(self, max_velocity, max_acceleration):
+        #         super().__init__()
+        #         self.max_velocity = max_velocity
+        #         self.max_acceleration = max_acceleration
                 
-            def maxVelocity(self, pose: Pose2d, curvature: float, velocity: float) -> float:
-                return self.grid_speed[0]
+        #     def maxVelocity(self, pose: Pose2d, curvature: float, velocity: float) -> float:
+        #         return self.grid_speed[0]
             
-            def minMaxAcceleration(self, pose: Pose2d, curvature: float, speed: float) -> super().MinMax:
-                res = super().MinMax()
-                res.minAcceleration = 0
-                res.maxAcceleration = self.grid_speed[1]
-                return res
+        #     def minMaxAcceleration(self, pose: Pose2d, curvature: float, speed: float) -> super().MinMax:
+        #         res = super().MinMax()
+        #         res.minAcceleration = 0
+        #         res.maxAcceleration = self.grid_speed[1]
+        #         return res
             
-        rec_points = list[Translation2d]
+        # rec_points = list[Translation2d]
             
-        if config.active_team == config.Team.blue:
-            rec_points = [
-                Pose2d(Translation2d(-constants.border_tag_to_wall, 0),0).relativeTo(constants.ApriltagPositionDictBlue[6].translation()).translation(),
-                Pose2d(Translation2d(constants.border_tag_to_wall, constants.path_box_height),0).relativeTo(constants.ApriltagPositionDictBlue[8].translation()).translation(),
-            ]
-        else:
-            rec_points = [
-                Pose2d(Translation2d(-constants.border_tag_to_wall, 0),0).relativeTo(constants.ApriltagPositionDictRed[1].translation()).translation(),
-                Pose2d(Translation2d(constants.border_tag_to_wall, constants.path_box_height),0).relativeTo(constants.ApriltagPositionDictRed[3].translation()).translation(),
-            ]
+        # if config.active_team == config.Team.blue:
+        #     rec_points = [
+        #         Pose2d(Translation2d(-constants.border_tag_to_wall, 0),0).relativeTo(constants.ApriltagPositionDictBlue[6].translation()).translation(),
+        #         Pose2d(Translation2d(constants.border_tag_to_wall, constants.path_box_height),0).relativeTo(constants.ApriltagPositionDictBlue[8].translation()).translation(),
+        #     ]
+        # else:
+        #     rec_points = [
+        #         Pose2d(Translation2d(-constants.border_tag_to_wall, 0),0).relativeTo(constants.ApriltagPositionDictRed[1].translation()).translation(),
+        #         Pose2d(Translation2d(constants.border_tag_to_wall, constants.path_box_height),0).relativeTo(constants.ApriltagPositionDictRed[3].translation()).translation(),
+        #     ]
             
-        community = RectangularRegionConstraint(
-            rec_points[0],
-            rec_points[1],
-            Constraint(self.grid_speed[0], self.grid_speed[1])
-        )
+        # community = RectangularRegionConstraint(
+        #     rec_points[0],
+        #     rec_points[1],
+        #     Constraint(self.grid_speed[0], self.grid_speed[1])
+        # )
         config = TrajectoryConfig(self.max_velocity, self.max_acceleration)
-        config.addConstraint(community)
+        # config.addConstraint(community)
         config.setReversed(self.reversed)
         return TrajectoryGenerator.generateTrajectory(self.start, self.waypoints, self.end, config)
     
@@ -71,15 +71,18 @@ class FollowPathCustom(SubsystemCommand[SwerveDrivetrain]):
         super().__init__(subsystem)
         self.subsystem = subsystem
         self.path: Path = path
-        self.y_pid: PIDController = PIDController(0.1, 0, 0)
-        self.x_pid: PIDController = PIDController(0.1, 0, 0)
-        self.w_pid: ProfiledPIDControllerRadians = ProfiledPIDControllerRadians(0.1, 0, 0)
+        self.y_pid: PIDController = PIDController(0.1, 0, 0.001)
+        self.x_pid: PIDController = PIDController(0.08, 0, 0.001)
+        self.w_pid: ProfiledPIDControllerRadians = PIDController(0.1, 0, 0)
         self.trajectory: Trajectory = None
         self.t_total: float = 0
         self.t_delta: Timer = Timer()
         
     def initialize(self):
         self.trajectory = self.path.generate()
+        # traj = Field2d
+        # SmartDashboard.putData(traj)
+        # traj.getObject('traj').setTrajectory(self.trajectory)
         self.t_total = self.trajectory.totalTime()
         self.t_delta.reset()
         self.t_delta.start()
@@ -103,11 +106,11 @@ class FollowPathCustom(SubsystemCommand[SwerveDrivetrain]):
         )
         
         d_theta = (
-            self.w_pid.calculate(odometry.rotation(), state.pose.rotation())
+            self.w_pid.calculate(odometry.rotation().radians(), state.pose.rotation().radians())
             * self.subsystem.max_angular_vel
         )
         
-        self.subsystem.set_driver_centric((dy, dx), d_theta)
+        self.subsystem.set_driver_centric((dy, -dx), d_theta)
         
     def isFinished(self):
         return (

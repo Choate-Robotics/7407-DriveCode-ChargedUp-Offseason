@@ -62,9 +62,9 @@ class DriveSwerveCustom(SubsystemCommand[Drivetrain]):
         #         self.ramp_limit_y.reset(dy_scale)
 
         if config.driver_centric:
-            self.subsystem.set_driver_centric((-dy, dx), -d_theta)
+            self.subsystem.set_driver_centric((dy, -dx), -d_theta)
         elif self.driver_centric_reversed:
-            self.subsystem.set_driver_centric((dy, -dx), d_theta)
+            self.subsystem.set_driver_centric((-dy, dx), d_theta)
         else:
             self.subsystem.set_robot_centric((dy, -dx), d_theta)
 

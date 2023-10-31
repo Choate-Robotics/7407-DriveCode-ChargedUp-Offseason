@@ -119,7 +119,7 @@ class Intake(Subsystem):
         Sets the intake motors to grab a cube
         :return: None
         """
-        self.set_lower_output(self.intake_speed)
+        self.set_lower_output(self.intake_speed * 1.5)
         self.set_upper_output(self.intake_speed)
 
     def grab_cone(self):
