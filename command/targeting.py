@@ -157,8 +157,8 @@ class Target(commands2.CommandBase):
         
         self.piece = config.active_piece
         
-        if self.target == None:
-            self.target = config.active_target
+
+        self.target = config.active_target
     
     
         command_list = []
