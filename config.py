@@ -1,5 +1,5 @@
 
-DEBUG_MODE = False
+DEBUG_MODE = True
 
 elevator_can_id = 11 # 11 can ID # Change later, this isn't accurate
 magnetic_limit_switch_port = 0 # Change later, this is from last year
@@ -112,9 +112,9 @@ class Target:
     }
     floor_down = {
         'length': 0,
-        'length-cube': .07,
+        'length-cube': .08,
         'angle': math.radians(175),
-        'angle-cube': math.radians(160),
+        'angle-cube': math.radians(155),
         'goal': 'pickup',
     }
     single = {
@@ -228,7 +228,7 @@ active_grid: int = 1
 
 active_station: Station = Station.single
 
-active_team: Team = Team.red
+active_team: Team = Team.blue
 
 active_route: Route = Route.grid
 
@@ -278,22 +278,22 @@ field_width = 315.25 * inches_to_meters # 26 ft 3.25 in
 front_left_move = 3
 front_left_turn = 4
 front_left_encoder = AnalogEncoder(3)
-front_left_zeroed_pos = 0.56253 # * 360 * degrees_to_radians
+front_left_zeroed_pos = 0.558524 #0.56253 # * 360 * degrees_to_radians
 
 front_right_move = 14
 front_right_turn = 15
 front_right_encoder = AnalogEncoder(0)
-front_right_zeroed_pos = 0.27433 #* 360 * degrees_to_radians
+front_right_zeroed_pos = 0.770884 # 0.27433 #* 360 * degrees_to_radians
 
 back_left_move = 6
 back_left_turn = 5
 back_left_encoder = AnalogEncoder(1)
-back_left_zeroed_pos = 0.79222 #* 360 * degrees_to_radians
+back_left_zeroed_pos = 0.770884 #0.79222 #* 360 * degrees_to_radians
 
 back_right_move = 13
 back_right_turn = 12
 back_right_encoder = AnalogEncoder(2)
-back_right_zeroed_pos = 0.61598 #* 360 * degrees_to_radians
+back_right_zeroed_pos = 0.113321 # 0.61598 #* 360 * degrees_to_radians
 
 calculated_max_vel = (15 * mile / hour).asNumber(m / s)  
 calculated_max_angular_vel: radians_per_second = (1 * rev / s).asNumber(rad / s)  # 5

@@ -33,6 +33,8 @@ MOVE_CONFIG = SparkMaxConfig(
     0.00005, 0, 0.0004, 0.00017, idle_mode=rev.CANSparkMax.IdleMode.kBrake
 )
 
+# THE WHEELS NEED TO BE ZEROED FACING THE LEFT OR RIGHT.
+# FOR GOOBER, BEVELS FACE AWAY FROM RIO
 
 @dataclass
 class SparkMaxSwerveNode(SwerveNode):
@@ -113,7 +115,7 @@ class SparkMaxSwerveNode(SwerveNode):
         )
 
     def get_drive_motor_traveled_distance(self) -> meters:
-        sensor_position = self.m_move.get_sensor_position() * (1 if self.motor_reversed else -1)
+        sensor_position = self.m_move.get_sensor_position()
         # print(self.name, sensor_position / constants.drivetrain_move_gear_ratio_as_rotations_per_meter * -1)
         return (
             (sensor_position
@@ -142,7 +144,7 @@ class Drivetrain(SwerveDrivetrain):
         config.front_right_encoder,
         absolute_encoder_zeroed_pos=config.front_right_zeroed_pos,
         name="n_front_right",
-        motor_reversed=True,
+        # motor_reversed=True,
         
     )
     n_back_left = SparkMaxSwerveNode(
@@ -158,7 +160,7 @@ class Drivetrain(SwerveDrivetrain):
         config.back_right_encoder,
         absolute_encoder_zeroed_pos=config.back_right_zeroed_pos,
         name="n_back_right",
-        motor_reversed=True,
+        # motor_reversed=True,
     )
 
     gyro: PigeonIMUGyro_Wrapper = PigeonIMUGyro_Wrapper(config.gyro_id)

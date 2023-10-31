@@ -118,14 +118,14 @@ class _Robot(wpilib.TimedRobot):
                 self.nt.getTable("Errors").putString("LEDS", str(e))
         
         
-        if config.DEBUG_MODE: 
+        # if config.DEBUG_MODE: 
             commands2.CommandScheduler.getInstance().run()
-        else:
-            try:
-                commands2.CommandScheduler.getInstance().run()
-            except Exception as e:
-                print('Command Scheduler Error:', str(e))
-                self.nt.getTable("Errors").putString("Command Scheduler", str(e))
+        # else:
+        #     try:
+        #         commands2.CommandScheduler.getInstance().run()
+        #     except Exception as e:
+        #         print('Command Scheduler Error:', str(e))
+        #         self.nt.getTable("Errors").putString("Command Scheduler", str(e))
         
 
         Sensors.limeLight_F.update()
@@ -184,6 +184,11 @@ class _Robot(wpilib.TimedRobot):
         #     n_bl.get_turn_motor_angle(), n_bl.get_motor_velocity(),
         #     n_br.get_turn_motor_angle(), n_br.get_motor_velocity()
         #     ])
+        
+        self.nt.getTable("SWERVE POD").putNumber('FL ABS',config.front_left_encoder.getAbsolutePosition())
+        self.nt.getTable("SWERVE POD").putNumber('BL ABS',config.back_left_encoder.getAbsolutePosition())
+        self.nt.getTable("SWERVE POD").putNumber('FR ABS',config.front_right_encoder.getAbsolutePosition())
+        self.nt.getTable("SWERVE POD").putNumber('BR ABS',config.back_right_encoder.getAbsolutePosition())
     
         rotation = Robot.drivetrain.get_heading()
         
@@ -210,7 +215,12 @@ class _Robot(wpilib.TimedRobot):
         # print('pipeline:', Sensors.limeLight_B.pipeline)
     # Initialize subsystems
     
-
+        if self.nt.getTable('FMSInfo').getBoolean('isRedAlliance', False) == False and config.active_team == config.Team.red:
+            config.active_team = config.Team.blue
+            # config.active_leds = (config.LedType.KBlink(0, 0, 255), 1, 30)
+        elif self.nt.getTable('FMSInfo').getBoolean('isRedAlliance', False) == True and config.active_team == config.Team.blue:
+            config.active_team = config.Team.red
+            # config.active_leds = (config.LedType.KBlink(255, 0, 0), 1, 30)
 
     # Pneumatics
 
@@ -250,18 +260,11 @@ class _Robot(wpilib.TimedRobot):
     def autonomousInit(self):
         
         
-        
-        if self.team.getSelected() == config.Team.blue:
-            config.active_team = config.Team.blue
-        else:
-            config.active_team = config.Team.red
-        
         if self.sensor_odometry.getSelected():
             Sensors.odometry.enable()
         else:
             Sensors.odometry.disable()
             
-        
             
         self.auto.getSelected().run()
         
@@ -272,13 +275,14 @@ class _Robot(wpilib.TimedRobot):
 
     def disabledInit(self) -> None:
         print(config.active_team)
-        if config.active_team == config.Team.blue:
-            config.active_leds = (config.LedType.KBlink(0, 0, 255), 1, 30)
-        else:
-            config.active_leds = (config.LedType.KBlink(255, 0, 0), 1, 30)
+        # if config.active_team == config.Team.blue:
 
     def disabledPeriodic(self) -> None:
-        pass
+        if config.active_team == config.Team.blue and config.active_leds != (config.LedType.KBlink(0, 0, 255), 1, 30):
+            config.active_leds = (config.LedType.KBlink(0, 0, 255), 1, 30)
+        elif config.active_team == config.Team.red and config.active_leds != (config.LedType.KBlink(255, 0, 0), 1, 30):
+            config.active_leds = (config.LedType.KBlink(255, 0, 0), 1, 30)
+
 
     
 
