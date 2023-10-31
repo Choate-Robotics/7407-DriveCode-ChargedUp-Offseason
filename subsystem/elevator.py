@@ -70,6 +70,7 @@ class Elevator(Subsystem):
         
     def set_auto_position(self):
         self.set_motor_position(config.elevator_auto_position)
+        self.zeroed = True
 
     def set_voltage(self, voltage: float) -> None:
         self.motor_extend.pid_controller.setReference(voltage, rev.CANSparkMax.ControlType.kVoltage)

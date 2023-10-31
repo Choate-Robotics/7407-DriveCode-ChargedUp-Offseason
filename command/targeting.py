@@ -135,24 +135,30 @@ class Target(commands2.CommandBase):
     :param force: (OPTIONAL) Force the elevator to move even if it is not zeroed (bool)
     '''
     
-    def __init__(self, intake: Intake, elevator: Elevator, force: bool = False, auto: bool = False):
+    def __init__(self, intake: Intake, elevator: Elevator, target: config.Target | None = None, force: bool = False):
         super().__init__()
         self.intake = intake
         self.elevator = elevator
-        self.target: config.active_target
+        self.target: config.active_target | None = target
         self.piece: config.active_piece
         self.force = force
-        self.auto = auto
+        self.finished: bool
         
     def initialize(self) -> None:
         
-        if self.elevator.zeroed == False or self.intake.wrist_zeroed == False:
+        self.finished = False
+        
+        def finish():
+            self.finished = True
+        
+        if self.elevator.zeroed == False and self.intake.wrist_zeroed == False:
             commands2.CommandScheduler.getInstance().schedule(ZeroTarget(self.intake, self.elevator))
             return
         
         self.piece = config.active_piece
         
-        self.target = config.active_target
+        if self.target == None:
+            self.target = config.active_target
     
     
         command_list = []
@@ -274,21 +280,19 @@ class Target(commands2.CommandBase):
         command_final = ParallelCommandGroup(
                 PrintCommand(action),
                 SequentialCommandGroup(
-                    *command_list
+                    *command_list,
+                    InstantCommand(finish)
                 )
             )
         
-        if self.auto:
-            return command_final
         
         # config.pickup_wall = wall
-        else:
-            commands2.CommandScheduler.getInstance().schedule(
-                command_final
-            )
+        commands2.CommandScheduler.getInstance().schedule(
+            command_final
+        )
         
     def isFinished(self) -> bool:
-        return True
+        return self.finished
     
     def end(self, interrupted):
         pass
@@ -350,15 +354,28 @@ class TargetAuto(commands2.CommandBase):
         self.target = target
         self.intake = intake
         self.elevator = elevator
+        self.finish: bool = False
+        
+    def finish(self):
+        self.finish = True
     
     def initialize(self):
+        self.finish = False
         target = config.active_target
         config.active_target = self.target
-        commands2.CommandScheduler.getInstance().schedule(Target(self.intake, self.elevator))
+        commands2.CommandScheduler.getInstance().schedule(
+            ParallelCommandGroup(
+                Target(self.intake, self.elevator),
+                InstantCommand(lambda: self.finish())
+            )
+        )
         config.active_target = target
         
     def isFinished(self) -> bool:
-        return True
+        return self.finish
+    
+    def end(self, interrupted):
+        pass
 
 class AutoPickup(SequentialCommandGroup):
     def __init__(self, drivetrain: Drivetrain, intake: Intake, elevator: Elevator, limelight: Limelight, target: config.GamePiece):
@@ -373,7 +390,6 @@ class AutoPickup(SequentialCommandGroup):
             InstantCommand(lambda: set_target(config.Target.floor_down)),
             Target(intake, elevator),
             # TargetAuto(intake, elevator, config.Target.floor_down),
-            WaitUntilCommand(lambda: intake.get_wrist_angle() > math.radians(155)),
             InstantCommand(lambda: drivetrain.set_robot_centric((-.5 * constants.drivetrain_max_vel, 0), 0)),
             WaitUntilCommand(lambda: intake.get_avg_current() > 30), # wait until intake has game piece,
             InstantCommand(lambda: drivetrain.set_robot_centric((0,0),0)),
