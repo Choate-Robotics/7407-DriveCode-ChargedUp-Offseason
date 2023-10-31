@@ -135,11 +135,11 @@ class Target(commands2.CommandBase):
     :param force: (OPTIONAL) Force the elevator to move even if it is not zeroed (bool)
     '''
     
-    def __init__(self, intake: Intake, elevator: Elevator, target: config.Target | None = None, force: bool = False):
+    def __init__(self, intake: Intake, elevator: Elevator, force: bool = False):
         super().__init__()
         self.intake = intake
         self.elevator = elevator
-        self.target: config.active_target | None = target
+        self.target: config.active_target
         self.piece: config.active_piece
         self.force = force
         self.finished: bool
