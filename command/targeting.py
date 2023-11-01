@@ -157,9 +157,7 @@ class Target(commands2.CommandBase):
         
         self.piece = config.active_piece
         
-
         self.target = config.active_target
-    
     
         command_list = []
         command_goal = []

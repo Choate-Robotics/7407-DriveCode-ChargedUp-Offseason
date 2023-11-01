@@ -194,7 +194,12 @@ class SquareDrivetrain(SubsystemCommand[Drivetrain]):
         dx *= config.calculated_max_vel # self.subsystem.max_vel
         dy *= -config.calculated_max_vel #-self.subsystem.max_vel
         
-        self.subsystem.set_driver_centric((-dy,dx), d_theta)
+        if config.driver_centric:
+            self.subsystem.set_driver_centric((dy, -dx), d_theta)
+        elif self.driver_centric_reversed:
+            self.subsystem.set_driver_centric((-dy, dx), -d_theta)
+        else:
+            self.subsystem.set_robot_centric((dy, -dx), -d_theta)
         
     def isFinished(self) -> bool:
         return False
