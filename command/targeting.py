@@ -142,14 +142,16 @@ class Target(commands2.CommandBase):
         self.target: config.active_target
         self.piece: config.active_piece
         self.force = force
-        self.finished: bool
+        self.finished: bool = False
+        self.nt = ntcore.NetworkTableInstance.getDefault().getTable('Target')
+        
+    def finish(self):
+            self.finished = True
         
     def initialize(self) -> None:
         
         self.finished = False
         
-        def finish():
-            self.finished = True
         
         if self.elevator.zeroed == False and self.intake.wrist_zeroed == False:
             commands2.CommandScheduler.getInstance().schedule(ZeroTarget(self.intake, self.elevator))
@@ -279,7 +281,7 @@ class Target(commands2.CommandBase):
                 PrintCommand(action),
                 SequentialCommandGroup(
                     *command_list,
-                    InstantCommand(finish)
+                    InstantCommand(lambda: self.finish())
                 )
             )
         
@@ -288,12 +290,21 @@ class Target(commands2.CommandBase):
         commands2.CommandScheduler.getInstance().schedule(
             command_final
         )
+        self.nt.putString('operation', action)
+        self.nt.putString('Finished', 'Not Finished')
+        
+    def execute(self) -> None:
+        pass
         
     def isFinished(self) -> bool:
-        return self.finished
-    
+        return True
+
     def end(self, interrupted):
-        pass
+        if interrupted:
+            self.nt.putString('Finished', 'Cancelled')
+            self.finished = True
+        else:
+            self.nt.putString('Finished', 'Finished')
         
 
 class Idle(commands2.CommandBase):

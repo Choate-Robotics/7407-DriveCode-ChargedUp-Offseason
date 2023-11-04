@@ -73,7 +73,7 @@ class FollowPathCustom(SubsystemCommand[SwerveDrivetrain]):
         self.path: Path = path
         self.y_pid: PIDController = PIDController(0.1, 0, 0.001)
         self.x_pid: PIDController = PIDController(0.08, 0, 0.001)
-        self.w_pid: ProfiledPIDControllerRadians = PIDController(0.1, 0, 0)
+        self.w_pid: ProfiledPIDControllerRadians = PIDController(0.2, 0, 0.0008)
         self.trajectory: Trajectory = None
         self.t_total: float = 0
         self.t_delta: Timer = Timer()
@@ -130,7 +130,7 @@ class FollowPathCustom(SubsystemCommand[SwerveDrivetrain]):
         
 class RouteTarget(SubsystemCommand[SwerveDrivetrain]):
     
-    def __init__(self, subsystem: SwerveDrivetrain, target: Pose2d, threshold: tuple = (0.4, 0.4, 0.1), grid: bool = False):
+    def __init__(self, subsystem: SwerveDrivetrain, target: Pose2d, threshold: tuple = (2, 2, 1), grid: bool = False):
         
         super().__init__(subsystem)
         self.subsystem = subsystem
@@ -192,7 +192,7 @@ class RouteTarget(SubsystemCommand[SwerveDrivetrain]):
         if self.w_pid.atSetpoint():
             self.w_done = True
         
-        self.subsystem.set_driver_centric((dx, dy), d_theta)
+        self.subsystem.set_robot_centric((dy, -dx), d_theta)
         
         
         
@@ -240,16 +240,31 @@ class RunRoute(commands2.CommandBase):
         # find grid targets
         grid_pos = []
         for tag in self.grid_tags:
+            tag2d = tag.toPose2d()
             # the left, front, and right nodes relative to the tag
-            grid_pos.append(Pose2d(poses.node_left, Rotation2d(180)).relativeTo(tag))
-            grid_pos.append(Pose2d(poses.node_front, Rotation2d(180)).relativeTo(tag))
-            grid_pos.append(Pose2d(poses.node_right, Rotation2d(180)).relativeTo(tag))
+            grid_pos.append(Pose2d(poses.node_left, Rotation2d(180)).relativeTo(tag2d))
+            grid_pos.append(Pose2d(poses.node_front, Rotation2d(180)).relativeTo(tag2d))
+            grid_pos.append(Pose2d(poses.node_right, Rotation2d(180)).relativeTo(tag2d))
 
         # find station targets (single station, double stations)
         station_pos = []
-        station_pos.append(self.team_station.relativeTo(self.station_tag))
-        station_pos.append(Pose2d(poses.load_double_left, Rotation2d(180)).relativeTo(self.station_tag))
-        station_pos.append(Pose2d(poses.load_double_right, Rotation2d(180)).relativeTo(self.station_tag))
+        station_pos.append(self.team_station.relativeTo(self.station_tag.toPose2d()))
+        station_pos.append(Pose2d(poses.load_double_left, Rotation2d(180)).relativeTo(self.station_tag.toPose2d()))
+        station_pos.append(Pose2d(poses.load_double_right, Rotation2d(180)).relativeTo(self.station_tag.toPose2d()))
+        
+        for i in range(len(grid_pos)):
+            ntcore.NetworkTableInstance.getDefault().getTable('Pose targets').putNumberArray(i, [
+                grid_pos[i].translation().x(),
+                grid_pos[i].translation().y(),
+                grid_pos[i].rotation().radians()
+            ])
+        
+        for i in range(len(station_pos)):
+            ntcore.NetworkTableInstance.getDefault().getTable('Pose targets').putNumberArray(i + len(grid_pos), [
+                station_pos[i].translation().x(),
+                station_pos[i].translation().y(),
+                station_pos[i].rotation().radians()
+            ])
         
         # if the active route type is grid, select grid target
         if config.active_route == config.Route.grid:

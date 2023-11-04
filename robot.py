@@ -216,9 +216,11 @@ class _Robot(wpilib.TimedRobot):
     # Initialize subsystems
     
         if self.nt.getTable('FMSInfo').getBoolean('isRedAlliance', False) == False and config.active_team == config.Team.red:
+            print('switch to blue!')
             config.active_team = config.Team.blue
             # config.active_leds = (config.LedType.KBlink(0, 0, 255), 1, 30)
         elif self.nt.getTable('FMSInfo').getBoolean('isRedAlliance', False) == True and config.active_team == config.Team.blue:
+            print('Switch to red!')
             config.active_team = config.Team.red
             # config.active_leds = (config.LedType.KBlink(255, 0, 0), 1, 30)
 
@@ -279,8 +281,10 @@ class _Robot(wpilib.TimedRobot):
 
     def disabledPeriodic(self) -> None:
         if config.active_team == config.Team.blue and config.active_leds != (config.LedType.KBlink(0, 0, 255), 1, 30):
+            print('switch blue')
             config.active_leds = (config.LedType.KBlink(0, 0, 255), 1, 30)
         elif config.active_team == config.Team.red and config.active_leds != (config.LedType.KBlink(255, 0, 0), 1, 30):
+            print('switch red')
             config.active_leds = (config.LedType.KBlink(255, 0, 0), 1, 30)
 
 

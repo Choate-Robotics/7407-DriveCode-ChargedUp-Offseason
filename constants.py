@@ -64,7 +64,7 @@ bumper_thickness: meters = 0.0762 # is the thickness of the bumpers
 robot_length_full = robot_length + bumper_thickness * 2 # is the distance between the front and back bumpers
 # TODO Maybe change these
 drivetrain_accel = True
-drivetrain_max_vel: meters_per_second = (15 * mile / hour).asNumber(m / s)  # 15 11
+drivetrain_max_vel: meters_per_second = (20 * mile / hour).asNumber(m / s)  # 15 11
 drivetrain_max_vel_adjustable: meters_per_second = (15 * mile / hour).asNumber(m / s)  # 15 11
 drivetrain_max_accel_tele: meters_per_second_squared = (45 * mile / hour).asNumber(m / s)
 drivetrain_max_target_accel: meters_per_second_squared = (

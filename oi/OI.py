@@ -98,10 +98,10 @@ class OI:
             config.active_target = config.previous_target
         
         
-        Keymap.Target.CONE_ACTIVE.debounce(0.3).whenActive(InstantCommand(lambda: set_active_piece(config.GamePiece.cone))).\
+        Keymap.Target.CONE_ACTIVE.debounce(0.05).whenActive(InstantCommand(lambda: set_active_piece(config.GamePiece.cone))).\
             whenInactive(InstantCommand(set_led_piece))
         
-        Keymap.Target.CUBE_ACTIVE.debounce(0.3).whenActive(InstantCommand(lambda: set_active_piece(config.GamePiece.cube))).\
+        Keymap.Target.CUBE_ACTIVE.debounce(0.05).whenActive(InstantCommand(lambda: set_active_piece(config.GamePiece.cube))).\
             whenInactive(InstantCommand(set_led_piece))
         
         
@@ -134,28 +134,28 @@ class OI:
             whenInactive(InstantCommand(set_led_piece))
         
         
-        # Keymap.Route.RUN_ROUTE.whenActive(command.RunRoute(Robot.drivetrain, Sensors.odometry))\
-        #     .onFalse(command.DriveSwerveCustom(Robot.drivetrain).alongWith(InstantCommand(set_led_piece)))
+        Keymap.Route.RUN_ROUTE.whenActive(command.RunRoute(Robot.drivetrain, Sensors.odometry))\
+            .onFalse(command.DriveSwerveCustom(Robot.drivetrain).alongWith(InstantCommand(set_led_piece)))
         
         # Keymap.Grid.AUTO_ALIGN.whenActive().whenInactive()
         
         
-        Keymap.Target.SET_LOW.debounce(0.2).whenActive(InstantCommand(lambda: set_active_target(config.Target.low))).\
+        Keymap.Target.SET_LOW.debounce(0.05).whenActive(InstantCommand(lambda: set_active_target(config.Target.low))).\
             whenInactive(InstantCommand(set_led_piece))
         
-        Keymap.Target.SET_MIDDLE.debounce(0.2).whenActive(InstantCommand(lambda: set_active_target(config.Target.mid))).\
+        Keymap.Target.SET_MIDDLE.debounce(0.05).whenActive(InstantCommand(lambda: set_active_target(config.Target.mid))).\
             whenInactive(InstantCommand(set_led_piece))
         
-        Keymap.Target.SET_HIGH.debounce(0.2).whenActive(InstantCommand(lambda: set_active_target(config.Target.high))).\
+        Keymap.Target.SET_HIGH.debounce(0.05).whenActive(InstantCommand(lambda: set_active_target(config.Target.high))).\
             whenInactive(InstantCommand(set_led_piece))
         
         Keymap.Target.SET_SINGLE.debounce(0.2).whenActive(InstantCommand(lambda: set_active_target(config.Target.single))).\
             whenInactive(InstantCommand(set_led_piece))
         
-        Keymap.Target.SET_DOUBLE.debounce(0.2).whenActive(InstantCommand(lambda: set_active_target(config.Target.double))).\
+        Keymap.Target.SET_DOUBLE.debounce(0.05).whenActive(InstantCommand(lambda: set_active_target(config.Target.double))).\
             whenInactive(InstantCommand(set_led_piece))
         
-        Keymap.Target.SET_FLOOR.debounce(0.2).whenActive(InstantCommand(lambda: set_active_target(config.Target.floor_down))).\
+        Keymap.Target.SET_FLOOR.debounce(0.05).whenActive(InstantCommand(lambda: set_active_target(config.Target.floor_down))).\
             whenInactive(InstantCommand(set_led_piece))
         
         Keymap.Target.RUN_SHOOT.onTrue(InstantCommand(set_led_shoot).alongWith(command.Shoot(Robot.intake, Robot.elevator))).\
