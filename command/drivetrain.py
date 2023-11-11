@@ -23,10 +23,6 @@ class DriveSwerveCustom(SubsystemCommand[Drivetrain]):
     driver_centric_reversed = False
 
     def initialize(self) -> None:
-        # self.ramp_limit_x = SlewRateLimiter(constants.drivetrain_max_accel_tele, -constants.drivetrain_max_accel_tele,
-        #                                     0.0)
-        # self.ramp_limit_y = SlewRateLimiter(constants.drivetrain_max_accel_tele, -constants.drivetrain_max_accel_tele,
-        #                                     0.0)
         pass
 
     def execute(self) -> None:
@@ -47,19 +43,6 @@ class DriveSwerveCustom(SubsystemCommand[Drivetrain]):
         dy *= -config.calculated_max_vel #-self.subsystem.max_vel
         d_theta *= config.calculated_max_angular_vel #self.subsystem.max_angular_vel
 
-        # if constants.drivetrain_accel:
-        #     dx_scale = dx
-        #     dy_scale = dy
-        #
-        #     dx = self.ramp_limit_x.calculate(dx)
-        #     dy = self.ramp_limit_y.calculate(dy)
-        #
-        #     # deceleration
-        #     if abs(dx) > abs(dx_scale):
-        #         self.ramp_limit_x.reset(dx_scale)
-        #
-        #     if abs(dy) > abs(dy_scale):
-        #         self.ramp_limit_y.reset(dy_scale)
 
         if config.driver_centric:
             self.subsystem.set_driver_centric((dy, -dx), -d_theta)
