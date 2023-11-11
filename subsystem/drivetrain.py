@@ -51,7 +51,10 @@ class SparkMaxSwerveNode(SwerveNode):
         self.m_move.init()
         self.m_move.motor.setClosedLoopRampRate(config.drivetrain_ramp_rate)
         self.m_turn.init()
-        print(self.name + ': ' + ('reversed' if self.motor_reversed else 'right'))
+        if self.m_move.motor.getLastError() != 0:
+            print(self.name, "move error", self.m_move.motor.getLastError())
+        if self.m_turn.motor.getLastError() != 0:
+            print(self.name, "turn error", self.m_turn.motor.getLastError())
 
     def initial_zero(self):
         self.m_turn.set_sensor_position(0)
