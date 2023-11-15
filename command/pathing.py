@@ -110,7 +110,7 @@ class FollowPathCustom(SubsystemCommand[SwerveDrivetrain]):
             * self.subsystem.max_angular_vel
         )
         
-        self.subsystem.set_driver_centric((dy, -dx), d_theta)
+        self.subsystem.set_driver_centric((-dx, -dy), d_theta)
         
     def isFinished(self):
         return (

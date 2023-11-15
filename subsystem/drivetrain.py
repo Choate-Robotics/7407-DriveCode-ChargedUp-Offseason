@@ -49,7 +49,7 @@ class SparkMaxSwerveNode(SwerveNode):
     def init(self):
         super().init()
         self.m_move.init()
-        self.m_move.motor.setClosedLoopRampRate(config.drivetrain_ramp_rate)
+        # self.m_move.motor.setClosedLoopRampRate(config.drivetrain_ramp_rate)
         self.m_turn.init()
         if self.m_move.motor.getLastError() != 0:
             print(self.name, "move error", self.m_move.motor.getLastError())

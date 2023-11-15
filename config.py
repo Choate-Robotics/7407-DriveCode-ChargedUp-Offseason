@@ -283,21 +283,21 @@ front_left_zeroed_pos = 0.558524 #0.56253 # * 360 * degrees_to_radians
 front_right_move = 14
 front_right_turn = 15
 front_right_encoder = AnalogEncoder(0)
-front_right_zeroed_pos = 0.770884 # 0.27433 #* 360 * degrees_to_radians
+front_right_zeroed_pos = 0.7725 # 0.27433 #* 360 * degrees_to_radians
 
 back_left_move = 6
 back_left_turn = 5
 back_left_encoder = AnalogEncoder(1)
-back_left_zeroed_pos = 0.770884 #0.79222 #* 360 * degrees_to_radians
+back_left_zeroed_pos = 0.783226 #0.79222 #* 360 * degrees_to_radians
 
 back_right_move = 13
 back_right_turn = 12
 back_right_encoder = AnalogEncoder(2)
-back_right_zeroed_pos = 0.113321 # 0.61598 #* 360 * degrees_to_radians
+back_right_zeroed_pos = 0.1175 # 0.61598 #* 360 * degrees_to_radians
 
 calculated_max_vel = (20 * mile / hour).asNumber(m / s)  
 calculated_max_angular_vel: radians_per_second = (1 * rev / s).asNumber(rad / s)  # 5
-drivetrain_ramp_rate = 0.1 # seconds from 0 to full speed
+drivetrain_ramp_rate = 0.6 # seconds from 0 to full speed
 # Sensors
 gyro_id = 26
 
