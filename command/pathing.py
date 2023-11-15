@@ -10,6 +10,23 @@ import config, commands2, constants
 from sensors import FieldOdometry
 import ntcore
 
+
+class SetPosition(SubsystemCommand[SwerveDrivetrain]):
+    
+    def __init__(self, subsystem: Drivetrain, position: Pose2d):
+        super().__init__(subsystem)    
+        self.subsystem = subsystem
+        self.new_pose: position = position
+    
+    def initialize(self) -> None:
+        self.subsystem.reset_odometry(self.new_pose)
+    
+    def isFinished(self) -> bool:
+        return True
+    
+    def end(self, interrupted: bool) -> None:
+        pass
+
 class Path():
     def __init__(self, start: Pose2d, end: Pose2d, waypoints: list[Translation2d], max_velocity:float, max_acceleration:float, reversed=False, grid_speed: tuple = (0, 0)):
         self.start:Pose2d = start
@@ -19,6 +36,8 @@ class Path():
         self.max_acceleration:float = max_acceleration
         self.reversed: bool = reversed
         self.grid_speed: tuple = grid_speed
+        self.poses = []
+        self.trajectory: Trajectory = None
         # if self.grid_speed[0] == 0:
         #     self.grid_speed[0] = self.max_velocity
         # if self.grid_speed[1] == 0:
@@ -60,10 +79,35 @@ class Path():
         #     rec_points[1],
         #     Constraint(self.grid_speed[0], self.grid_speed[1])
         # )
-        config = TrajectoryConfig(self.max_velocity, self.max_acceleration)
+        config = TrajectoryConfig(constants.drivetrain_max_vel, constants.drivetrain_max_target_accel * 2)
         # config.addConstraint(community)
         config.setReversed(self.reversed)
-        return TrajectoryGenerator.generateTrajectory(self.start, self.waypoints, self.end, config)
+        self.trajectory = TrajectoryGenerator.generateTrajectory(self.start, self.waypoints, self.end, config)
+        return self.trajectory
+    
+    def getPoses(self):
+        if self.trajectory == None:
+            self.generate()
+        traj = self.trajectory
+        self.poses = []
+        for state in traj.states():
+            self.poses.append(state.pose.X())
+            self.poses.append(state.pose.Y())
+            self.poses.append(state.pose.rotation().radians())
+        return self.poses
+        
+    def log(self, name):
+        if len(self.poses) == 0:
+            self.getPoses
+        ntcore.NetworkTableInstance.getDefault().getTable('trajectories').putNumberArray(
+            name, self.poses
+        )
+        
+    def logActive(self, name = 'none'):
+        if name == 'none':
+            name = 'active'
+        self.log(name)
+        
     
 class FollowPathCustom(SubsystemCommand[SwerveDrivetrain]):
     
@@ -71,28 +115,43 @@ class FollowPathCustom(SubsystemCommand[SwerveDrivetrain]):
         super().__init__(subsystem)
         self.subsystem = subsystem
         self.path: Path = path
-        self.y_pid: PIDController = PIDController(0.1, 0, 0.001)
-        self.x_pid: PIDController = PIDController(0.08, 0, 0.001)
+        self.y_pid: PIDController = PIDController(1, 0, 0)
+        self.x_pid: PIDController = PIDController(1, 0, 0)
         self.w_pid: ProfiledPIDControllerRadians = PIDController(0.2, 0, 0.0008)
+        self.y_pid.setTolerance(.2)
+        self.x_pid.setTolerance(.2)
+        self.w_pid.setTolerance(.2)
         self.trajectory: Trajectory = None
         self.t_total: float = 0
         self.t_delta: Timer = Timer()
+        self.finished = False
         
     def initialize(self):
+        self.y_pid.reset()
+        self.x_pid.reset()
+        self.w_pid.reset()
         self.trajectory = self.path.generate()
-        # traj = Field2d
-        # SmartDashboard.putData(traj)
-        # traj.getObject('traj').setTrajectory(self.trajectory)
+        self.path.logActive()
         self.t_total = self.trajectory.totalTime()
         self.t_delta.reset()
         self.t_delta.start()
-        self.y_pid.reset()
         
     def execute(self):
         odometry = self.subsystem.odometry.getPose()
         t = self.t_delta.get()
         if t > self.t_total:
             t = self.t_total
+            
+        pose_fin = self.trajectory.sample(self.t_total).pose
+        
+        if(
+                abs(pose_fin.X() - odometry.X()) < .1
+                and abs(pose_fin.Y() - odometry.Y()) < .1
+                and abs(pose_fin.rotation().radians() - odometry.rotation().radians()) < .1
+        ):
+            t = self.t_total
+            self.finished = True
+
         state = self.trajectory.sample(t)
         
         dy = (
@@ -113,17 +172,8 @@ class FollowPathCustom(SubsystemCommand[SwerveDrivetrain]):
         self.subsystem.set_driver_centric((-dx, -dy), d_theta)
         
     def isFinished(self):
-        return (
-            self.t_delta.get() > self.t_total
-            and
-            (
-                self.y_pid.atSetpoint()
-                and
-                self.x_pid.atSetpoint()
-                and
-                self.w_pid.atSetpoint()
-            )
-        )
+        return self.finished
+        
         
     def end(self, interrupted: bool):
         self.subsystem.set_driver_centric((0, 0), 0)
