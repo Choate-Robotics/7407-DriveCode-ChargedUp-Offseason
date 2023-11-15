@@ -1,6 +1,7 @@
 import ntcore, config, time
 
 from wpimath.geometry import Pose3d, Translation3d, Rotation3d
+from wpimath.filter import MedianFilter
 
 from robotpy_toolkit_7407.sensors.limelight.limelight import VisionEstimator
 
@@ -41,18 +42,26 @@ class Limelight():
         self.botpose_blue: Pose3d = Pose3d(Translation3d(0, 0, 0), Rotation3d(0, 0, 0))
         self.botpose_red: Pose3d = Pose3d(Translation3d(0, 0, 0), Rotation3d(0, 0, 0))
         self.botpose: Pose3d = Pose3d(Translation3d(0, 0, 0), Rotation3d(0, 0, 0))
+        # self.pose_filter_x = MedianFilter(5)
+        # self.pose_filter_y = MedianFilter(5)
+        # self.pose_filter_z = MedianFilter(5)
+        # self.pose_filter_pitch = MedianFilter(5)
+        # self.pose_filter_yaw = MedianFilter(5)
+        # self.pose_filter_roll = MedianFilter(5)
         
     def init(self):
-        campose = [
-            self.origin_offset.Y(),
-            self.origin_offset.X(),
-            self.origin_offset.Z(),
-            self.origin_offset.rotation().X(),
-            self.origin_offset.rotation().Y(),
-            self.origin_offset.rotation().Z()
-        ]
+        pass
+        # self.feducial_filter.reset()
+        # campose = [
+        #     self.origin_offset.Y(),
+        #     self.origin_offset.X(),
+        #     self.origin_offset.Z(),
+        #     self.origin_offset.rotation().x(),
+        #     self.origin_offset.rotation().Y(),
+        #     self.origin_offset.rotation().Z()
+        # ]
         
-        self.table.putNumberArray('camerapose_robotspace', campose)
+        # self.table.putNumberArray('camerapose_robotspace', campose)
         
     def enable_force_update(self):
         '''
