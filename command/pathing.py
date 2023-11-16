@@ -9,7 +9,7 @@ from wpilib import Timer, SmartDashboard, Field2d
 import config, commands2, constants
 from sensors import FieldOdometry
 import ntcore, math
-
+from robot_systems import Sensors
 
 class SetPosition(SubsystemCommand[SwerveDrivetrain]):
     
@@ -278,7 +278,7 @@ class RunRoute(commands2.CommandBase):
         
     def initialize(self):
         
-
+        grid_pos, station_pos, _ = config.active_poses.return_poses()
         
         # if the active route type is grid, select grid target
         if config.active_route == config.Route.grid:
@@ -291,7 +291,7 @@ class RunRoute(commands2.CommandBase):
                 )
             else:
                 # select grid target
-                self.target = grid_pos[config.active_grid - 1]
+                self.target = grid_pos[config.active_grid]
         # if the active route type is station, select station target
         elif config.active_route == config.Route.station:
             # if the active station is auto, select the closest station target
@@ -302,7 +302,7 @@ class RunRoute(commands2.CommandBase):
                 )
             else:
                 # select station target
-                self.target = station_pos[config.active_station - 1]
+                self.target = station_pos[config.active_station]
         # if the active route type is auto, select the closest target
         else:
             targets_total:list[Pose2d] = grid_pos + station_pos

@@ -10,7 +10,7 @@ class Poses():
     is_red = None
     
     #left to right
-    Nodes = {
+    Nodes: dict[int, Pose2d] = {
         1: None,
         2: None,
         3: None,
@@ -23,14 +23,14 @@ class Poses():
     }
     
     #left to right, so 1 is single station 2 and 3 are double stations
-    Station = {
+    Station: dict[int, Pose2d] = {
         1: None,
         2: None,
         3: None,
     }
     
     # left to right
-    Auto_Pieces = {
+    Auto_Pieces: dict[int, Pose2d] = {
         1: None,
         2: None,
         3: None,
@@ -126,3 +126,8 @@ class Poses():
     
     def get_game_piece(self, piece):
         return self.Auto_Pieces[piece]
+    
+    def return_poses(self):
+        if self.grid_pos is None or self.station_pos is None or self.game_piece_pos is None:
+            self.grid_pos, self.station_pos, self.game_piece_pos = self.get_poses()
+        return self.grid_pos, self.station_pos, self.game_piece_pos

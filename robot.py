@@ -219,13 +219,13 @@ class _Robot(wpilib.TimedRobot):
             print('Switch to blue!')
             config.active_team = config.Team.blue
             self.nt.getTable('auto').putString('team', 'blue')
-            Sensors.poses.init()
+            config.active_poses.init()
             # config.active_leds = (config.LedType.KBlink(0, 0, 255), 1, 30)
         elif wpilib.DriverStation.getAlliance() == wpilib.DriverStation.Alliance.kRed and config.active_team == config.Team.blue:
             print('Switch to red!')
             config.active_team = config.Team.red
             self.nt.getTable('auto').putString('team', 'red')
-            Sensors.poses.init()
+            config.active_poses.init()
             # config.active_leds = (config.LedType.KBlink(255, 0, 0), 1, 30)
 
     # Pneumatics

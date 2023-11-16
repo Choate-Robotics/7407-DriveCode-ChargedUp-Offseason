@@ -14,6 +14,7 @@ from wpimath.trajectory import TrapezoidProfile
 from wpimath.controller import ProfiledPIDController
 from wpilib import AnalogEncoder
 import math
+import utils
 from wpimath.geometry import Translation2d
 # from sensors import ALeds
 
@@ -149,10 +150,10 @@ class Team:
     
 class Station:
     
-    single = 0
-    double_left = 1
-    double_right = 2
-    auto = 3
+    single = 1
+    double_left = 2
+    double_right = 3
+    auto = 4
     
 class Route:
     
@@ -217,6 +218,8 @@ class LedType(Type):
         
 
 auto_target: bool = False
+
+active_poses: utils.Poses = utils.Poses()
     
 active_piece: GamePiece = GamePiece.cone
 

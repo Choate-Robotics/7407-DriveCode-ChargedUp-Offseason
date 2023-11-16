@@ -19,45 +19,90 @@ def eject():
 #     WaitCommand(1),
 # )
 
+right_node = config.active_poses.Nodes[9]
+right_cone = config.active_poses.Auto_Pieces[4]
+left_node = config.active_poses.Nodes[7]
+center_node = config.active_poses.Nodes[8]
+middle_right_cube = config.active_poses.Auto_Pieces[3]
+
+max_vel = constants.drivetrain_max_vel
+
+max_accel = constants.drivetrain_max_target_accel
+
+# path1 = Path(
+#     Pose2d(1.887, 0.4020, 0),
+#     Pose2d(6.466, 0.892, 0),
+#     [],
+#     constants.drivetrain_max_vel,
+#     constants.drivetrain_max_target_accel,
+# )
+
 path1 = Path(
-    Pose2d(1.887, 0.4020, 0),
-    Pose2d(6.466, 0.892, 0),
+    right_node,
+    right_cone,
     [],
-    constants.drivetrain_max_vel,
-    constants.drivetrain_max_target_accel,
+    max_vel,
+    max_accel
 )
+    
+
+# path2 = Path(
+#     Pose2d(6.466, 0.892, 0),
+#     Pose2d(1.7808, 1.05, 0),
+#     [],
+#     constants.drivetrain_max_vel,
+#     constants.drivetrain_max_target_accel
+# )
 
 path2 = Path(
-    Pose2d(6.466, 0.892, 0),
-    Pose2d(1.7808, 1.05, 0),
+    right_cone,
+    left_node,
     [],
-    constants.drivetrain_max_vel,
-    constants.drivetrain_max_target_accel
+    max_vel,
+    max_accel
 )
+
+# path3 = Path(
+#     Pose2d(1.7808, 1.05, 0),
+#     Pose2d(6.465, 2.106, 0),
+#     [Translation2d(4.879, 0.971)],
+#     constants.drivetrain_max_vel,
+#     constants.drivetrain_max_target_accel
+# )
 
 path3 = Path(
-    Pose2d(1.7808, 1.05, 0),
-    Pose2d(6.465, 2.106, 0),
-    [Translation2d(4.879, 0.971)],
-    constants.drivetrain_max_vel,
-    constants.drivetrain_max_target_accel
+    left_node,
+    middle_right_cube,
+    [],
+    max_vel,
+    max_accel
 )
+
+# path4 = Path(
+#     Pose2d(6.465, 2.106, 0),
+#     Pose2d(1.7808, 1.05, 0),
+#     [Translation2d(4.879, 0.971)],
+#     constants.drivetrain_max_vel,
+#     constants.drivetrain_max_target_accel
+# )
 
 path4 = Path(
-    Pose2d(6.465, 2.106, 0),
-    Pose2d(1.7808, 1.05, 0),
-    [Translation2d(4.879, 0.971)],
-    constants.drivetrain_max_vel,
-    constants.drivetrain_max_target_accel
+    middle_right_cube,
+    center_node,
+    [],
+    max_vel,
+    max_accel
 )
 
-for path in [path1, path2, path3, path4]:
-    path.generate()
-    path.getPoses()
+def generate_paths(paths):
+    for path in paths:
+        path.generate()
+        path.getPoses()
 
 auto = SequentialCommandGroup(
-    # InstantCommand(Robot.intake.zero_wrist),
-    SetPosition(Robot.drivetrain, Pose2d(1.887, 0.4020, 0)),
+    InstantCommand(generate_paths, [path1, path2, path3, path4]),
+    # SetPosition(Robot.drivetrain, Pose2d(1.887, 0.4020, 0)),
+    SetPosition(Robot.drivetrain, right_node),
     WaitCommand(1),
     FollowPathCustom(Robot.drivetrain, path1),
     FollowPathCustom(Robot.drivetrain, path2),
