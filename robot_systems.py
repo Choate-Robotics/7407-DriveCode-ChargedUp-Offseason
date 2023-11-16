@@ -1,4 +1,4 @@
-import config
+import config, utils
 import subsystem
 from sensors import Limelight, LimelightController, FieldOdometry, ALeds
 import wpilib
@@ -15,7 +15,6 @@ class Robot:
     drivetrain = subsystem.Drivetrain()
     puncher = subsystem.Puncher()
 
-
 class Pneumatics:
     pass
 
@@ -25,6 +24,7 @@ class PowerDistribution:
 class LEDs:
     
     elevator = ALeds(config.elevator_leds_id, config.elevator_leds_size)
+    
 
 class Sensors:
     limeLight_F: Limelight = Limelight(constants.limelight_offset['front'], "limelight-f")
@@ -33,6 +33,8 @@ class Sensors:
     l_c: LimelightController 
     
     odometry: FieldOdometry
+    
+    poses: utils.Poses = utils.Poses()
 
     gyro: SwerveGyro
 

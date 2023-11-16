@@ -8,7 +8,7 @@ from robotpy_toolkit_7407.subsystem_templates.drivetrain import SwerveDrivetrain
 from wpilib import Timer, SmartDashboard, Field2d
 import config, commands2, constants
 from sensors import FieldOdometry
-import ntcore
+import ntcore, math
 
 
 class SetPosition(SubsystemCommand[SwerveDrivetrain]):
@@ -99,13 +99,13 @@ class Path():
     def log(self, name):
         if len(self.poses) == 0:
             self.getPoses
-        ntcore.NetworkTableInstance.getDefault().getTable('trajectories').putNumberArray(
+        ntcore.NetworkTableInstance.getDefault().getTable('auto').putNumberArray(
             name, self.poses
         )
         
     def logActive(self, name = 'none'):
         if name == 'none':
-            name = 'active'
+            name = 'active_trajectory'
         self.log(name)
         
     
@@ -180,13 +180,13 @@ class FollowPathCustom(SubsystemCommand[SwerveDrivetrain]):
         
 class RouteTarget(SubsystemCommand[SwerveDrivetrain]):
     
-    def __init__(self, subsystem: SwerveDrivetrain, target: Pose2d, threshold: tuple = (2, 2, 1), grid: bool = False):
+    def __init__(self, subsystem: SwerveDrivetrain, target: Pose2d, threshold: tuple = (.2, .2, .1), grid: bool = False):
         
         super().__init__(subsystem)
         self.subsystem = subsystem
         self.target: Pose2d = target
-        self.y_pid: PIDController = PIDController(0.1, 0, 0)
-        self.x_pid: PIDController = PIDController(0.1, 0, 0)
+        self.y_pid: PIDController = PIDController(0.4, 0, 0)
+        self.x_pid: PIDController = PIDController(0.4, 0, 0)
         self.w_pid: PIDController = PIDController(0.02, 0, 0.008)
         self.threshold: tuple = threshold
         self.grid: bool = grid
@@ -204,6 +204,13 @@ class RouteTarget(SubsystemCommand[SwerveDrivetrain]):
         self.w_pid.setTolerance(self.threshold[2])
     
         config.active_leds = (config.LedType.KStatic(5, 0, 134), 1, 5)
+        
+        ntcore.NetworkTableInstance.getDefault().getTable('auto').putNumberArray('active_pose',[
+            self.target.X(),
+            self.target.Y(),
+            self.target.rotation().radians()
+            ]
+            )
 
     def execute(self):
         
@@ -220,16 +227,16 @@ class RouteTarget(SubsystemCommand[SwerveDrivetrain]):
         )
         
         d_theta = (
-            self.w_pid.calculate(self.pose.rotation(), self.target.rotation())
+            self.w_pid.calculate(self.pose.rotation().radians(), self.target.rotation().radians())
             * config.calculated_max_angular_vel
         )
         
         if self.grid:
-            if not self.y_done:
-                dx = 0
-            
-            if self.y_done:
+            if not self.x_done:
                 dy = 0
+            
+            if self.x_done:
+                dx = 0
                 
         # DOES NOT TAKE VELOCITY INTO CONSIDERATION
                 
@@ -242,7 +249,7 @@ class RouteTarget(SubsystemCommand[SwerveDrivetrain]):
         if self.w_pid.atSetpoint():
             self.w_done = True
         
-        self.subsystem.set_robot_centric((dy, -dx), d_theta)
+        self.subsystem.set_driver_centric((-dx, -dy), d_theta)
         
         
         
@@ -263,7 +270,7 @@ class RunRoute(commands2.CommandBase):
         self.drivetrain = drivetrain
         self.odometry = odometry
         self.target: Pose2d = None
-        self.april_tags: list[Pose3d] = None
+        self.april_tags: dict[int, Pose3d] = None
         self.grid_tags: list[Pose3d] = None
         self.station_tag: Pose3d = None
         self.team_station: Pose2d = None
@@ -271,50 +278,7 @@ class RunRoute(commands2.CommandBase):
         
     def initialize(self):
         
-        poses = constants.Poses
-        
-        dis = lambda target: target.translation().distance(self.odometry.getPose().translation())
-        
-        # Find team and april tags
-        if config.active_team == config.Team.blue:
-            self.april_tags = [tag for tag in constants.ApriltagPositionDictBlue.values()]
-            self.grid_tags = [self.april_tags[0], self.april_tags[1], self.april_tags[2]]
-            self.station_tag = self.april_tags[4]
-            self.team_station = Pose2d(poses.load_single['blue'], Rotation2d(90))
-        else:
-            self.april_tags = [tag for tag in constants.ApriltagPositionDictRed.values()]
-            self.grid_tags = [self.april_tags[5], self.april_tags[6], self.april_tags[7]]
-            self.station_tag = self.april_tags[3]
-            self.team_station = Pose2d(poses.load_single['red'], Rotation2d(-90))
-            
-        # find grid targets
-        grid_pos = []
-        for tag in self.grid_tags:
-            tag2d = tag.toPose2d()
-            # the left, front, and right nodes relative to the tag
-            grid_pos.append(Pose2d(poses.node_left, Rotation2d(180)).relativeTo(tag2d))
-            grid_pos.append(Pose2d(poses.node_front, Rotation2d(180)).relativeTo(tag2d))
-            grid_pos.append(Pose2d(poses.node_right, Rotation2d(180)).relativeTo(tag2d))
 
-        # find station targets (single station, double stations)
-        station_pos = []
-        station_pos.append(self.team_station.relativeTo(self.station_tag.toPose2d()))
-        station_pos.append(Pose2d(poses.load_double_left, Rotation2d(180)).relativeTo(self.station_tag.toPose2d()))
-        station_pos.append(Pose2d(poses.load_double_right, Rotation2d(180)).relativeTo(self.station_tag.toPose2d()))
-        
-        for i in range(len(grid_pos)):
-            ntcore.NetworkTableInstance.getDefault().getTable('Pose targets').putNumberArray(i, [
-                grid_pos[i].translation().x(),
-                grid_pos[i].translation().y(),
-                grid_pos[i].rotation().radians()
-            ])
-        
-        for i in range(len(station_pos)):
-            ntcore.NetworkTableInstance.getDefault().getTable('Pose targets').putNumberArray(i + len(grid_pos), [
-                station_pos[i].translation().x(),
-                station_pos[i].translation().y(),
-                station_pos[i].rotation().radians()
-            ])
         
         # if the active route type is grid, select grid target
         if config.active_route == config.Route.grid:
@@ -323,7 +287,7 @@ class RunRoute(commands2.CommandBase):
             if config.active_grid == 0:
                 self.target = min(
                     grid_pos,
-                    key=dis
+                    key=lambda target: target.translation().distance(self.odometry.getPose().translation())
                 )
             else:
                 # select grid target
@@ -334,7 +298,7 @@ class RunRoute(commands2.CommandBase):
             if config.active_station == config.Station.auto:
                 self.target = min(
                     station_pos,
-                    key=dis
+                    key=lambda target: target.translation().distance(self.odometry.getPose().translation())
                 )
             else:
                 # select station target
@@ -344,13 +308,16 @@ class RunRoute(commands2.CommandBase):
             targets_total:list[Pose2d] = grid_pos + station_pos
             self.target = min(
                 targets_total,
-                key=dis
+                key=lambda target: target.translation().distance(self.odometry.getPose().translation())
             )
             
         # run the route
-        commands2.CommandScheduler.get_instance().schedule(
+        commands2.CommandScheduler.getInstance().schedule(
             RouteTarget(self.drivetrain, self.target, grid=self.grid)
         )
         
     def isFinished(self):
         return True
+    
+    def end(self, interrupted: bool) -> None:
+        pass

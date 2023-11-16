@@ -230,7 +230,7 @@ active_station: Station = Station.single
 
 active_team: Team = Team.blue
 
-active_route: Route = Route.grid
+active_route: Route = Route.auto
 
 active_leds: tuple[LedType, float, float] = (LedType.KStatic(255, 0, 0), 1, 5)
 

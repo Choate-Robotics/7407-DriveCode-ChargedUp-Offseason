@@ -215,13 +215,17 @@ class _Robot(wpilib.TimedRobot):
         # print('pipeline:', Sensors.limeLight_B.pipeline)
     # Initialize subsystems
     
-        if self.nt.getTable('FMSInfo').getBoolean('isRedAlliance', False) == False and config.active_team == config.Team.red:
-            print('switch to blue!')
+        if wpilib.DriverStation.getAlliance() == wpilib.DriverStation.Alliance.kBlue and config.active_team == config.Team.red:
+            print('Switch to blue!')
             config.active_team = config.Team.blue
+            self.nt.getTable('auto').putString('team', 'blue')
+            Sensors.poses.init()
             # config.active_leds = (config.LedType.KBlink(0, 0, 255), 1, 30)
-        elif self.nt.getTable('FMSInfo').getBoolean('isRedAlliance', False) == True and config.active_team == config.Team.blue:
+        elif wpilib.DriverStation.getAlliance() == wpilib.DriverStation.Alliance.kRed and config.active_team == config.Team.blue:
             print('Switch to red!')
             config.active_team = config.Team.red
+            self.nt.getTable('auto').putString('team', 'red')
+            Sensors.poses.init()
             # config.active_leds = (config.LedType.KBlink(255, 0, 0), 1, 30)
 
     # Pneumatics
@@ -242,10 +246,10 @@ class _Robot(wpilib.TimedRobot):
 
     def teleopPeriodic(self):
         
-        if self.team.getSelected() == config.Team.blue:
-            config.active_team = config.Team.blue
-        else:
-            config.active_team = config.Team.red
+        # if self.team.getSelected() == config.Team.blue:
+        #     config.active_team = config.Team.blue
+        # else:
+        #     config.active_team = config.Team.red
         
         if Robot.intake.rumble_if_detected():
             self.detected_c = True

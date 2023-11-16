@@ -134,8 +134,8 @@ class OI:
             whenInactive(InstantCommand(set_led_piece))
         
         
-        # Keymap.Route.RUN_ROUTE.whenActive(command.RunRoute(Robot.drivetrain, Sensors.odometry))\
-        #     .onFalse(command.DriveSwerveCustom(Robot.drivetrain).alongWith(InstantCommand(set_led_piece)))
+        Keymap.Route.RUN_ROUTE.whenActive(command.RunRoute(Robot.drivetrain, Sensors.odometry))\
+            .onFalse(command.DriveSwerveCustom(Robot.drivetrain).alongWith(InstantCommand(set_led_piece)))
         
         # Keymap.Grid.AUTO_ALIGN.whenActive().whenInactive()
         

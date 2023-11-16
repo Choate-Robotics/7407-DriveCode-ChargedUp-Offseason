@@ -95,6 +95,8 @@ staging_mark_spacing = (4 * 12) * inches_to_meters
 
 center_drivetrain = robot_length_full / 2
 
+full_extension_x = 26.19 * inches_to_meters + node_bumps
+
 class Poses:
     
     # scoring location to the left of the apriltag
@@ -109,16 +111,16 @@ class Poses:
     
     load_single = {
         # loading location near apriltag 5 (red)
-        'red': Translation2d(-single_station_x - center_drivetrain, single_station_y - center_drivetrain),
+        'red': Translation2d(single_station_x - center_drivetrain, single_station_y - center_drivetrain),
         # loading location near apriltag 4 (blue)
-        'blue': Translation2d(-single_station_x - center_drivetrain, - single_station_y - center_drivetrain)
+        'blue': Translation2d(single_station_x - center_drivetrain, -single_station_y + center_drivetrain)
     }
     
     # loading location near apriltag 4/5
-    load_double_left: Translation2d = Translation2d(-center_drivetrain, 32.43 * inches_to_meters)
+    load_double_left: Translation2d = Translation2d(center_drivetrain + full_extension_x, -32.43 * inches_to_meters + center_drivetrain/2)
     
     # loading location near apriltag 4/5
-    load_double_right: Translation2d = Translation2d(-center_drivetrain, -32.43 * inches_to_meters)
+    load_double_right: Translation2d = Translation2d(center_drivetrain + full_extension_x, 32.43 * inches_to_meters - center_drivetrain/2)
     
     far_left_piece_auto = {
         'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y + (4 * staging_mark_spacing)),
