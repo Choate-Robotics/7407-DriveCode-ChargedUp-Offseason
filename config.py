@@ -219,7 +219,7 @@ class LedType(Type):
 
 auto_target: bool = False
 
-active_poses: utils.Poses = utils.Poses()
+active_poses = None
     
 active_piece: GamePiece = GamePiece.cone
 

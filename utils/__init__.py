@@ -1,1 +1,1 @@
-from poses import Poses
+from utils.poses import Poses

@@ -123,23 +123,23 @@ class Poses:
     load_double_right: Translation2d = Translation2d(center_drivetrain + full_extension_x, 32.43 * inches_to_meters - center_drivetrain/2)
     
     far_left_piece_auto = {
-        'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y + (4 * staging_mark_spacing)),
+        'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y + (3 * staging_mark_spacing)),
         'blue': Translation2d(staging_mark_x + grid_depth, field_width - staging_mark_init_y)
     }
     
     center_left_piece_auto = {
-        'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y + (3 * staging_mark_spacing)),
+        'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y + (2 * staging_mark_spacing)),
         'blue': Translation2d(staging_mark_x + grid_depth, field_width - staging_mark_init_y - staging_mark_spacing)
     }
     
     center_right_piece_auto ={
         'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y + staging_mark_spacing),
-        'blue': Translation2d(staging_mark_x + grid_depth, field_width - staging_mark_init_y - (3 * staging_mark_spacing))
+        'blue': Translation2d(staging_mark_x + grid_depth, field_width - staging_mark_init_y - (2 * staging_mark_spacing))
     }
     
     far_right_piece_auto = {
         'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y),
-        'blue': Translation2d(staging_mark_x + grid_depth, field_width - staging_mark_init_y - (4 * staging_mark_spacing))
+        'blue': Translation2d(staging_mark_x + grid_depth, field_width - staging_mark_init_y - (3 * staging_mark_spacing))
     }
     
 ApriltagPositionDictRed = {

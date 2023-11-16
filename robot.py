@@ -90,6 +90,8 @@ class _Robot(wpilib.TimedRobot):
         Robot.drivetrain.n_front_left.initial_zero()
         Robot.drivetrain.n_front_right.initial_zero()
         
+        Sensors.poses.init()
+        
     def robotPeriodic(self):
         
         config.DEBUG_MODE = self.debug.getSelected()
@@ -219,13 +221,13 @@ class _Robot(wpilib.TimedRobot):
             print('Switch to blue!')
             config.active_team = config.Team.blue
             self.nt.getTable('auto').putString('team', 'blue')
-            config.active_poses.init()
+            Sensors.poses.init()
             # config.active_leds = (config.LedType.KBlink(0, 0, 255), 1, 30)
         elif wpilib.DriverStation.getAlliance() == wpilib.DriverStation.Alliance.kRed and config.active_team == config.Team.blue:
             print('Switch to red!')
             config.active_team = config.Team.red
             self.nt.getTable('auto').putString('team', 'red')
-            config.active_poses.init()
+            Sensors.poses.init()
             # config.active_leds = (config.LedType.KBlink(255, 0, 0), 1, 30)
 
     # Pneumatics

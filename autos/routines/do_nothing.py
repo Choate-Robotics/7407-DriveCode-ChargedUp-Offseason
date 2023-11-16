@@ -1,6 +1,6 @@
 from commands2 import SequentialCommandGroup, InstantCommand, WaitCommand
 from autos.auto_routine import AutoRoutine
-from robot_systems import Robot
+from robot_systems import Robot, Sensors
 from command import Target, ZeroElevator, FollowPathCustom, Path, SetPosition
 from robot_systems import Robot
 import config, constants
@@ -19,11 +19,14 @@ def eject():
 #     WaitCommand(1),
 # )
 
-right_node = config.active_poses.Nodes[9]
-right_cone = config.active_poses.Auto_Pieces[4]
-left_node = config.active_poses.Nodes[7]
-center_node = config.active_poses.Nodes[8]
-middle_right_cube = config.active_poses.Auto_Pieces[3]
+
+pse = Sensors.poses
+
+right_node = (pse.Type.KNodes, 9)
+right_cone = (pse.Type.KAutoPieces, 4)
+left_node = (pse.Type.KNodes, 7)
+center_node = (pse.Type.KNodes, 8)
+middle_right_cube = (pse.Type.KAutoPieces, 3)
 
 max_vel = constants.drivetrain_max_vel
 
@@ -100,9 +103,10 @@ def generate_paths(paths):
         path.getPoses()
 
 auto = SequentialCommandGroup(
-    InstantCommand(generate_paths, [path1, path2, path3, path4]),
-    # SetPosition(Robot.drivetrain, Pose2d(1.887, 0.4020, 0)),
+    InstantCommand(Sensors.poses.init),
+    # InstantCommand(generate_paths, [path1, path2, path3, path4]),
     SetPosition(Robot.drivetrain, right_node),
+    # SetPosition(Robot.drivetrain, right_node),
     WaitCommand(1),
     FollowPathCustom(Robot.drivetrain, path1),
     FollowPathCustom(Robot.drivetrain, path2),

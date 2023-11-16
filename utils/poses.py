@@ -3,11 +3,17 @@ from wpimath.geometry import Pose2d, Rotation2d, Transform2d
 
 
 class Poses():
-    temp_poses = constants.poses
+    temp_poses = constants.Poses
     grid_pos = None
     station_pos = None
     game_piece_pos = None
     is_red = None
+    
+    class Type:
+        KNodes = 0
+        KStation = 1
+        KAutoPieces = 2
+        
     
     #left to right
     Nodes: dict[int, Pose2d] = {
@@ -65,7 +71,7 @@ class Poses():
         else:
             self.is_red = True
             april_tags = constants.ApriltagPositionDictRed
-            grid_tags = [april_tags[1], april_tags[2], april_tags[3]]
+            grid_tags = [april_tags[3], april_tags[2], april_tags[1]]
             station_tag = april_tags[5]
             team = 'red'
             team_station = Pose2d(poses.load_single['red'], Rotation2d(math.radians(90)))
@@ -74,9 +80,15 @@ class Poses():
         grid_pos = []
         for tag in grid_tags:
             tag2d = tag.toPose2d()
-            grid_pos.append(Pose2d(tag2d.X() + poses.node_left.X(), tag2d.Y() + poses.node_left.Y(), 0 ))
-            grid_pos.append(Pose2d(tag2d.X() + poses.node_front.X(), tag2d.Y(), 0))
-            grid_pos.append(Pose2d(tag2d.X() + poses.node_right.X(), tag2d.Y() + poses.node_right.Y(), 0))
+            if team == 'red':
+                grid_pos.append(Pose2d(tag2d.X() + poses.node_left.X(), tag2d.Y() + poses.node_left.Y(), 0 ))
+                grid_pos.append(Pose2d(tag2d.X() + poses.node_front.X(), tag2d.Y(), 0))
+                grid_pos.append(Pose2d(tag2d.X() + poses.node_right.X(), tag2d.Y() + poses.node_right.Y(), 0))
+            else:
+                grid_pos.append(Pose2d(tag2d.X() + poses.node_right.X(), tag2d.Y() + poses.node_right.Y(), 0))
+                grid_pos.append(Pose2d(tag2d.X() + poses.node_front.X(), tag2d.Y(), 0))
+                grid_pos.append(Pose2d(tag2d.X() + poses.node_left.X(), tag2d.Y() + poses.node_left.Y(), 0 ))
+                
 
         # find station targets (single station, double stations)
         station_pos = []
@@ -84,12 +96,23 @@ class Poses():
         station_pos.append(Pose2d(poses.load_double_left, Rotation2d(math.radians(0))).relativeTo(station_tag.toPose2d()))
         station_pos.append(Pose2d(poses.load_double_right, Rotation2d(math.radians(0))).relativeTo(station_tag.toPose2d()))
         
-        game_piece_pos = [
-            poses.far_left_piece_auto[team],
-            poses.center_left_piece_auto[team],
-            poses.center_right_piece_auto[team],
-            poses.far_right_piece_auto[team]
-        ]
+        game_piece_pos = []
+        
+        if team == 'blue':
+            game_piece_pos = [
+                Pose2d(poses.far_left_piece_auto[team], Rotation2d()),
+                Pose2d(poses.center_left_piece_auto[team], Rotation2d()),
+                Pose2d(poses.center_right_piece_auto[team], Rotation2d()),
+                Pose2d(poses.far_right_piece_auto[team], Rotation2d())
+            ]
+        else:
+            game_piece_pos = [
+                Pose2d(poses.far_right_piece_auto[team], Rotation2d()),
+                Pose2d(poses.center_right_piece_auto[team], Rotation2d()),
+                Pose2d(poses.center_left_piece_auto[team], Rotation2d()),
+                Pose2d(poses.far_left_piece_auto[team], Rotation2d()),
+                
+            ]
         
 
         tot_pos: list[Pose2d] = station_pos + grid_pos + game_piece_pos
@@ -116,6 +139,21 @@ class Poses():
         )
 
         return grid_pos, station_pos, game_piece_pos
+    
+    def poses_created(self):
+        if self.grid_pos == None or self.station_pos == None or self.game_piece_pos == None:
+            return False
+        else:
+            return True
+        
+    def get_selected_POI(self, pose: tuple[Type, int]):
+            pose_type, num = pose
+            if pose_type == Poses.Type.KNodes:
+                return self.Nodes[num]
+            elif pose_type == Poses.Type.KStation:
+                return self.Station[num]
+            elif pose_type == Poses.Type.KAutoPieces:
+                return self.Auto_Pieces[num]
     
     
     def get_grid(self, node):

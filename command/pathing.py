@@ -10,15 +10,20 @@ import config, commands2, constants
 from sensors import FieldOdometry
 import ntcore, math
 from robot_systems import Sensors
+from utils import Poses
 
 class SetPosition(SubsystemCommand[SwerveDrivetrain]):
     
-    def __init__(self, subsystem: Drivetrain, position: Pose2d):
+    def __init__(self, subsystem: Drivetrain, position: Pose2d | tuple[Poses.Type, int]):
         super().__init__(subsystem)    
         self.subsystem = subsystem
         self.new_pose: position = position
     
     def initialize(self) -> None:
+        
+        if not isinstance(self.new_pose, Pose2d):
+            self.new_pose = Sensors.poses.get_selected_POI(self.new_pose)
+        Sensors.poses.init()
         self.subsystem.reset_odometry(self.new_pose)
     
     def isFinished(self) -> bool:
@@ -28,9 +33,9 @@ class SetPosition(SubsystemCommand[SwerveDrivetrain]):
         pass
 
 class Path():
-    def __init__(self, start: Pose2d, end: Pose2d, waypoints: list[Translation2d], max_velocity:float, max_acceleration:float, reversed=False, grid_speed: tuple = (0, 0)):
-        self.start:Pose2d = start
-        self.end:Pose2d = end
+    def __init__(self, start: Pose2d | tuple[Poses.Type, int], end: Pose2d | tuple[Poses.Type, int], waypoints: list[Translation2d], max_velocity:float, max_acceleration:float, reversed=False, grid_speed: tuple = (0, 0)):
+        self.start:Pose2d | tuple[Poses.Type, int] = start
+        self.end:Pose2d | tuple[Poses.Type, int] = end
         self.waypoints:list[Translation2d] = waypoints
         self.max_velocity:float = max_velocity
         self.max_acceleration:float = max_acceleration
@@ -45,40 +50,15 @@ class Path():
 
     def generate(self):
         
-        # class Constraint(TrajectoryConstraint):
+        
+        if not isinstance(self.start, Pose2d):
+            self.start = Sensors.poses.get_selected_POI(self.start)
+        if not isinstance(self.end, Pose2d):
+            self.end = Sensors.poses.get_selected_POI(self.end)
+        
+        # for waypoint in self.waypoints:
+        #     if not isinstance(waypoint, Translation2d):
             
-        #     def __init__(self, max_velocity, max_acceleration):
-        #         super().__init__()
-        #         self.max_velocity = max_velocity
-        #         self.max_acceleration = max_acceleration
-                
-        #     def maxVelocity(self, pose: Pose2d, curvature: float, velocity: float) -> float:
-        #         return self.grid_speed[0]
-            
-        #     def minMaxAcceleration(self, pose: Pose2d, curvature: float, speed: float) -> super().MinMax:
-        #         res = super().MinMax()
-        #         res.minAcceleration = 0
-        #         res.maxAcceleration = self.grid_speed[1]
-        #         return res
-            
-        # rec_points = list[Translation2d]
-            
-        # if config.active_team == config.Team.blue:
-        #     rec_points = [
-        #         Pose2d(Translation2d(-constants.border_tag_to_wall, 0),0).relativeTo(constants.ApriltagPositionDictBlue[6].translation()).translation(),
-        #         Pose2d(Translation2d(constants.border_tag_to_wall, constants.path_box_height),0).relativeTo(constants.ApriltagPositionDictBlue[8].translation()).translation(),
-        #     ]
-        # else:
-        #     rec_points = [
-        #         Pose2d(Translation2d(-constants.border_tag_to_wall, 0),0).relativeTo(constants.ApriltagPositionDictRed[1].translation()).translation(),
-        #         Pose2d(Translation2d(constants.border_tag_to_wall, constants.path_box_height),0).relativeTo(constants.ApriltagPositionDictRed[3].translation()).translation(),
-        #     ]
-            
-        # community = RectangularRegionConstraint(
-        #     rec_points[0],
-        #     rec_points[1],
-        #     Constraint(self.grid_speed[0], self.grid_speed[1])
-        # )
         config = TrajectoryConfig(constants.drivetrain_max_vel, constants.drivetrain_max_target_accel * 2)
         # config.addConstraint(community)
         config.setReversed(self.reversed)
@@ -98,7 +78,7 @@ class Path():
         
     def log(self, name):
         if len(self.poses) == 0:
-            self.getPoses
+            self.getPoses()
         ntcore.NetworkTableInstance.getDefault().getTable('auto').putNumberArray(
             name, self.poses
         )
@@ -108,6 +88,8 @@ class Path():
             name = 'active_trajectory'
         self.log(name)
         
+    
+    
     
 class FollowPathCustom(SubsystemCommand[SwerveDrivetrain]):
     
@@ -127,6 +109,7 @@ class FollowPathCustom(SubsystemCommand[SwerveDrivetrain]):
         self.finished = False
         
     def initialize(self):
+        self.finished = False
         self.y_pid.reset()
         self.x_pid.reset()
         self.w_pid.reset()
@@ -278,7 +261,9 @@ class RunRoute(commands2.CommandBase):
         
     def initialize(self):
         
-        grid_pos, station_pos, _ = config.active_poses.return_poses()
+        self.grid = False
+        
+        grid_pos, station_pos, _ = Sensors.poses.return_poses()
         
         # if the active route type is grid, select grid target
         if config.active_route == config.Route.grid:
@@ -306,10 +291,23 @@ class RunRoute(commands2.CommandBase):
         # if the active route type is auto, select the closest target
         else:
             targets_total:list[Pose2d] = grid_pos + station_pos
-            self.target = min(
-                targets_total,
+            gs = min(
+                grid_pos,
                 key=lambda target: target.translation().distance(self.odometry.getPose().translation())
             )
+            
+            ss = min(
+                station_pos,
+                key=lambda target: target.translation().distance(self.odometry.getPose().translation())
+            )
+            
+            self.target = min(
+                [ss, gs],
+                key=lambda target: target.translation().distance(self.odometry.getPose().translation())
+            )
+            
+            if self.target == gs:
+                self.grid = True
             
         # run the route
         commands2.CommandScheduler.getInstance().schedule(

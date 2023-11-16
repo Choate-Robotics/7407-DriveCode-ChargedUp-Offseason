@@ -34,6 +34,7 @@ class Sensors:
     
     odometry: FieldOdometry
     
+    poses: utils.Poses = utils.Poses()
 
     gyro: SwerveGyro
 
