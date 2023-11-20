@@ -97,11 +97,6 @@ path4 = Path(
     max_accel
 )
 
-def generate_paths(paths):
-    for path in paths:
-        path.generate()
-        path.getPoses()
-
 auto = SequentialCommandGroup(
     InstantCommand(Sensors.poses.init),
     # InstantCommand(generate_paths, [path1, path2, path3, path4]),

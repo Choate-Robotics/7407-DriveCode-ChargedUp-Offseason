@@ -3,7 +3,7 @@ from oi.keymap import Keymap
 from robot_systems import Robot, Sensors
 import command, math, config, constants, commands2
 from sensors import ALeds
-from commands2 import InstantCommand, StartEndCommand, RunCommand, RepeatCommand
+from commands2 import InstantCommand, StartEndCommand, RunCommand, RepeatCommand, ParallelCommandGroup
 logger.info("Hi, I'm OI!")
 
 class OI:
@@ -71,7 +71,7 @@ class OI:
                 config.led_piece = config.led_cube
                 print('piece', 'cube')
                 
-        def set_led_shoot(self):
+        def set_led_shoot():
             config.active_leds = (config.Type.KBlink(255, 140, 0), 1, 3)
                 
         def intake_drop():
@@ -91,11 +91,16 @@ class OI:
         def set_led_piece():
             config.active_leds = (config.led_piece, 1, 5)
             
-        def save_target():
-            config.previous_target = config.active_target
+        # def save_target():
+        #     config.previous_target = config.active_target
             
-        def set_previous_target():
-            config.active_target = config.previous_target
+        # def set_previous_target():
+        #     config.active_target = config.previous_target
+            
+        set_idle = ParallelCommandGroup(
+            command.Target(Robot.intake, Robot.elevator, config.Target.idle),
+            InstantCommand(set_led_piece)
+        )
         
         
         Keymap.Target.CONE_ACTIVE.debounce(0.05).whenActive(InstantCommand(lambda: set_active_piece(config.GamePiece.cone))).\
@@ -137,53 +142,43 @@ class OI:
         Keymap.Route.RUN_ROUTE.whenActive(command.RunRoute(Robot.drivetrain, Sensors.odometry))\
             .onFalse(command.DriveSwerveCustom(Robot.drivetrain).alongWith(InstantCommand(set_led_piece)))
         
-        # Keymap.Grid.AUTO_ALIGN.whenActive().whenInactive()
         
+        Keymap.Target.SET_LOW.debounce(0.05).onTrue(command.Target(Robot.intake, Robot.elevator, config.Target.low))\
+            .onFalse(set_idle)
+            
         
-        Keymap.Target.SET_LOW.debounce(0.05).whenActive(InstantCommand(lambda: set_active_target(config.Target.low))).\
-            whenInactive(InstantCommand(set_led_piece))
+        Keymap.Target.SET_MIDDLE.debounce(0.05).onTrue(command.Target(Robot.intake, Robot.elevator, config.Target.mid))\
+            .onFalse(set_idle)
         
-        Keymap.Target.SET_MIDDLE.debounce(0.05).whenActive(InstantCommand(lambda: set_active_target(config.Target.mid))).\
-            whenInactive(InstantCommand(set_led_piece))
+        Keymap.Target.SET_HIGH.debounce(0.05).onTrue(command.Target(Robot.intake, Robot.elevator, config.Target.high))\
+            .onFalse(set_idle)
         
-        Keymap.Target.SET_HIGH.debounce(0.05).whenActive(InstantCommand(lambda: set_active_target(config.Target.high))).\
-            whenInactive(InstantCommand(set_led_piece))
+        Keymap.Target.SET_SINGLE.debounce(0.1).onTrue(command.Target(Robot.intake, Robot.elevator, config.Target.single))\
+            .onFalse(set_idle)
         
-        Keymap.Target.SET_SINGLE.debounce(0.2).whenActive(InstantCommand(lambda: set_active_target(config.Target.single))).\
-            whenInactive(InstantCommand(set_led_piece))
+        Keymap.Target.SET_DOUBLE.debounce(0.05).onTrue(command.Target(Robot.intake, Robot.elevator, config.Target.double))\
+            .onFalse(set_idle)
         
-        Keymap.Target.SET_DOUBLE.debounce(0.05).whenActive(InstantCommand(lambda: set_active_target(config.Target.double))).\
-            whenInactive(InstantCommand(set_led_piece))
+        Keymap.Target.SET_FLOOR.debounce(0.05).onTrue(command.Target(Robot.intake, Robot.elevator, config.Target.floor_down))\
+            .onFalse(set_idle)
         
-        Keymap.Target.SET_FLOOR.debounce(0.05).whenActive(InstantCommand(lambda: set_active_target(config.Target.floor_down))).\
-            whenInactive(InstantCommand(set_led_piece))
+        Keymap.Target.RUN_SHOOT.onTrue(InstantCommand(set_led_shoot).alongWith(command.Target(Robot.intake, Robot.elevator, config.Target.shoot))\
+            .onFalse(set_idle))
         
-        Keymap.Target.RUN_SHOOT.onTrue(InstantCommand(set_led_shoot).alongWith(command.Shoot(Robot.intake, Robot.elevator))).\
-            onFalse(command.Idle(Robot.intake, Robot.elevator).alongWith(InstantCommand(set_led_piece)))
-        
-        Keymap.Target.RUN_TARGET.onTrue(command.Target(Robot.intake, Robot.elevator))\
-            .onFalse(command.Idle(Robot.intake, Robot.elevator).alongWith(InstantCommand(set_led_piece)))
+        # Keymap.Target.RUN_TARGET.onTrue(command.Target(Robot.intake, Robot.elevator))\
+        #     .onFalse(command.Idle(Robot.intake, Robot.elevator).alongWith(InstantCommand(set_led_piece)))
         
         Keymap.Intake.DROP_PIECE.whileTrue(InstantCommand(intake_drop)).onFalse(InstantCommand(intake_idle))
-        
-        
-        # Keymap.Puncher.PUNCH_EXTEND.whenActive(command.ExtendPuncher(Robot.puncher))
-
-        # Keymap.Puncher.PUNCH_RETRACT.whenActive(command.RetractPuncher(Robot.puncher))
-        
-        
         
         Keymap.Drivetrain.RESET_GYRO.onTrue(command.DrivetrainZero(Robot.drivetrain)).onFalse(command.DriveSwerveCustom(Robot.drivetrain))
         
         Keymap.Drivetrain.X_MODE.onTrue(InstantCommand(lambda: Robot.drivetrain.x_mode()))
         
         Keymap.Drivetrain.AUTO_PICKUP.onTrue(
-            command.AutoPickup(Robot.drivetrain, Robot.intake, Robot.elevator, Sensors.limeLight_B, config.GamePiece.cube)
+            command.AutoPickup(Robot.drivetrain, Robot.intake, Robot.elevator, Sensors.limeLight_B)
             ).onFalse(
                 command.DriveSwerveCustom(Robot.drivetrain)\
-                    .alongWith(command.Idle(Robot.intake, Robot.elevator))\
-                    .alongWith(InstantCommand(set_led_piece))\
-                    # .alongWith(InstantCommand(lambda: Sensors.limeLight_B.set_pipeline_mode(config.LimelightPipeline.feducial)))
+                    .alongWith(set_idle)
                 )
             
         Keymap.Drivetrain.SQUARE_DRIVE.onTrue(
@@ -193,8 +188,4 @@ class OI:
         Keymap.Drivetrain.ZERO_ELEVATOR.onTrue(
             command.ZeroElevator(Robot.elevator)
         )
-        
-        # Keymap.Drivetrain.TEST_WRIST.whenPressed(command.SetCarriage(Robot.intake, math.radians(90), True, config.game_piece['cone'])).whenReleased(command.SetCarriage(Robot.intake, math.radians(0), False, config.game_piece['cone']))
-        
-        # Keymap.Drivetrain.TEST_WRIST.whenPressed(command.SetElevator(Robot.elevator, 1)).whenReleased(command.SetElevator(Robot.elevator, 0))
         

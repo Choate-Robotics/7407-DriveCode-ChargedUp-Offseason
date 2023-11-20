@@ -135,11 +135,11 @@ class Target(commands2.CommandBase):
     :param force: (OPTIONAL) Force the elevator to move even if it is not zeroed (bool)
     '''
     
-    def __init__(self, intake: Intake, elevator: Elevator, force: bool = False):
+    def __init__(self, intake: Intake, elevator: Elevator, target: config.Target, force: bool = False):
         super().__init__()
         self.intake = intake
         self.elevator = elevator
-        self.target: config.active_target
+        self.target: target
         self.piece: config.active_piece
         self.force = force
         self.finished: bool = False
@@ -158,8 +158,6 @@ class Target(commands2.CommandBase):
             return
         
         self.piece = config.active_piece
-        
-        self.target = config.active_target
     
         command_list = []
         command_goal = []
@@ -297,7 +295,7 @@ class Target(commands2.CommandBase):
         pass
         
     def isFinished(self) -> bool:
-        return True
+        return self.finished
 
     def end(self, interrupted):
         if interrupted:
@@ -327,82 +325,24 @@ class Idle(commands2.CommandBase):
         pass
     
 
-class Shoot(commands2.CommandBase):
-    
-    def __init__(self, intake: Intake, elevator: Elevator) -> None:
-        super().__init__()
-        self.intake = intake
-        self.elevator = elevator
-        
-    def initialize(self) -> None:
-        target = config.active_target
-        config.active_target = config.Target.shoot
-        commands2.CommandScheduler.getInstance().schedule(Target(self.intake, self.elevator))
-        config.active_target = target
-        
-    def isFinished(self) -> bool:
-        return True
-
-    def end(self, interrupted):
-        pass
     
     
-def set_target(target: config.Target):
-    config.active_target = target
-    
-def set_piece(piece: config.GamePiece):
-    config.active_piece = piece
 
 def set_auto():
     config.active_leds = (config.LedType.KBlink(0, 255, 0), 1, 5)
 
-class TargetAuto(commands2.CommandBase):
-    
-    def __init__(self, intake: Intake, elevator: Elevator, target: config.Target = config.Target.idle):
-        super().__init__()
-        self.target = target
-        self.intake = intake
-        self.elevator = elevator
-        self.finish: bool = False
-        
-    def finish(self):
-        self.finish = True
-    
-    def initialize(self):
-        self.finish = False
-        target = config.active_target
-        config.active_target = self.target
-        commands2.CommandScheduler.getInstance().schedule(
-            ParallelCommandGroup(
-                Target(self.intake, self.elevator),
-                InstantCommand(lambda: self.finish())
-            )
-        )
-        config.active_target = target
-        
-    def isFinished(self) -> bool:
-        return self.finish
-    
-    def end(self, interrupted):
-        pass
 
 class AutoPickup(SequentialCommandGroup):
-    def __init__(self, drivetrain: Drivetrain, intake: Intake, elevator: Elevator, limelight: Limelight, target: config.GamePiece):
+    def __init__(self, drivetrain: Drivetrain, intake: Intake, elevator: Elevator, limelight: Limelight):
         super().__init__(
             ParallelCommandGroup(
                 InstantCommand(set_auto),
                 LineupSwerve(drivetrain, limelight),
-                InstantCommand(lambda: set_target(config.Target.floor_up)),
-                Target(intake, elevator)
-                # TargetAuto(intake, elevator, config.Target.floor_up)
+                Target(intake, elevator, config.Target.floor_up)
                 ),
-            InstantCommand(lambda: set_target(config.Target.floor_down)),
-            Target(intake, elevator),
-            # TargetAuto(intake, elevator, config.Target.floor_down),
+            Target(intake, elevator, config.Target.floor_down),
             InstantCommand(lambda: drivetrain.set_robot_centric((-.5 * constants.drivetrain_max_vel, 0), 0)),
             WaitUntilCommand(lambda: intake.get_avg_current() > 30), # wait until intake has game piece,
             InstantCommand(lambda: drivetrain.set_robot_centric((0,0),0)),
-            InstantCommand(lambda: set_target(config.Target.idle)),
-            Target(intake, elevator),
-            # TargetAuto(intake, elevator),
+            Target(intake, elevator, config.Target.idle),
             )

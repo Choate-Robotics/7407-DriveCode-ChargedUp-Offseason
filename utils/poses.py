@@ -126,6 +126,7 @@ class Poses():
         ntcore.NetworkTableInstance.getDefault().getTable('auto').putNumberArray(
             "POI", send_pose 
         )
+        
 
         send_tags = []
         for tag in april_tags.values():
