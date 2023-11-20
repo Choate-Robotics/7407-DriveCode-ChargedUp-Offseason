@@ -44,23 +44,7 @@ class SetIntake(SubsystemCommand[Intake]):
             
 
     def execute(self) -> None:
-        """
-        Checks if the intake has detected a game piece
-        :return:
-        """
-        # if self.piece == 'cube' and self.subsystem.get_cube_detected():
-        #     self.finished = True
-        #     Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 0.5)
-        # elif self.piece == 'cone' and self.subsystem.get_cone_detected():
-        #     self.finished = True
-        #     Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 0.5)
-        # elif self.piece == 'cube' and self.subsystem.get_no_grab_cube_detected():
-        #     self.finished = True
-        #     Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 0.5)
-        # if self.subsystem.get_avg_current() > 20:
-        #     self.finished = True
-        #     Controllers.OPERATOR_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 1)
-        #     Controllers.DRIVER_CONTROLLER.setRumble(wpilib.Joystick.RumbleType.kBothRumble, 1)
+        pass
 
     def isFinished(self) -> bool:
         """
