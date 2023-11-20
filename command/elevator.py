@@ -61,6 +61,20 @@ class ZeroElevator(SubsystemCommand[Elevator]):
             self.subsystem.motor_extend.set_sensor_position(0)
 
 
+class SetElevatorPosition(SubsystemCommand[Elevator]):
+    def __init__(self, subsystem: Elevator):
+        super().__init__(subsystem)
+        self.subsystem = subsystem
+    
+    def initialize(self) -> None:
+        self.subsystem.set_auto_position()
+        
+    def isFinished(self) -> bool:
+        return True
+    
+    def end(self, interrupted=False) -> None:
+        pass
+
 class SetElevator(SubsystemCommand[Elevator]):
     def __init__(self, subsystem: Elevator, length: float, force: bool = False):
         super().__init__(subsystem)
