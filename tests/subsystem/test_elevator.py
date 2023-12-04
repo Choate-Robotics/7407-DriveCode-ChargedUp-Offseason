@@ -1,8 +1,15 @@
 import pytest
 from unittest.mock import MagicMock
-
+from robot_systems import Robot
 import constants
 from subsystem import Elevator
+from wpilib import DataLogManager
+
+
+@pytest.fixture
+def subsystem():
+    subsystem = Robot()
+    
 
 
 @pytest.fixture

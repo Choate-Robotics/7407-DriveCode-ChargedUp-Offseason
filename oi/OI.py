@@ -10,7 +10,7 @@ class OI:
     @staticmethod
     def init() -> None:
         logger.info("Initializing OI...")
-        
+        OI.map_controls()
         
         
     @staticmethod
@@ -103,43 +103,44 @@ class OI:
         )
         
         
-        Keymap.Target.CONE_ACTIVE.debounce(0.05).whenActive(InstantCommand(lambda: set_active_piece(config.GamePiece.cone))).\
-            whenInactive(InstantCommand(set_led_piece))
         
-        Keymap.Target.CUBE_ACTIVE.debounce(0.05).whenActive(InstantCommand(lambda: set_active_piece(config.GamePiece.cube))).\
-            whenInactive(InstantCommand(set_led_piece))
+        Keymap.Target.CONE_ACTIVE.debounce(0.05).onTrue(InstantCommand(lambda: set_active_piece(config.GamePiece.cone))).\
+            onFalse(InstantCommand(set_led_piece))
         
-        
-        Keymap.Grid.RAISE_GRID.whenActive(InstantCommand(raise_active_grid)).\
-            whenInactive(InstantCommand(set_led_piece))
-        
-        Keymap.Grid.LOWER_GRID.whenActive(InstantCommand(lower_active_grid)).\
-            whenInactive(InstantCommand(set_led_piece))
-        
-        Keymap.Grid.NO_GRID.whenActive(InstantCommand(no_active_grid)).\
-            whenInactive(InstantCommand(set_led_piece))
+        Keymap.Target.CUBE_ACTIVE.debounce(0.05).onTrue(InstantCommand(lambda: set_active_piece(config.GamePiece.cube))).\
+            onFalse(InstantCommand(set_led_piece))
         
         
-        Keymap.Station.SINGLE_STATION.whenActive(InstantCommand(lambda: set_active_station(config.Station.single))).\
-            whenInactive(InstantCommand(set_led_piece))
+        Keymap.Grid.RAISE_GRID.onTrue(InstantCommand(raise_active_grid)).\
+            onFalse(InstantCommand(set_led_piece))
         
-        Keymap.Station.DOUBLE_STATION_LEFT.whenActive(InstantCommand(lambda: set_active_station(config.Station.double_left))).\
-            whenInactive(InstantCommand(set_led_piece))
+        Keymap.Grid.LOWER_GRID.onTrue(InstantCommand(lower_active_grid)).\
+            onFalse(InstantCommand(set_led_piece))
         
-        Keymap.Station.DOUBLE_STATION_RIGHT.whenActive(InstantCommand(lambda: set_active_station(config.Station.double_right))).\
-            whenInactive(InstantCommand(set_led_piece))
-        
-        Keymap.Route.SET_STATION_ROUTE.whenActive(InstantCommand(lambda: set_active_route(config.Route.station))).\
-            whenInactive(InstantCommand(set_led_piece))
-        
-        Keymap.Route.SET_GRID_ROUTE.whenActive(InstantCommand(lambda: set_active_route(config.Route.grid))).\
-            whenInactive(InstantCommand(set_led_piece))
-        
-        Keymap.Route.SET_AUTO_ROUTE.whenActive(InstantCommand(lambda: set_active_route(config.Route.auto))).\
-            whenInactive(InstantCommand(set_led_piece))
+        Keymap.Grid.NO_GRID.onTrue(InstantCommand(no_active_grid)).\
+            onFalse(InstantCommand(set_led_piece))
         
         
-        Keymap.Route.RUN_ROUTE.whenActive(command.RunRoute(Robot.drivetrain, Sensors.odometry))\
+        Keymap.Station.SINGLE_STATION.onTrue(InstantCommand(lambda: set_active_station(config.Station.single))).\
+            onFalse(InstantCommand(set_led_piece))
+        
+        Keymap.Station.DOUBLE_STATION_LEFT.onTrue(InstantCommand(lambda: set_active_station(config.Station.double_left))).\
+            onFalse(InstantCommand(set_led_piece))
+        
+        Keymap.Station.DOUBLE_STATION_RIGHT.onTrue(InstantCommand(lambda: set_active_station(config.Station.double_right))).\
+            onFalse(InstantCommand(set_led_piece))
+        
+        Keymap.Route.SET_STATION_ROUTE.onTrue(InstantCommand(lambda: set_active_route(config.Route.station))).\
+            onFalse(InstantCommand(set_led_piece))
+        
+        Keymap.Route.SET_GRID_ROUTE.onTrue(InstantCommand(lambda: set_active_route(config.Route.grid))).\
+            onFalse(InstantCommand(set_led_piece))
+        
+        Keymap.Route.SET_AUTO_ROUTE.onTrue(InstantCommand(lambda: set_active_route(config.Route.auto))).\
+            onFalse(InstantCommand(set_led_piece))
+        
+        
+        Keymap.Route.RUN_ROUTE.onTrue(command.RunRoute(Robot.drivetrain, Sensors.odometry))\
             .onFalse(command.DriveSwerveCustom(Robot.drivetrain).alongWith(InstantCommand(set_led_piece)))
         
         
@@ -162,11 +163,10 @@ class OI:
         Keymap.Target.SET_FLOOR.debounce(0.05).onTrue(command.Target(Robot.intake, Robot.elevator, config.Target.floor_down))\
             .onFalse(set_idle)
         
-        Keymap.Target.RUN_SHOOT.onTrue(InstantCommand(set_led_shoot).alongWith(command.Target(Robot.intake, Robot.elevator, config.Target.shoot))\
-            .onFalse(set_idle))
+        Keymap.Target.RUN_SHOOT.onTrue(InstantCommand(set_led_shoot).alongWith(command.Target(Robot.intake, Robot.elevator, config.Target.shoot)))\
+            .onFalse(set_idle)
         
-        # Keymap.Target.RUN_TARGET.onTrue(command.Target(Robot.intake, Robot.elevator))\
-        #     .onFalse(command.Idle(Robot.intake, Robot.elevator).alongWith(InstantCommand(set_led_piece)))
+        
         
         Keymap.Intake.DROP_PIECE.whileTrue(InstantCommand(intake_drop)).onFalse(InstantCommand(intake_idle))
         
@@ -189,3 +189,6 @@ class OI:
             command.ZeroElevator(Robot.elevator)
         )
         
+        
+        # Keymap.Target.RUN_TARGET.onTrue(command.Target(Robot.intake, Robot.elevator))\
+        #     .onFalse(command.Idle(Robot.intake, Robot.elevator).alongWith(InstantCommand(set_led_piece)))

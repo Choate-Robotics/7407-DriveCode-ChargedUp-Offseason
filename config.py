@@ -298,9 +298,9 @@ back_right_turn = 12
 back_right_encoder = AnalogEncoder(2)
 back_right_zeroed_pos = 0.1175 # 0.61598 #* 360 * degrees_to_radians
 
-calculated_max_vel = (20 * mile / hour).asNumber(m / s)  
-calculated_max_angular_vel: radians_per_second = (1 * rev / s).asNumber(rad / s)  # 5
-drivetrain_ramp_rate = 0.6 # seconds from 0 to full speed
+calculated_max_vel = (100 * mile / hour).asNumber(m / s)  
+calculated_max_angular_vel: radians_per_second = (10 * rev / s).asNumber(rad / s)  # 5
+drivetrain_ramp_rate = 2 # seconds from 0 to full speed
 # Sensors
 gyro_id = 26
 

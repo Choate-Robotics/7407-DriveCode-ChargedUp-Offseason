@@ -7,7 +7,7 @@ from robotpy_toolkit_7407.sensors.limit_switches import MagneticLimitSwitch
 import config
 import constants
 from units.SI import meters
-
+# from utils import SparkMax
 
 
 # TODO: Change config once robot is built
@@ -30,6 +30,7 @@ class Elevator(Subsystem):
     def init(self) -> None:
         self.motor_extend.init()
         self.motor_extend.motor.setClosedLoopRampRate(config.elevator_ramp_rate)
+        print("Elevator init ok")
         self.elevator_bottom_sensor = MagneticLimitSwitch(config.magnetic_limit_switch_port)
 
     def stop(self) -> None:

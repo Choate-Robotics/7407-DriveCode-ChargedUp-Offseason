@@ -10,11 +10,23 @@
       "style": "0",
       "userScale": "2",
       "width": "3200",
-      "xpos": "-1",
-      "ypos": "-1"
+      "xpos": "547",
+      "ypos": "160"
+    }
+  },
+  "Table": {
+    "0x542B5671,2": {
+      "Column 0  Width": "656",
+      "Column 1  Width": "1181",
+      "RefScale": "31"
     }
   },
   "Window": {
+    "###/SmartDashboard/Sensor Odometry": {
+      "Collapsed": "0",
+      "Pos": "60,60",
+      "Size": "576,90"
+    },
     "###FMS": {
       "Collapsed": "0",
       "Pos": "12,1350",
@@ -23,17 +35,27 @@
     "###Joysticks": {
       "Collapsed": "0",
       "Pos": "625,1162",
-      "Size": "1876,127"
+      "Size": "1876,296"
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "625,692",
-      "Size": "1875,462"
+      "Pos": "393,288",
+      "Size": "1875,848"
     },
     "###Other Devices": {
       "Collapsed": "0",
       "Pos": "2562,50",
       "Size": "625,1737"
+    },
+    "###Plot <0>": {
+      "Collapsed": "0",
+      "Pos": "60,60",
+      "Size": "700,400"
+    },
+    "###Plot <1>": {
+      "Collapsed": "0",
+      "Pos": "1001,218",
+      "Size": "1545,1320"
     },
     "###System Joysticks": {
       "Collapsed": "0",
@@ -43,7 +65,7 @@
     "###Timing": {
       "Collapsed": "0",
       "Pos": "12,375",
-      "Size": "294,217"
+      "Size": "294,258"
     },
     "Debug##Default": {
       "Collapsed": "0",

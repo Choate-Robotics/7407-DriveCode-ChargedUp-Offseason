@@ -13,6 +13,8 @@ from oi.OI import OI
 import ntcore
 import math
 
+
+
 class _Robot(wpilib.TimedRobot):
     def __init__(self):
         super().__init__()
@@ -35,7 +37,10 @@ class _Robot(wpilib.TimedRobot):
         
         Robot.drivetrain.init()
         Robot.intake.init()
-        Robot.elevator.init()
+        try:
+            Robot.elevator.init()
+        except Exception as e:
+            raise e
         LEDs.elevator.init()
         Sensors.limeLight_F.init()
         Sensors.limeLight_B.init()
@@ -49,8 +54,15 @@ class _Robot(wpilib.TimedRobot):
         Sensors.odometry = FieldOdometry(Robot.drivetrain, Sensors.l_c)
         Sensors.gyro = Robot.drivetrain.gyro
         
-        OI.init()
-        OI.map_controls()
+        try:
+            OI.init()
+            OI.map_controls()
+        except Exception as e:
+            print('OI Error:', str(e), type(e))
+            self.nt.getTable("Errors").putString("OI", str(e))
+            raise e
+        
+        # OI.init()
         
         # Team
         self.team = wpilib.SendableChooser()
@@ -92,6 +104,9 @@ class _Robot(wpilib.TimedRobot):
         
         Sensors.poses.init()
         
+        if wpilib.TimedRobot.isSimulation():
+            wpilib.DriverStation.silenceJoystickConnectionWarning(True)
+        
     def robotPeriodic(self):
         
         config.DEBUG_MODE = self.debug.getSelected()
@@ -120,14 +135,17 @@ class _Robot(wpilib.TimedRobot):
                 self.nt.getTable("Errors").putString("LEDS", str(e))
         
         
-        # if config.DEBUG_MODE: 
-            commands2.CommandScheduler.getInstance().run()
-        # else:
-        #     try:
-        #         commands2.CommandScheduler.getInstance().run()
-        #     except Exception as e:
-        #         print('Command Scheduler Error:', str(e))
-        #         self.nt.getTable("Errors").putString("Command Scheduler", str(e))
+        if config.DEBUG_MODE: 
+            try:
+                commands2.CommandScheduler.getInstance().run()
+            except Exception as e:
+                raise e
+        else:
+            try:
+                commands2.CommandScheduler.getInstance().run()
+            except Exception as e:
+                print('Command Scheduler Error:', str(e))
+                self.nt.getTable("Errors").putString("Command Scheduler", str(e))
         
 
         Sensors.limeLight_F.update()

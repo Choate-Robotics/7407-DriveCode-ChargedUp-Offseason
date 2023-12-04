@@ -1,7 +1,6 @@
 import wpilib
 
 import commands2.button
-
 from robotpy_toolkit_7407.oi import (
     XBoxController,
     JoystickAxis,

@@ -9,10 +9,7 @@ import rev
 from ctre.sensors import CANCoder
 from robotpy_toolkit_7407.sensors.gyro import PigeonIMUGyro_Wrapper
 from robotpy_toolkit_7407.motors.rev_motors import SparkMax, SparkMaxConfig
-from robotpy_toolkit_7407.subsystem_templates.drivetrain import (
-    SwerveDrivetrain,
-    SwerveNode,
-)
+
 from robotpy_toolkit_7407.utils.units import (
     meters,
     meters_per_second,
@@ -25,6 +22,9 @@ import config
 import constants
 from oi.keymap import Keymap
 from units.SI import degrees, meters_per_second_squared
+from utils import SwerveDrivetrain, SwerveNode
+
+
 
 TURN_CONFIG = SparkMaxConfig(
     0.22, 0, 0.003, 0.00015, (-0.5, 0.5), rev.CANSparkMax.IdleMode.kBrake
@@ -51,10 +51,16 @@ class SparkMaxSwerveNode(SwerveNode):
         self.m_move.init()
         # self.m_move.motor.setClosedLoopRampRate(config.drivetrain_ramp_rate)
         self.m_turn.init()
-        if self.m_move.motor.getLastError() != 0:
+        if self.m_move.motor.getLastError() == rev.REVLibError.kOk and self.m_turn.motor.getLastError() == rev.REVLibError.kOk:
+            print(self.name, "init ok")
+        elif self.m_move.motor.getLastError() != rev.REVLibError.kOk:
             print(self.name, "move error", self.m_move.motor.getLastError())
-        if self.m_turn.motor.getLastError() != 0:
+        else:
+            print(self.name, "move ok")
+        if self.m_turn.motor.getLastError() != rev.REVLibError.kOk:
             print(self.name, "turn error", self.m_turn.motor.getLastError())
+        else:
+            print(self.name, "turn ok")
 
     def initial_zero(self):
         self.m_turn.set_sensor_position(0)
