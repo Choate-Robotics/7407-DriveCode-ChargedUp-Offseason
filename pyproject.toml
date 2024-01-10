@@ -1,24 +1,33 @@
-[tool.poetry]
-name = "7407-DRIVECODE-TEMPLATE"
-version = "0.1.0"
-description = "Team 7407 Wired Boars 2022-2023 Robot Code"
-authors = ["Sebastian Plunkett <gamebot60000@gmail.com>","Sidharth Rao <sidharthmrao@gmail.com>"]
+#
+# Use this configuration file to control what RobotPy packages are installed
+# on your RoboRIO
+#
 
-[tool.poetry.dependencies]
-python = ">3.9,<3.12"
-robotpy-toolkit-7407 = "^2023.2.0.0"
-pre-commit = "^3.0.0"
-black = "^22.12.0"
-isort = "^5.11.4"
-flake8 = "^6.0.0"
-coverage = "^7.3.1"
+[tool.robotpy]
 
-[tool.poetry.dev-dependencies]
+# Version of robotpy this project depends on
+robotpy_version = "2024.1.1.1"
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.4.0"
-coverage = "^7.2.7"
+# Which extra RobotPy components should be installed
+# -> equivalent to `pip install robotpy[extra1, ...]
+robotpy_extras = [
+    # "all",
+    # "apriltag"
+    # "commands2",
+    # "cscore"
+    # "navx"
+    # "pathplannerlib"
+    # "phoenix5"
+    # "phoenix6",
+    # "playingwithfusion"
+    # "rev",
+    # "romi"
+    "sim"
+    # "xrp"
+]
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+# Other pip packages to install
+requires = [
+    "robotpy-commands-v2==2024.0.0b4",
+    "robotpy-ctre==2024.0.0b4"
+]

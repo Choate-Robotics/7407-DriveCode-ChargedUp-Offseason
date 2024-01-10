@@ -15,6 +15,8 @@ from robotpy_toolkit_7407.unum import Unum
 from robotpy_toolkit_7407.motors.ctre_motors import hundred_ms
 
 
+spark_max_sim_list = []
+
 @dataclass
 class SparkMaxConfig:
     """
@@ -127,7 +129,7 @@ if wpilib.RobotBase.isSimulation():
 
     class SparkMax():
         def __init__(self, channel: int, inverted: bool = True, brushless: bool = True, config: SparkMaxConfig = None) -> None:
-            
+            spark_max_sim_list.append(self)
             self.id = channel
             self._inverted = inverted
             self._config = config

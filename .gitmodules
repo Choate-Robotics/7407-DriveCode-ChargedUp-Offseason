@@ -1,0 +1,3 @@
+[submodule "robotpy_toolkit_7407"]
+	path = robotpy_toolkit_7407
+	url = https://github.com/Choate-Robotics/7407-RobotPy-Toolkit-v2.git
