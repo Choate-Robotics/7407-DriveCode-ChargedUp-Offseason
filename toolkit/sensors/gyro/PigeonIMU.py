@@ -2,7 +2,7 @@ from phoenix5.sensors import Pigeon2
 import math
 
 from units.SI import radians
-from base_gyro import BaseGyro
+from toolkit.sensors.gyro.base_gyro import BaseGyro
 
 
 class PigeonIMUGyro_Wrapper(BaseGyro):

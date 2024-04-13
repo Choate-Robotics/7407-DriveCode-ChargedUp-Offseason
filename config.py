@@ -8,19 +8,19 @@ elevator_intake_threshold = .4 # multiply this by max rotations, this is the thr
 elevator_wall_threshold = .3 # multiply this by max rotations, this is the threshold for the elevator and intake to move at the same time when the robot is against the wall
 elevator_auto_position = .2
 
-from robotpy_toolkit_7407.motors.rev_motors import SparkMaxConfig
+from toolkit.motors.rev_motors import SparkMaxConfig
 from rev import CANSparkMax
 from wpimath.trajectory import TrapezoidProfile
 from wpimath.controller import ProfiledPIDController
 from wpilib import AnalogEncoder
 import math
-import utils
+#import utils
 from wpimath.geometry import Translation2d
 # from sensors import ALeds
 
 enable_pid_tuning = True  # change this to enable pid tuning
 
-from robotpy_toolkit_7407.utils.units import hour, m, mile, rad, rev, s
+#from toolkit.utils.units import hour, m, mile, rad, rev, s
 
 from units.SI import (
     inches_to_meters,
@@ -29,7 +29,7 @@ from units.SI import (
     meters_per_second_squared,
     radians_per_second,
     rotations,
-    rotations_per_minute,
+    rotations_per_minute, miles_per_hour_to_meters_per_second, rotations_per_second__to__radians_per_second,
 )
 
 elevator_leds_id = 0
@@ -66,80 +66,80 @@ class IntakeActive:
     kIdle = 2
     kShoot = 3
 
-class LimelightPipeline:
-    
-    feducial = 0.0
-    neural = 1.0
-    retroreflective = 2.0
+# class LimelightPipeline:
+#
+#     feducial = 0.0
+#     neural = 1.0
+#     retroreflective = 2.0
+#
+# limelight_led_mode: int = {
+#     'pipeline_default': 0,
+#     'force_off': 1,
+#     'force_blink': 2,
+#     'force_on': 3
+#
+# }
 
-limelight_led_mode: int = {
-    'pipeline_default': 0,
-    'force_off': 1,
-    'force_blink': 2,
-    'force_on': 3
-    
-}
-
-class Target:
-    
-    high = {
-        'length': 1,
-        'angle': math.radians(-40),
-        'goal': 'score',
-    }
-    mid = {
-        'length': .7,
-        'angle': math.radians(-50),
-        'goal': 'score',
-    }
-    low = {
-        'length': .45,
-        'angle': math.radians(-50),
-        'goal': 'score',
-    }
-    shoot = {
-        'length': .3,
-        'length-cube': .25,
-        'angle': math.radians(0),
-        'angle-cube': math.radians(45),
-        'goal': 'shoot'
-    }
-    floor_up = {
-        'length': 0,
-        'length-cube': .07,
-        'angle': math.radians(110),
-        'angle-cube': math.radians(140),
-        'goal': 'pickup'
-    }
-    floor_down = {
-        'length': 0,
-        'length-cube': .08,
-        'angle': math.radians(175),
-        'angle-cube': math.radians(155),
-        'goal': 'pickup',
-    }
-    single = {
-        'length': .4,
-        'length-cube': .365,
-        'angle': math.radians(145),
-        'angle-cube': math.radians(0),
-        'wall': False,
-        'wall-cube': False,
-        'goal': 'pickup',
-    }
-    double = {
-        'length': 1,
-        'length-cube': .9,
-        'angle': math.radians(-42),
-        'angle-cube': math.radians(-33),
-        'goal': 'pickup',
-    }
-    
-    idle = {
-        'length': .2,
-        'angle': math.radians(0),
-        'goal': 'idle',
-    }
+# class Target:
+#
+#     high = {
+#         'length': 1,
+#         'angle': math.radians(-40),
+#         'goal': 'score',
+#     }
+#     mid = {
+#         'length': .7,
+#         'angle': math.radians(-50),
+#         'goal': 'score',
+#     }
+#     low = {
+#         'length': .45,
+#         'angle': math.radians(-50),
+#         'goal': 'score',
+#     }
+#     shoot = {
+#         'length': .3,
+#         'length-cube': .25,
+#         'angle': math.radians(0),
+#         'angle-cube': math.radians(45),
+#         'goal': 'shoot'
+#     }
+#     floor_up = {
+#         'length': 0,
+#         'length-cube': .07,
+#         'angle': math.radians(110),
+#         'angle-cube': math.radians(140),
+#         'goal': 'pickup'
+#     }
+#     floor_down = {
+#         'length': 0,
+#         'length-cube': .08,
+#         'angle': math.radians(175),
+#         'angle-cube': math.radians(155),
+#         'goal': 'pickup',
+#     }
+#     single = {
+#         'length': .4,
+#         'length-cube': .365,
+#         'angle': math.radians(145),
+#         'angle-cube': math.radians(0),
+#         'wall': False,
+#         'wall-cube': False,
+#         'goal': 'pickup',
+#     }
+#     double = {
+#         'length': 1,
+#         'length-cube': .9,
+#         'angle': math.radians(-42),
+#         'angle-cube': math.radians(-33),
+#         'goal': 'pickup',
+#     }
+#
+#     idle = {
+#         'length': .2,
+#         'angle': math.radians(0),
+#         'goal': 'idle',
+#     }
     
 pickup_wall: bool = False
     
@@ -148,118 +148,118 @@ class Team:
     red = 0
     blue = 1
     
-class Station:
-    
-    single = 1
-    double_left = 2
-    double_right = 3
-    auto = 4
-    
-class Route:
-    
-    grid = 0
-    station = 1
-    auto = 2
+# class Station:
+#
+#     single = 1
+#     double_left = 2
+#     double_right = 3
+#     auto = 4
+#
+# class Route:
+#
+#     grid = 0
+#     station = 1
+#     auto = 2
 
-class Type():
-        
-        def KStatic(r, g, b):
-            return {
-                'type': 1,
-                'color': {
-                    'r': r,
-                    'g': g,
-                    'b': b
-                }
-            }
-        
-        def KRainbow():
-            return {
-                'type': 2
-            }
-        
-        def KTrack(r1, g1, b1, r2, g2, b2):
-            return {
-                'type': 3,
-                'color': {
-                    'r1': r1,
-                    'g1': g1,
-                    'b1': b1,
-                    'r2': r2,
-                    'g2': g2,
-                    'b2': b2
-                }
-            }
-        
-        def KBlink(r,g,b):
-            return {
-                'type': 4,
-                'color': {
-                    'r': r,
-                    'g': g,
-                    'b': b
-                }
-            }
-            
-        def KLadder(typeA,typeB,percent,speed):
-            return {
-                'type': 5,
-                'percent': percent, # 0-1
-                'typeA': typeA,
-                'typeB': typeB,
-                'speed': speed
-            }
-        
-    
-class LedType(Type):
-    
-    def __init__():
-        super().__init__()
+# class Type():
+#
+#         def KStatic(r, g, b):
+#             return {
+#                 'type': 1,
+#                 'color': {
+#                     'r': r,
+#                     'g': g,
+#                     'b': b
+#                 }
+#             }
+#
+#         def KRainbow():
+#             return {
+#                 'type': 2
+#             }
+#
+#         def KTrack(r1, g1, b1, r2, g2, b2):
+#             return {
+#                 'type': 3,
+#                 'color': {
+#                     'r1': r1,
+#                     'g1': g1,
+#                     'b1': b1,
+#                     'r2': r2,
+#                     'g2': g2,
+#                     'b2': b2
+#                 }
+#             }
+#
+#         def KBlink(r,g,b):
+#             return {
+#                 'type': 4,
+#                 'color': {
+#                     'r': r,
+#                     'g': g,
+#                     'b': b
+#                 }
+#             }
+#
+#         def KLadder(typeA,typeB,percent,speed):
+#             return {
+#                 'type': 5,
+#                 'percent': percent, # 0-1
+#                 'typeA': typeA,
+#                 'typeB': typeB,
+#                 'speed': speed
+#             }
+#
+#
+# class LedType(Type):
+#
+#     def __init__():
+#         super().__init__()
         
 
 auto_target: bool = False
 
-active_poses = None
-    
-active_piece: GamePiece = GamePiece.cone
+# active_poses = None
+#
+# active_piece: GamePiece = GamePiece.cone
+#
+# active_target: Target = Target.single
+#
+# previous_target: Target = Target.single
 
-active_target: Target = Target.single
+# active_grid: int = 1
 
-previous_target: Target = Target.single
-
-active_grid: int = 1
-
-active_station: Station = Station.single
+# active_station: Station = Station.single
 
 active_team: Team = Team.blue
 
-active_route: Route = Route.auto
+# active_route: Route = Route.auto
 
-active_leds: tuple[LedType, float, float] = (LedType.KStatic(255, 0, 0), 1, 5)
+# active_leds: tuple[LedType, float, float] = (LedType.KStatic(255, 0, 0), 1, 5)
+#
+# led_cone: LedType = LedType.KStatic(255, 255, 0)
+#
+# led_cube: LedType = LedType.KStatic(255, 0, 255)
+#
+# led_piece: LedType = led_cone
+#
+# led_elevator: LedType = LedType.KRainbow()
 
-led_cone: LedType = LedType.KStatic(255, 255, 0)
-
-led_cube: LedType = LedType.KStatic(255, 0, 255)
-
-led_piece: LedType = led_cone
-
-led_elevator: LedType = LedType.KRainbow()
-
-auto_led_elevator: bool = True
-
-game_piece_targeting_constraints = {
-    'cube': {
-        'tx': [-3.5,-3.5],
-        'ty': [-12,-10],
-        'ta': [12,14]
-    },
-    'cone': {
-        'tx': [-3.5, 3.5], #left to right
-        'ty': [-12, -10], #top to bottom
-        'ta': [12, 14] #area
-    }
-}
-
+# auto_led_elevator: bool = True
+#
+# game_piece_targeting_constraints = {
+#     'cube': {
+#         'tx': [-3.5,-3.5],
+#         'ty': [-12,-10],
+#         'ta': [12,14]
+#     },
+#     'cone': {
+#         'tx': [-3.5, 3.5], #left to right
+#         'ty': [-12, -10], #top to bottom
+#         'ta': [12, 14] #area
+#     }
+# }
+#
 
 
 from units.SI import (
@@ -298,15 +298,15 @@ back_right_turn = 12
 back_right_encoder = AnalogEncoder(2)
 back_right_zeroed_pos = 0.1175 # 0.61598 #* 360 * degrees_to_radians
 
-calculated_max_vel = (20 * mile / hour).asNumber(m / s)  
-calculated_max_angular_vel: radians_per_second = (1 * rev / s).asNumber(rad / s)  # 5
+calculated_max_vel = 20 * miles_per_hour_to_meters_per_second
+calculated_max_angular_vel: radians_per_second = 1 * rotations_per_second__to__radians_per_second  # 5
 drivetrain_ramp_rate = 0.6 # seconds from 0 to full speed
 # Sensors
 gyro_id = 26
 
 drivetrain_reversed = True
 
-# Puncher
-punch_left = 30
-punch_right = 50
-PUNCHER_CONFIG = SparkMaxConfig(1,0, .5, 0, (-1,1), CANSparkMax.IdleMode.kBrake)
+# # Puncher
+# punch_left = 30
+# punch_right = 50
+# PUNCHER_CONFIG = SparkMaxConfig(1,0, .5, 0, (-1,1), CANSparkMax.IdleMode.kBrake)

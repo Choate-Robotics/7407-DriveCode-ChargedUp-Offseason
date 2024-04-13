@@ -1,6 +1,6 @@
-import config, utils
+import config
 import subsystem
-from sensors import Limelight, LimelightController, FieldOdometry, ALeds
+#from sensors import Limelight, LimelightController, FieldOdometry, ALeds
 import wpilib
 
 import constants

@@ -13,16 +13,16 @@ wrist_gear_ratio = 155 / 1
 from wpimath.geometry import Pose3d, Translation3d, Rotation3d
 
 # limelight offsets from robot origin (in meters)
-limelight_offset: Pose3d = {
-    "front": Pose3d(Translation3d(0.0872, -0.3111, 0.422), Rotation3d(0.0, 10.0, -180.0)),
-    "back": Pose3d(Translation3d(0.0, 0.27, 0.239), Rotation3d(0.0, 0.0, 0.0)),
-}
+# limelight_offset: Pose3d = {
+#     "front": Pose3d(Translation3d(0.0872, -0.3111, 0.422), Rotation3d(0.0, 10.0, -180.0)),
+#     "back": Pose3d(Translation3d(0.0, 0.27, 0.239), Rotation3d(0.0, 0.0, 0.0)),
+# }
 import math
 
-from robotpy_toolkit_7407.utils.units import hour, m, mile, rad, rev, s
+from units import hours, meters, miles, radians, rotations, seconds
 from wpimath.geometry import Pose3d, Rotation3d, Translation2d
 
-from config import field_length, field_width
+#from config import field_length, field_width
 from units.SI import (
     inches_to_meters,
     meters,
@@ -31,6 +31,8 @@ from units.SI import (
     radians_per_second,
     rotations,
     rotations_per_minute,
+    miles_per_hour_to_meters_per_second,
+rotations_per_second__to__radians_per_second
 )
 
 #TODO Change drivetrain track width
@@ -64,196 +66,192 @@ bumper_thickness: meters = 0.0762 # is the thickness of the bumpers
 robot_length_full = robot_length + bumper_thickness * 2 # is the distance between the front and back bumpers
 # TODO Maybe change these
 drivetrain_accel = True
-drivetrain_max_vel: meters_per_second = (20 * mile / hour).asNumber(m / s)  # 15 11
-drivetrain_max_vel_adjustable: meters_per_second = (15 * mile / hour).asNumber(m / s)  # 15 11
-drivetrain_max_accel_tele: meters_per_second_squared = (45 * mile / hour).asNumber(m / s)
-drivetrain_max_target_accel: meters_per_second_squared = (
-    1.5 * mile / hour
-).asNumber(  # 10
-    m / s
-)
-drivetrain_target_max_vel: meters_per_second = (2 * mile / hour).asNumber(m / s)  # 3
-drivetrain_max_angular_vel: radians_per_second = (1 * rev / s).asNumber(rad / s)  # 5
-drivetrain_max_correction_vel: radians_per_second = (2 * rev / s).asNumber(rad / s)
-drivetrain_max_climb_vel: meters_per_second = (5 * mile / hour).asNumber(m / s)
+drivetrain_max_vel: meters_per_second = 20 * miles_per_hour_to_meters_per_second  # 15 11
+drivetrain_max_vel_adjustable: meters_per_second = 15 * miles_per_hour_to_meters_per_second  # 15 11
+drivetrain_max_accel_tele: meters_per_second_squared = 45 * miles_per_hour_to_meters_per_second
+drivetrain_max_target_accel: meters_per_second_squared = 1.5 * miles_per_hour_to_meters_per_second
+drivetrain_target_max_vel: meters_per_second = 2 * miles_per_hour_to_meters_per_second  # 3
+drivetrain_max_angular_vel: radians_per_second = 1 * rotations_per_second__to__radians_per_second  # 5
+drivetrain_max_correction_vel: radians_per_second = 2 * rotations_per_second__to__radians_per_second
+drivetrain_max_climb_vel: meters_per_second = 5 * miles_per_hour_to_meters_per_second
 
 node_bumps = 22.7 * inches_to_meters
 
-# from double station apriltag to loading station x
-single_station_x = (90.77) * inches_to_meters
-
-# from double station apriltag to loading station y
-single_station_y = (42.535) * inches_to_meters
-
-grid_depth = ((4 * 12) + 8.25) * inches_to_meters
-
-staging_mark_x = ((18 * 12) + 8) * inches_to_meters 
-
-staging_mark_init_y = field_width - (180.25 * inches_to_meters)
-
-staging_mark_spacing = (4 * 12) * inches_to_meters
+# # from double station apriltag to loading station x
+# single_station_x = (90.77) * inches_to_meters
+#
+# # from double station apriltag to loading station y
+# single_station_y = (42.535) * inches_to_meters
+#
+# grid_depth = ((4 * 12) + 8.25) * inches_to_meters
+#
+# staging_mark_x = ((18 * 12) + 8) * inches_to_meters
+#
+# staging_mark_init_y = field_width - (180.25 * inches_to_meters)
+#
+# staging_mark_spacing = (4 * 12) * inches_to_meters
 
 center_drivetrain = robot_length_full / 2
 
 full_extension_x = 26.19 * inches_to_meters + node_bumps
 
-class Poses:
-    
-    # scoring location to the left of the apriltag
-    node_left: Translation2d = Translation2d(node_bumps + center_drivetrain, -22 * inches_to_meters)
-    
-    # scoring location to the right of the apriltag
-    node_right: Translation2d = Translation2d(node_bumps + center_drivetrain, 22 * inches_to_meters)
-    
-    # scoring location in front of the apriltag
-    node_front: Translation2d = Translation2d(node_bumps + center_drivetrain, 0)
-    
-    
-    load_single = {
-        # loading location near apriltag 5 (red)
-        'red': Translation2d(single_station_x - center_drivetrain, single_station_y - center_drivetrain),
-        # loading location near apriltag 4 (blue)
-        'blue': Translation2d(single_station_x - center_drivetrain, -single_station_y + center_drivetrain)
-    }
-    
-    # loading location near apriltag 4/5
-    load_double_left: Translation2d = Translation2d(center_drivetrain + full_extension_x, -32.43 * inches_to_meters + center_drivetrain/2)
-    
-    # loading location near apriltag 4/5
-    load_double_right: Translation2d = Translation2d(center_drivetrain + full_extension_x, 32.43 * inches_to_meters - center_drivetrain/2)
-    
-    far_left_piece_auto = {
-        'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y + (3 * staging_mark_spacing)),
-        'blue': Translation2d(staging_mark_x + grid_depth, field_width - staging_mark_init_y)
-    }
-    
-    center_left_piece_auto = {
-        'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y + (2 * staging_mark_spacing)),
-        'blue': Translation2d(staging_mark_x + grid_depth, field_width - staging_mark_init_y - staging_mark_spacing)
-    }
-    
-    center_right_piece_auto ={
-        'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y + staging_mark_spacing),
-        'blue': Translation2d(staging_mark_x + grid_depth, field_width - staging_mark_init_y - (2 * staging_mark_spacing))
-    }
-    
-    far_right_piece_auto = {
-        'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y),
-        'blue': Translation2d(staging_mark_x + grid_depth, field_width - staging_mark_init_y - (3 * staging_mark_spacing))
-    }
-    
-ApriltagPositionDictRed = {
-    1: Pose3d(
-        (field_length - inches_to_meters * 610.77),
-        (field_width - inches_to_meters * 42.19),
-        (inches_to_meters * 18.22),
-        Rotation3d(0.0, 0.0, 0),
-    ),
-    2: Pose3d(
-        (field_length - inches_to_meters * 610.77),
-        (field_width - inches_to_meters * 108.19),
-        (inches_to_meters * 18.22),
-        Rotation3d(0.0, 0.0, 0),
-    ),
-    3: Pose3d(
-        (field_length - inches_to_meters * 610.77),
-        (field_width - inches_to_meters * 174.19),
-        (inches_to_meters * 18.22),
-        Rotation3d(0.0, 0.0, 0),
-    ),
-    4: Pose3d(
-        (field_length - inches_to_meters * 636.96),
-        (field_width - inches_to_meters * 265.74),
-        (inches_to_meters * 27.38),
-        Rotation3d(0.0, 0.0, 0),
-    ),
-    5: Pose3d(
-        (field_length - inches_to_meters * 14.25),
-        (field_width - inches_to_meters * 265.74),
-        (inches_to_meters * 27.38),
-        Rotation3d(0.0, 0.0, math.pi),
-    ),
-    6: Pose3d(
-        (field_length - inches_to_meters * 40.45),
-        (field_width - inches_to_meters * 174.19),
-        (inches_to_meters * 18.22),
-        Rotation3d(0.0, 0.0, math.pi),
-    ),
-    7: Pose3d(
-        (field_length - inches_to_meters * 40.45),
-        (field_width - inches_to_meters * 108.19),
-        (inches_to_meters * 18.22),
-        Rotation3d(0.0, 0.0, math.pi),
-    ),
-    8: Pose3d(
-        (field_length - inches_to_meters * 40.45),
-        (field_width - inches_to_meters * 42.19),
-        (inches_to_meters * 18.22),
-        Rotation3d(0.0, 0.0, math.pi),
-    ),
-}
-
-ApriltagPositionDictBlue = {
-    1: Pose3d(
-        (inches_to_meters * 610.77),
-        (inches_to_meters * 42.19),
-        (inches_to_meters * 18.22),
-        Rotation3d(0.0, 0.0, math.pi),
-    ),
-    2: Pose3d(
-        (inches_to_meters * 610.77),
-        (inches_to_meters * 108.19),
-        (inches_to_meters * 18.22),
-        Rotation3d(0.0, 0.0, math.pi),
-    ),
-    3: Pose3d(
-        (inches_to_meters * 610.77),
-        (inches_to_meters * 174.19),  # FIRST's diagram has a typo (it says 147.19)
-        (inches_to_meters * 18.22),
-        Rotation3d(0.0, 0.0, math.pi),
-    ),
-    4: Pose3d(
-        (inches_to_meters * 636.96),
-        (inches_to_meters * 265.74),
-        (inches_to_meters * 27.38),
-        Rotation3d(0.0, 0.0, math.pi),
-    ),
-    5: Pose3d(
-        (inches_to_meters * 14.25),
-        (inches_to_meters * 265.74),
-        (inches_to_meters * 27.38),
-        Rotation3d(),
-    ),
-    6: Pose3d(
-        (inches_to_meters * 40.45),
-        (inches_to_meters * 174.19),  # FIRST's diagram has a typo (it says 147.19)
-        (inches_to_meters * 18.22),
-        Rotation3d(),
-    ),
-    7: Pose3d(
-        (inches_to_meters * 40.45),
-        (inches_to_meters * 108.19),
-        (inches_to_meters * 18.22),
-        Rotation3d(),
-    ),
-    8: Pose3d(
-        (inches_to_meters * 40.45),
-        (inches_to_meters * 42.19),
-        (inches_to_meters * 18.22),
-        Rotation3d(),
-    ),
-}
-
-border_tag_to_wall = 42.015 * inches_to_meters
-
-path_box_height = 70 * inches_to_meters
-
-# Puncher Ratio
-# 0.00764 m/r
-# 1.53m
-puncher_ratio = 0.00764
-puncher_length = 1.53
-puncher_extend = puncher_length / puncher_ratio
-puncher_retract = 0
-puncher_init_pos = 0
-
+# class Poses:
+#
+#     # scoring location to the left of the apriltag
+#     node_left: Translation2d = Translation2d(node_bumps + center_drivetrain, -22 * inches_to_meters)
+#
+#     # scoring location to the right of the apriltag
+#     node_right: Translation2d = Translation2d(node_bumps + center_drivetrain, 22 * inches_to_meters)
+#
+#     # scoring location in front of the apriltag
+#     node_front: Translation2d = Translation2d(node_bumps + center_drivetrain, 0)
+#
+#
+#     load_single = {
+#         # loading location near apriltag 5 (red)
+#         'red': Translation2d(single_station_x - center_drivetrain, single_station_y - center_drivetrain),
+#         # loading location near apriltag 4 (blue)
+#         'blue': Translation2d(single_station_x - center_drivetrain, -single_station_y + center_drivetrain)
+#     }
+#
+#     # loading location near apriltag 4/5
+#     load_double_left: Translation2d = Translation2d(center_drivetrain + full_extension_x, -32.43 * inches_to_meters + center_drivetrain/2)
+#
+#     # loading location near apriltag 4/5
+#     load_double_right: Translation2d = Translation2d(center_drivetrain + full_extension_x, 32.43 * inches_to_meters - center_drivetrain/2)
+#
+#     far_left_piece_auto = {
+#         'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y + (3 * staging_mark_spacing)),
+#         'blue': Translation2d(staging_mark_x + grid_depth, field_width - staging_mark_init_y)
+#     }
+#
+#     center_left_piece_auto = {
+#         'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y + (2 * staging_mark_spacing)),
+#         'blue': Translation2d(staging_mark_x + grid_depth, field_width - staging_mark_init_y - staging_mark_spacing)
+#     }
+#
+#     center_right_piece_auto ={
+#         'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y + staging_mark_spacing),
+#         'blue': Translation2d(staging_mark_x + grid_depth, field_width - staging_mark_init_y - (2 * staging_mark_spacing))
+#     }
+#
+#     far_right_piece_auto = {
+#         'red': Translation2d(staging_mark_x + grid_depth, staging_mark_init_y),
+#         'blue': Translation2d(staging_mark_x + grid_depth, field_width - staging_mark_init_y - (3 * staging_mark_spacing))
+#     }
+#
+# ApriltagPositionDictRed = {
+#     1: Pose3d(
+#         (field_length - inches_to_meters * 610.77),
+#         (field_width - inches_to_meters * 42.19),
+#         (inches_to_meters * 18.22),
+#         Rotation3d(0.0, 0.0, 0),
+#     ),
+#     2: Pose3d(
+#         (field_length - inches_to_meters * 610.77),
+#         (field_width - inches_to_meters * 108.19),
+#         (inches_to_meters * 18.22),
+#         Rotation3d(0.0, 0.0, 0),
+#     ),
+#     3: Pose3d(
+#         (field_length - inches_to_meters * 610.77),
+#         (field_width - inches_to_meters * 174.19),
+#         (inches_to_meters * 18.22),
+#         Rotation3d(0.0, 0.0, 0),
+#     ),
+#     4: Pose3d(
+#         (field_length - inches_to_meters * 636.96),
+#         (field_width - inches_to_meters * 265.74),
+#         (inches_to_meters * 27.38),
+#         Rotation3d(0.0, 0.0, 0),
+#     ),
+#     5: Pose3d(
+#         (field_length - inches_to_meters * 14.25),
+#         (field_width - inches_to_meters * 265.74),
+#         (inches_to_meters * 27.38),
+#         Rotation3d(0.0, 0.0, math.pi),
+#     ),
+#     6: Pose3d(
+#         (field_length - inches_to_meters * 40.45),
+#         (field_width - inches_to_meters * 174.19),
+#         (inches_to_meters * 18.22),
+#         Rotation3d(0.0, 0.0, math.pi),
+#     ),
+#     7: Pose3d(
+#         (field_length - inches_to_meters * 40.45),
+#         (field_width - inches_to_meters * 108.19),
+#         (inches_to_meters * 18.22),
+#         Rotation3d(0.0, 0.0, math.pi),
+#     ),
+#     8: Pose3d(
+#         (field_length - inches_to_meters * 40.45),
+#         (field_width - inches_to_meters * 42.19),
+#         (inches_to_meters * 18.22),
+#         Rotation3d(0.0, 0.0, math.pi),
+#     ),
+# }
+#
+# ApriltagPositionDictBlue = {
+#     1: Pose3d(
+#         (inches_to_meters * 610.77),
+#         (inches_to_meters * 42.19),
+#         (inches_to_meters * 18.22),
+#         Rotation3d(0.0, 0.0, math.pi),
+#     ),
+#     2: Pose3d(
+#         (inches_to_meters * 610.77),
+#         (inches_to_meters * 108.19),
+#         (inches_to_meters * 18.22),
+#         Rotation3d(0.0, 0.0, math.pi),
+#     ),
+#     3: Pose3d(
+#         (inches_to_meters * 610.77),
+#         (inches_to_meters * 174.19),  # FIRST's diagram has a typo (it says 147.19)
+#         (inches_to_meters * 18.22),
+#         Rotation3d(0.0, 0.0, math.pi),
+#     ),
+#     4: Pose3d(
+#         (inches_to_meters * 636.96),
+#         (inches_to_meters * 265.74),
+#         (inches_to_meters * 27.38),
+#         Rotation3d(0.0, 0.0, math.pi),
+#     ),
+#     5: Pose3d(
+#         (inches_to_meters * 14.25),
+#         (inches_to_meters * 265.74),
+#         (inches_to_meters * 27.38),
+#         Rotation3d(),
+#     ),
+#     6: Pose3d(
+#         (inches_to_meters * 40.45),
+#         (inches_to_meters * 174.19),  # FIRST's diagram has a typo (it says 147.19)
+#         (inches_to_meters * 18.22),
+#         Rotation3d(),
+#     ),
+#     7: Pose3d(
+#         (inches_to_meters * 40.45),
+#         (inches_to_meters * 108.19),
+#         (inches_to_meters * 18.22),
+#         Rotation3d(),
+#     ),
+#     8: Pose3d(
+#         (inches_to_meters * 40.45),
+#         (inches_to_meters * 42.19),
+#         (inches_to_meters * 18.22),
+#         Rotation3d(),
+#     ),
+# }
+#
+# border_tag_to_wall = 42.015 * inches_to_meters
+#
+# path_box_height = 70 * inches_to_meters
+#
+# # Puncher Ratio
+# # 0.00764 m/r
+# # 1.53m
+# puncher_ratio = 0.00764
+# puncher_length = 1.53
+# puncher_extend = puncher_length / puncher_ratio
+# puncher_retract = 0
+# puncher_init_pos = 0
+#

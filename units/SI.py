@@ -14,6 +14,7 @@ meters_to_inches = 39.3701
 meters_to_feet = meters_to_inches / 12
 meters_to_yards = meters_to_feet / 3
 meters_to_miles = meters_to_yards / 1760
+m=float
 
 inches = float
 inches_to_meters = 1 / meters_to_inches
@@ -38,6 +39,7 @@ miles_to_meters = 1 / meters_to_miles
 miles_to_inches = miles_to_meters * meters_to_inches
 miles_to_feet = miles_to_meters * meters_to_feet
 miles_to_yards = miles_to_meters * meters_to_yards
+mile=float
 
 # Rotation
 rotations = float
@@ -67,6 +69,7 @@ hours = float
 hours_to_seconds = 1 / seconds_to_hours
 hours_to_minutes = hours_to_seconds * seconds_to_minutes
 hours_to_days = hours_to_seconds * seconds_to_days
+hour = float
 
 days = float
 days_to_seconds = 1 / seconds_to_days

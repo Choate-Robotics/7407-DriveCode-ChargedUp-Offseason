@@ -1,7 +1,7 @@
 import pytest
 import wpilib
 from unittest import mock
-import ctre
+import phoenix5
 import commands2
 import rev
 from robot_systems import Robot, Sensors, Pneumatics
@@ -30,8 +30,8 @@ def ctre_mock():
     # this will replace the ctre library with a mock version of it
     # and then we will yield the mock library
     # and then when the context manager exits, it will unmock the ctre library
-    with mock.patch("ctre"):
-        yield ctre
+    with mock.patch("phoenix5"):
+        yield phoenix5
     print("ctre_mock teardown")
 
 

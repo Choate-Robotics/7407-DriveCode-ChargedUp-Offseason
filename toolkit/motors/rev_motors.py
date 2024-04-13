@@ -1,10 +1,10 @@
 from __future__ import annotations
 import config
-from utils import LocalLogger, CAN_delay
+#from utils import LocalLogger, CAN_delay
 
 import time  # noqa
 
-from utils import LocalLogger  # noqa
+#from utils import LocalLogger  # noqa
 import rev
 from rev import CANSparkMax, REVLibError, SparkMaxPIDController, SparkMaxRelativeEncoder
 from wpilib import TimedRobot
@@ -120,7 +120,7 @@ class SparkMax(PIDMotor):
     pid_controller: SparkMaxPIDController
     _configs: list[SparkMaxConfig] = []
     _has_init_run: bool = False
-    _logger: LocalLogger
+    #_logger: LocalLogger
     _abs_encoder = None
     _get_analog = None
     _is_init: bool
@@ -160,8 +160,8 @@ class SparkMax(PIDMotor):
                 elif config.DEBUG_MODE:
                     raise TypeError(f'Invalid config type {type(config)}')
 
-        self._logger = LocalLogger(f"SparkMax: {self._can_id}")
-
+        #self._logger = LocalLogger(f"SparkMax: {self._can_id}")
+        print(f"SparkMax: {self._can_id}")
         self._has_init_run = False
 
         self._abs_encoder = None
@@ -174,13 +174,15 @@ class SparkMax(PIDMotor):
         """
 
         if self._has_init_run:
-            self._logger.warn("Already initialized")
+            #self._logger.warn("Already initialized")
+            print("Already initialized")
             return
 
         # if TimedRobot.isSimulation():
         #     raise RuntimeError("SparkMax cannot be used in simulation")
 
-        self._logger.setup("Initializing")
+        #self._logger.setup("Initializing")
+        print("Initializing")
 
         self.motor = CANSparkMax(
             self._can_id,
@@ -195,25 +197,26 @@ class SparkMax(PIDMotor):
 
         # self.motor.restoreFactoryDefaults(True)
 
-        CAN_delay(0.5)
+        #CAN_delay(0.5)
 
         # Use the default config
         if self._configs[0] is not None and self._brushless:
             for enum, config in enumerate(self._configs):
-                CAN_delay(0.5)
+                #CAN_delay(0.5)
                 self._set_config(config, enum)
 
         self.motor.setInverted(self._inverted)
         
         
         
-        CAN_delay(0.5)
+        #CAN_delay(0.5)
         self.motor.burnFlash()
         
-        CAN_delay(0.25)
+        #CAN_delay(0.25)
 
         self._has_init_run = True
-        self._logger.complete("Initialized")
+        #self._logger.complete("Initialized")
+        print("Initialized")
 
     def add_config_option(self, config: SparkMaxConfig):
         """
@@ -247,7 +250,8 @@ class SparkMax(PIDMotor):
         if TimedRobot.isSimulation():
             return
         if error != REVLibError.kOk:
-            self._logger.error(f'Error: {error} {message}')
+            #self._logger.error(f'Error: {error} {message}')
+            print(f'Error: {error} {message}')
             if config.DEBUG_MODE:
                 raise RuntimeError(f'Error: {error} {message}')
 

@@ -5,7 +5,7 @@ import command
 import config
 import constants
 from robot_systems import Robot, Sensors
-import utils
+#import utils
 from oi.OI import OI
 import ntcore
 

@@ -4,7 +4,7 @@ from phoenix6 import StatusCode, StatusSignal, configs, controls, hardware, sign
 import config
 from toolkit.motor import PIDMotor
 from units.SI import rotations, rotations_per_second
-from utils import LocalLogger
+#from utils import LocalLogger
 from wpilib import TimedRobot
 radians_per_second_squared = float
 
@@ -95,7 +95,7 @@ class TalonConfig:
 class TalonFX(PIDMotor):
     _motor: hardware.TalonFX
     
-    _logger: LocalLogger
+    #_logger: LocalLogger
 
     _config: configs.TalonFXConfigurator
 
@@ -133,17 +133,19 @@ class TalonFX(PIDMotor):
         self._foc = foc
         self._can_id = can_id
         self._talon_config = config
-        self._logger = LocalLogger(f'TalonFX: {can_id}')
+        #self._logger = LocalLogger(f'TalonFX: {can_id}')
         self._initialized = False
         self._optimized = optimize
 
     def init(self):
         
         if self._initialized:
-            self._logger.warn('already initialized')
+            #self._logger.warn('already initialized')
+            print("already initialized")
             return
         
-        self._logger.setup('initializing')
+        #self._logger.setup('initializing')
+        print("initializing")
         self._motor = hardware.TalonFX(self._can_id, 'rio')
         self._config = self._motor.configurator
         self._motor_pos = self._motor.get_position()
@@ -156,10 +158,12 @@ class TalonFX(PIDMotor):
 
         if self._optimized:
             if self.optimize_normal_operation() == StatusCode.OK:
-                self._logger.complete('optimized')
+                print("optimized")
+                #self._logger.complete('optimized')
                 
         self._initialized = True
-        self._logger.complete('initialized')
+        print("initialized")
+        #self._logger.complete('initialized')
 
     def __setup_controls(self):
         self._mm_v_v = controls.MotionMagicVelocityVoltage(0)
@@ -170,7 +174,8 @@ class TalonFX(PIDMotor):
         if TimedRobot.isSimulation():
             return
         if status != StatusCode.OK:
-            self._logger.error(f'Error: {status} {message}')
+            print(f'Error: {status} {message}')
+            #self._logger.error(f'Error: {status} {message}')
             if config.DEBUG_MODE:
                 raise RuntimeError(f'Error: {status} {message}')
 

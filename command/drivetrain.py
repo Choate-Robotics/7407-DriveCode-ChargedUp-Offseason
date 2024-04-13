@@ -1,5 +1,5 @@
 import logging
-from robotpy_toolkit_7407.command import SubsystemCommand
+from toolkit.command import SubsystemCommand
 from wpimath.filter import SlewRateLimiter
 from wpimath.controller import ProfiledPIDController, PIDController
 
@@ -82,7 +82,6 @@ class DrivetrainZero(SubsystemCommand[Drivetrain]):
         ...
 
     def isFinished(self) -> bool:
-        ...
         return True
 
     def end(self, interrupted: bool) -> None:
@@ -188,7 +187,8 @@ class SquareDrivetrain(SubsystemCommand[Drivetrain]):
         return False
     
     def end(self, interrupted):
-        # self.subsystem.set_driver_centric((0,0),0)self.subsystem.n_front_left.set_motor_velocity(0)
+        # self.subsystem.set_driver_centric((0,0),0)
+        self.subsystem.n_front_left.set_motor_velocity(0)
         self.subsystem.n_front_right.set_motor_velocity(0)
         self.subsystem.n_back_left.set_motor_velocity(0)
         self.subsystem.n_back_right.set_motor_velocity(0)
